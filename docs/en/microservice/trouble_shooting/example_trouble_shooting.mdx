@@ -1,0 +1,95 @@
+---
+weight: 10
+sourceSHA: 4894d6ee9f6876a61b243b991087cc3b3083a7c424fdf0374d5300a347099774
+---
+
+:::tip
+
+Introduce common problems that users may encounter and their solutions. If the content is brief, it can be placed directly on a single page titled "Problem Handling." If the content is extensive, "Problem Handling" can serve as a directory, with each problem addressed in a separate document.
+
+You can visit the [Problem Handling Document Example](https://product-doc-guide.alauda.cn/template/trouble_shooting/example.html) for a corresponding document example.
+
+:::
+
+# \<Title: Typically the name of the problem>
+
+## Problem Description
+
+Provide a detailed explanation of the environment in which the problem occurs, its impact scope, and the symptoms. Additionally, include the following auxiliary information as appropriate:
+
+- Screenshots of the problem: Currently, it is recommended to use text descriptions as the primary method. If text cannot adequately describe the issue, screenshots are necessary. Users should register and discuss with the documentation team.
+- Relevant logs: Add error messages, system logs, debugging information, etc., in a code block format.
+
+## Root Cause Analysis
+
+List one or more actual causes that have previously occurred and led to this problem (these can be a single confirmed cause or multiple potential causes). Each cause must meet the following criteria:
+
+1. It must be an actual cause that has manifested and been verified to lead to this problem, rather than conjectured or imagined causes.
+2. A detailed causal analysis must be provided, including:
+   - How this cause triggered the problem.
+   - The specific mechanisms and processes by which the problem occurred.
+
+## Problem Investigation (Optional)
+
+List in detail the specific steps for investigating the problem. Through this investigation, users can identify the most likely or certain cause among multiple potential reasons and apply appropriate solutions to resolve the issue. Note the following for problem investigation:
+
+- If there is only one root cause, provide investigation steps, preferably presented as an ordered list.
+
+  ```
+  1. Investigation Step 1
+  ...
+  n. Investigation Step N
+  ```
+
+- If there are multiple root causes with different investigation steps, list each root cause using a tertiary header, and provide detailed investigation steps under each root cause.
+  ```
+  ### Root Cause 1
+    1. Investigation Step 1
+    ...
+    n. Investigation Step N
+  ...
+  ### Root Cause N
+    1. Investigation Step 1
+    ...
+    n. Investigation Step N
+  ```
+
+## Solution for Root Cause 1 (This is how to title if there are multiple root causes; if there is only a single root cause, this second-level title should be "Solution")
+
+Outline the specific considerations, prerequisites, and procedures for resolving the problem.
+
+> **Note**: If there is only one root cause, the second-level title should be "Solution"; if there are multiple root causes with different corresponding solutions, each solution should be given a separate second-level title, such as "Solution for Root Cause 1," "Solution for Root Cause N," etc.
+
+### Considerations (Optional)
+
+Important considerations to keep in mind before proceeding with operations. Failing to thoroughly read this could lead to operational failures or even more severe consequences.
+
+### Prerequisites (Optional)
+
+Conditions that must be met before starting operational steps.
+
+### Operational Steps (This tertiary header can be omitted if there are no considerations or prerequisites)
+
+- Operational steps are generally presented as an ordered list; if the steps are complicated, additional headings can be used to differentiate between steps, and each step can be detailed in an ordered list format.
+- If operations are being conducted on a container platform, a complete and detailed list of operational steps can be provided. If operations are to be performed on a third-party platform or other software, only the key steps should be provided.
+
+  > Reason: For non-container platform operations, if details are written too elaborately, we cannot guarantee timely updates to the documentation when their interfaces change, leading to various potential issues. To ensure the long-term usability of the documentation, operational steps for third-party platforms should adhere to the following principles:
+  >
+  > - Highlight the core steps and key operations.
+  > - Avoid over-reliance on specific interface details.
+  > - Maintain the generality and flexibility of operational step descriptions.
+  > - Ensure that users understand the purpose and basic workflow of the operations.
+
+...
+
+## Solution for Root Cause N (This is how to title if there are multiple root causes; if there is only a single root cause, this section should be removed)
+
+The content in this section should follow the same format as the solution for Root Cause 1; further explanation is unnecessary here.
+
+## Preventive Measures (Optional)
+
+Offer specific measures (recommendations, commands, operations, prerequisites, etc.) to prevent the reoccurrence of this problem.
+
+## Related Content (Optional)
+
+This can house content referenced within the documentation but not suitable for inclusion in the main text, such as usage methods for tools, reference materials, etc.

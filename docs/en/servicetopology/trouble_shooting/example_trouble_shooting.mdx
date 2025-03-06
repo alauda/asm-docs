@@ -1,0 +1,95 @@
+---
+weight: 10
+sourceSHA: 4894d6ee9f6876a61b243b991087cc3b3083a7c424fdf0374d5300a347099774
+---
+
+:::tip
+
+Introduce common issues users may encounter along with their solutions. If the content is brief, it can be placed directly on a single page titled "Troubleshooting". If the content is extensive, "Troubleshooting" can serve as a table of contents, with each issue documented separately.
+
+You can access the [Troubleshooting Document Example](https://product-doc-guide.alauda.cn/template/trouble_shooting/example.html) to view a corresponding document example.
+
+:::
+
+# \<Title: Generally the Issue Name>
+
+## Problem Description
+
+Provide detailed information about the environment in which this issue occurs, its scope of influence, and the symptoms of the problem. Additionally, include the following supplementary information as appropriate:
+
+- Problem Screenshots: Currently, it is preferred to use textual descriptions. If text cannot adequately describe the issue, screenshots may be used, and users must register for discussion with the documentation team.
+- Related Logs: Include error messages, system logs, debugging information, etc., in code blocks.
+
+## Root Cause Analysis
+
+List one or more actual causes that have led to the issue (this can include a single definite cause or various possible causes). Each cause must meet the following criteria:
+
+1. Must be a verified cause that has resulted in the issue, rather than speculative or assumed causes.
+2. A detailed causal analysis should be provided, including:
+   - How this cause triggers the issue.
+   - The specific mechanism and process through which the issue occurs.
+
+## Issue Troubleshooting (Optional)
+
+Provide a detailed list of the specific steps for troubleshooting the issue. Through troubleshooting, users can identify the most likely or definitive cause among several possibilities and apply appropriate solutions. Note the following for troubleshooting:
+
+- If there is only one root cause, it is necessary to provide troubleshooting steps. In this case, it is advisable to present them in a numbered list:
+
+  ```
+  1. Step 1
+  ...
+  n. Step N
+  ```
+
+- If there are multiple root causes with different troubleshooting steps, list each root cause using third-level titles, and provide detailed troubleshooting steps under each root cause.
+  ```
+  ### Root Cause 1
+    1. Step 1
+    ...
+    n. Step N
+  ...
+  ### Root Cause N
+    1. Step 1
+    ...
+    n. Step N
+  ```
+
+## Solution for Root Cause 1 (This is the title format for multiple root causes; if there is a single root cause, this second-level title should be “Solution”)
+
+Specific precautions, prerequisites, and operation steps to resolve the issue.
+
+> **Note**: If there is only one root cause, then the second-level title is “Solution”; if there are multiple root causes, with different solutions for each, each solution should have its own second-level title, named “Solution for Root Cause 1”, “Solution for Root Cause N”, etc.
+
+### Precautions (Optional)
+
+Precautions that need to be taken before starting operations; failure to read this carefully may lead to operational failures or even more serious consequences.
+
+### Prerequisites (Optional)
+
+Conditions that must be met before starting the operation steps.
+
+### Operation Steps (This third-level title can be omitted if there are no precautions or prerequisites)
+
+- Operation steps are generally presented in a numbered list; if the steps are complex, additional titles can be used to distinguish between them, utilizing fourth-level titles for each step, with specific steps listed in numbered format.
+- If the operations are performed on a container platform, detailed steps for each action can be outlined. If operated on a third-party platform or other software, only the key steps should be provided.
+
+  > Reason: For non-container platform operations, detailed instructions may lead to challenges in timely updates when the interface changes, potentially causing various issues. Hence, the description of procedures on third-party platforms should adhere to the following principles:
+  >
+  > - Highlight core steps and key actions.
+  > - Avoid excessive reliance on specific interface details.
+  > - Maintain generality and flexibility in operation step descriptions.
+  > - Ensure users understand the purpose and basic flow of the operations.
+
+...
+
+## Solution for Root Cause N (This is the title format for multiple root causes; if there is a single root cause, this second-level title should be removed)
+
+This section follows the same format as the solution for Root Cause 1, and thus will not be repeated here.
+
+## Preventive Measures (Optional)
+
+Provide specific measures to prevent the recurrence of this issue (suggestions, commands, operations, prerequisites, etc.).
+
+## Related Content (Optional)
+
+This can include additional materials referenced in the documentation but are not suitable for inclusion in the main text, such as tool usage instructions, reference materials, etc.

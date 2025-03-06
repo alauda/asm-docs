@@ -1,0 +1,105 @@
+---
+weight: 10
+sourceSHA: 0b66532a25ea553264d78333e2e4fd66630f01647eee05590441bfef6d5e3009
+---
+
+:::tip
+
+When writing functional documentation, the person responsible for each feature should reasonably split the document pages and directory structure based on the specific characteristics of the functionality. First, provide the corresponding CLI operation instructions to facilitate users' quick onboarding.
+
+1. Overview
+
+Functional guide documentation typically exists between the feature overview and HowTo documents, focusing on a detailed introduction to a single feature. It can encompass a thorough description of the feature itself.
+
+2. Core Characteristics
+
+Functional guide documentation should have the following core characteristics:
+
+- Concept-oriented: Systematically explains the core concepts and usage of the functionality.
+- Flexibility: Descriptions can be made independently of specific scenarios.
+- CLI Detail: Prioritize providing detailed command-line operation instructions to help users quickly realize functionality through the CLI. Supplement this with usage methods corresponding to the graphical interface of the feature.
+
+3. Differences Between Functional Documentation and HowTo Documentation
+
+Functional documentation often accompanies introductions to feature usage and operations, yet the distinction with HowTo can also be a source of confusion. The differences are as follows:
+
+- **Content Focus**
+  - Functional Guide: Answers "what it is" and "why it is," helping users understand the functionality itself.
+  - HowTo: Answers "how to do it," guiding users to complete specific tasks.
+
+- **Structural Characteristics**
+  - Functional Guide: A systematic, hierarchical knowledge framework that emphasizes concept explanations and principle elaboration.
+  - HowTo: Task-oriented linear operation steps that emphasize practical guidance.
+
+- **Usage Scenarios**
+  - Functional Guide: When users are initially learning about a feature or need to thoroughly understand the functionality’s principles.
+  - HowTo: When users need to resolve a specific issue or accomplish a concrete task.
+
+- **Coverage Scope**
+  - Functional Guide: Completes the introduction of all features, configuration items, and usage methods of the functionality.
+  - HowTo: Specific operational guides for a single scenario or task.
+
+4. Writing Guidelines
+
+When developing functional documentation, especially regarding the CLI section, the following steps are recommended:
+
+- Define Target Audience: Identify the target readers of the documentation and their needs. Understand their familiarity with the CLI to adjust the depth and complexity of the content accordingly.
+- Structure Content: Divide the document into multiple sections, such as feature introduction, detailed CLI command parameters, usage examples, and notes. Ensure each section is logically clear and easy to understand.
+- Detailed Command Descriptions: For each CLI command, provide detailed parameter descriptions and usage examples. Explain the command's purpose, applicable scenarios, and possible output results.
+
+:::
+
+# \<Title: Typically the Name of the Feature>
+
+## Feature Introduction
+
+> There is no fixed introduction format; describe the core definition of the feature, including the following elements:
+>
+> - What is this feature
+> - What problem does it solve
+> - In what scenarios is it applicable
+> - What value does it bring
+
+## Main Features
+
+> Briefly introduce the main features
+
+- Feature One: (Brief description)
+- Feature Two: (Brief description)
+- ...
+
+## Feature Advantages
+
+> Describe the technical highlights of this feature, such as:
+>
+> - Performance advantages
+> - Scalability
+> - Security
+> - Stability
+
+## \<Feature Module One>
+
+> Provide a detailed description of the specific functions of this module, prioritizing the CLI introduction.
+
+Use the functionality by following the steps below:
+
+<Steps>
+  ### Step 1
+
+  > For the description of the steps, it is recommended to adopt clear, executable steps, using specific commands and displaying them in a copyable code format.
+
+  Parameter Descriptions
+
+  | Parameter | Description                  |
+  | :-- | :------------------ |
+  | Parameter One | \<Whether required>, describe according to the specific parameter usage. |
+  | Parameter Two | \<Whether required>, describe according to the specific parameter usage. |
+
+  ### Step 2
+
+  ### ......
+</Steps>
+
+## \<Feature Module Two>
+
+...

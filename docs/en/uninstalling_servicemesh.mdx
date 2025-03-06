@@ -1,0 +1,105 @@
+---
+weight: 90
+sourceSHA: b8dbc4a21edf3960dec2c435704bd11e67ffcd7117911b22b72567586d88c90e
+---
+
+:::tip
+
+When writing feature documentation, each feature owner should reasonably split the document pages and directory structure based on the specific characteristics of the feature. It is advisable to prioritize the corresponding CLI operation instructions, enabling users to get started quickly.
+
+1. Overview
+
+Feature guideline documents are typically located between feature overviews and HowTo documents, focusing on a detailed introduction of a single feature. They can cover a comprehensive description of the feature itself.
+
+2. Core Characteristics
+
+Feature guideline documents should possess the following core characteristics:
+
+- Concept-oriented: Systematically explain the core concepts and usage of the feature.
+- Flexibility: The feature description can be independent of specific scenarios.
+- Detailed CLI: Prioritize providing detailed command-line operation instructions to help users quickly implement the feature through the CLI. Additionally, supplement this with the usage of corresponding functional interfaces.
+
+3. Differences between Feature Documentation and HowTo Documents
+
+Feature documentation often accompanies some introductions to feature usage and operations; however, the differences from HowTo are often a source of confusion. Their distinctions are as follows:
+
+- **Content Focus**
+  - Feature Guide: Answers "what is it" and "why," helping users understand the feature itself.
+  - HowTo: Answers "how to do it," guiding users to complete specific tasks.
+
+- **Structural Characteristics**
+  - Feature Guide: A systematic and hierarchical knowledge system that emphasizes concept explanation and principle elaboration.
+  - HowTo: Task-oriented linear operational steps that focus on practical guidance.
+
+- **Usage Scenarios**
+  - Feature Guide: When users first learn about the feature or need to understand its principles in depth.
+  - HowTo: When users need to solve specific problems or complete specific tasks.
+
+- **Coverage Scope**
+  - Feature Guide: Completely introduce all characteristics, configuration items, and usage methods of the feature.
+  - HowTo: Specific operation guidelines for a single scenario or task.
+
+4. Writing Guidelines
+
+When drafting feature documentation, especially for CLI-related sections, it is recommended to follow these steps:
+
+- Identify the target user group: Determine the target audience of the document and their needs. Understand their familiarity with the CLI to adjust the depth and complexity of the content.
+- Structure content: Divide the document into multiple sections, such as feature introduction, CLI command parameter details, usage examples, and precautions. Ensure each section is logically clear and easy to understand.
+- Detailed command explanation: For each CLI command, provide detailed parameter explanations and usage examples. Explain the command's function, applicable scenarios, and possible output results.
+
+:::
+
+# Delete Service Mesh
+
+## Feature Introduction
+
+> There is no fixed introductory paradigm. The core definition of the feature should contain the following elements:
+>
+> - What is this feature?
+> - What problem does it solve?
+> - In what scenarios is it applicable?
+> - What value does it bring?
+
+## Main Functions
+
+> Introduce the main functions through simple descriptions.
+
+- Function One: (Brief description)
+- Function Two: (Brief description)
+- ...
+
+## Feature Advantages
+
+> Describe the technical highlights of the feature, such as:
+>
+> - Performance advantages
+> - Scalability
+> - Security
+> - Stability
+
+## \<Function Module One>
+
+> Detail the specific functions of this module, prioritizing CLI introductions.
+
+Use the feature by following these steps:
+
+<Steps>
+  ### Step 1
+
+  > For the description of steps, it is recommended to adopt clear and executable steps, such as specifying which instructions to use. Present it in a copyable code display control.
+
+  Parameter Description
+
+  | Parameter  | Description                    |
+  | :--       | :---------------------------- |
+  | Parameter One | \<Required/Optional>, describe based on the specific parameter's purpose. |
+  | Parameter Two | \<Required/Optional>, describe based on the specific parameter's purpose. |
+
+  ### Step 2
+
+  ### ......
+</Steps>
+
+## \<Function Module Two>
+
+...
