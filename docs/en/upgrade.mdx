@@ -7,18 +7,125 @@ sourceSHA: ca877d503e4d5812aaf2ea24956f0500017337d1e9d247ef5d2fafdbaa3cbd04
 title: Upgrade
 ---
 
-:::tip
+As the platform (global) upgrades, ensure timely upgrades of all Service Mesh components to maintain the proper functioning of Service Mesh-related features.
 
-If the parent module requires a manual upgrade operation, an upgrade document must be provided; otherwise, it can be omitted.
+## <span id="ref">Before Upgrading</span>
 
-The upgrade document should include the upgrade process, upgrade configurations, rollback procedures, etc.
+The platform provides a canary upgrade for Istio in the service mesh, where the new version of the istiod component is deployed first. Once all data planes are upgraded, the old version of the istiod component is decommissioned.
 
-If there are significant differences in the upgrade process between versions, the upgrade document should be converted into a directory, providing separate upgrade documents for different versions (e.g., "3.10 Upgrade Guide", "3.18 Upgrade Guide").
+Given the strong dependency between Istio versions and Kubernetes versions, ensure the current Kubernetes version of the cluster meets Istio upgrade requirements before upgrading Istio to successfully complete the canary upgrade.
 
-You can visit [Upgrade](https://product-doc-guide.alauda.cn/template/upgrade/example.html) for examples of the corresponding documents.
+The table below shows the supported Istio upgrade paths for the current platform version and the required Kubernetes versions for these paths.
 
-:::
+| Supported Istio Upgrade Paths | Kubernetes Version Requirements |
+| ----------------------------- | ------------------------------- |
+| Istio from 1.20 to 1.22        | Kubernetes version `1.27`, `1.28` |
+| Istio from 1.18 to 1.22        | Kubernetes version `1.27`                            |
 
-# Upgrade
+**Note**:
 
-Introduction to the upgrade process of the specific module.
+- The table only describes the major versions of Istio and Kubernetes; minor versions do not affect compatibility.
+- You can check the current running versions of Istio and Kubernetes in the cluster by going to the **Components** list.
+- If the current Kubernetes version of the cluster is lower than the required version for the Istio upgrade, you need to upgrade Kubernetes to a compatible version through [Upgrade Components](@console-platform-docs/zh/platform-usermanual/clusterall/1cluster/11upgrade/).
+- For more information, please refer to the [Community's Supported Kubernetes Versions for Istio](https://istio.io/latest/docs/releases/supported-releases/).
+
+## Upgrade Process
+
+The complete service mesh upgrade process includes the following steps:
+
+1. [Upgrade the non-Istio components of the service mesh in the cluster](#component), such as asm operator, flagger operator, etc.
+2. [Deploy the new version of istiod in the cluster](#newistiod).
+3. [Check if there are any EnvoyFilters in the cluster](#envoyfilters).
+4. [Upgrade all Istio data planes in the cluster](#data-planes).
+5. [Decommission the old version of istiod in the cluster](#oldistiod).
+
+## Upgrade Operations
+
+### <span id="component">Upgrade the Non-Istio Components of the Service Mesh in the Cluster</span>
+
+1. In the **Platform Management** left navigation, click **Service Mesh** > **Meshes**.
+2. Click the `Service Mesh Name` that needs to be upgraded to enter the mesh details.
+3. In the **Mesh Deployment** area of the mesh details, there is a list of clusters where the service mesh has been deployed. Click the `Cluster Name` to open the cluster details page in a new tab.
+4. Switch to **Components** in the cluster details page, and click upgrade to upgrade the non-Istio components of the service mesh in the cluster to the latest version. For detailed documentation on upgrading components, see [Upgrade Components](@console-platform-docs/zh/platform-usermanual/clusterall/1cluster/11upgrade/).
+
+**Note**: The non-Istio components of the service mesh include asm, Flagger Operator, Asm Operator, Jaeger Operator.
+
+### <span id="newistiod">Deploy the New Version of istiod</span>
+
+**Note**: Before deploying the new version of istiod, please refer to [Before Upgrading](#ref) to ensure the Kubernetes version of the cluster meets the upgrade path requirements.
+
+1. Return to the mesh details page, and in the **Mesh Deployment** area, click the **Upgrade** button to the right of the `Istio Version` of the corresponding cluster. An upgrade path for Istio will be displayed in the popup.
+2. Click the **Upgrade** button in the popup.
+
+### <span id="envoyfilters">Check if there are any EnvoyFilters in the Cluster</span>
+
+1. In the **Platform Management** left navigation, click **Service Mesh** > **EnvoyFilter**.
+
+    **Note**: If there are multiple service meshes on the platform, you can switch the service mesh to the one where the cluster is located through the top navigation bar.
+
+2. Check whether there is data in the EnvoyFilter list.
+    - If no data is found, the check is complete.
+    - If data is found, contact the EnvoyFilter creator to adapt all EnvoyFilters to the new version of Istio, or contact technical support.
+
+### <span id="data-planes">Upgrade All Istio Data Planes in the Cluster</span>
+
+The Istio data planes in the cluster include Sidecars, ingress gateways, and egress gateways.
+
+**Method 1: Upgrade via Interactive Command Line Tool**
+
+The interactive command line tool can batch upgrade all Sidecars and gateways in the cluster. This method is suitable for users familiar with command line operations, especially those who need to quickly upgrade the entire cluster at once.
+
+```bash
+kubectl -ncpaas-system exec -it deploy/asm-controller -- /app/asm-controller bfg rollout
+```
+
+**Note**: You can also use the fast upgrade parameter without confirmation to execute the upgrade.
+
+```bash
+kubectl -ncpaas-system exec -it deploy/asm-controller -- /app/asm-controller bfg rollout --no-prompt
+```
+
+**Note**: The rolling upgrade process of ingress and egress gateways involves deleting the old Pods first and then creating new Pods until all Pods are updated to the new version of the data plane image. Therefore, if the gateway has only one Pod, it will be inaccessible during the gateway upgrade.
+
+**Method 2: Upgrade via UI**
+
+Upgrading via UI allows for batch upgrades by different namespaces or specifying a single service/gateway for upgrade. This method is suitable for users who prefer to operate in a visual interface, especially those who need flexible selection of upgrade targets.
+
+**Upgrade Ingress and Egress Gateways**
+
+1. In the left navigation bar, click **Service Mesh** > **Gateways**.
+    **Note**: In the cluster's gateway list, the ![](/zh/img/00feature.png) icon to the right of **Istio Version** indicates that the data plane proxy of the gateway can be upgraded.
+2. Click the **Upgrade** button to the right of **Istio Version**, and **Confirm**.
+
+**Upgrade Sidecars**
+
+1. In the **Platform Management** left navigation, click **Service Mesh** > **Meshes**.
+2. Click the `Service Mesh Name` that needs to upgrade Sidecars to enter the mesh details.
+3. In the **Namespaces** area of the mesh details, there is a list of namespaces managed by the service mesh. Click the `Namespace Name` to open the **Service Mesh** in a new tab and enter the namespace where the Sidecar is located.
+    **Note**: Perform Sidecar upgrades for all namespaces sequentially.
+4. In the left navigation bar, click **Service List**.
+    **Note**: When the ![](/zh/img/00feature.png) icon appears next to the `Service Name`, it indicates that the Sidecar of the service can be upgraded.
+5. Click **Batch Upgrade Sidecars**.
+    **Note**: Click the **Upgrade** button to the right of the ![](/zh/img/00feature.png) icon for the service record to upgrade a single service.
+6. Select all, one, or more services, and then click **Upgrade**.
+    **Note**: The platform will upgrade the Sidecar of the service by rolling updating the Pods with different current and target versions of the Sidecar. If the upgrade fails, check the container group events in the Container Platform to understand the cause of the failure or try **Re-upgrade**.
+
+**Note**: The Sidecar is updated through rolling update of the service's Deployment to complete the data plane image update of the Pod. Therefore, if the service has long connections, there will be a brief service interruption during the rolling update of the Pod.
+
+### <span id="oldistiod">Decommission the Old Version of istiod in the Cluster</span>
+
+The old version of istiod in the cluster can only be decommissioned after all Istio data planes in the cluster have been upgraded.
+
+**Caution**:
+
+- If the old version of istiod in the cluster is not decommissioned, you will not be able to use the add cluster and Sidecar configuration functions of the service mesh.
+- When there is a new upgradeable version on the platform, if any cluster has not decommissioned the old version of istiod, the platform cannot be upgraded.
+- In a multi-cluster service mesh, the old version of istiod in the clusters can only be decommissioned sequentially after all clusters have completed the Istio data plane upgrade.
+
+**Steps**
+
+1. Return to the mesh details page, and in the **Mesh Deployment** area, click the **Decommission Old Version** button to the right of the `Istio Version` of the corresponding cluster. The **Decommission Old Version** popup will be displayed.
+2. Click the **Confirm** button in the popup.
+
+**Note**: If there are data planes that have not been upgraded in the cluster, after clicking **Decommission Old Version**, the popup will display the ingress gateways, egress gateways, and Sidecars in the cluster that have not been upgraded, quickly tracking the data planes to be upgraded.
+
