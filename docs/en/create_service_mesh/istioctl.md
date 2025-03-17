@@ -1,0 +1,16 @@
+---
+weight: 25
+title: Istioctl Tool
+---
+
+Istioctl is a command-line utility provided by Istio, which can be used to diagnose issues within the Service Mesh or to create, view, modify, and delete configuration resources in the mesh.
+
+**Note**: When you deploy a Service Mesh on the platform, the platform will automatically install the corresponding Istioctl based on the Istio version you selected. You can use the Istioctl tool to manage your Service Mesh through the UI provided by the platform. If you want to use Istioctl directly on your machine outside the platform UI, you need to download the appropriate Istio distribution from the Istio community and extract the distribution on your machine to use istioctl.
+
+For commonly used commands and instructions, please refer to [Istioctl](https://istio.io/latest/docs/reference/commands/istioctl/).
+
+**Steps**
+
+1. In the left navigation bar, click **Service Mesh** > **Mesh**.
+2. Click the **Service Mesh Name**.
+3. In the **Mesh Deployment** area, click the menu icon on the right side of the cluster where you want to open the Istioctl tool ![](/zh/img/003point.png), and then select **Istioctl Tool**.
