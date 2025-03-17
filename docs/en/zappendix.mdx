@@ -3,14 +3,6 @@ weight: 125
 sourceSHA: 9997b13a979f1a2564d346e5579b23643b67f2573637cd83c19bf7d61db7a294
 ---
 
-:::tip
-
-Provide a detailed introduction to the concepts introduced by the functional module (including parameter explanations, examples, etc.). If the core concepts are relatively simple, they can be combined into a single document to introduce multiple concepts; otherwise, it is recommended to introduce each concept in a separate document. For obscure and complex concepts, it is advisable to write a standalone article "In-Depth Understanding of XXXX" in the current directory for clear and comprehensive introduction.
-
-You can visit the [concept documentation example](https://product-doc-guide.alauda.cn/template/concept/core_example.html) for corresponding document examples.
-
-:::
-
 # Glossary
 
 The following are proprietary terms, terminology, and abbreviations that appear in this document.
@@ -18,8 +10,8 @@ The following are proprietary terms, terminology, and abbreviations that appear 
 
 | Glossary           | Description                                                         |
 | ------------------------------------- | ------------------------------------------------------------ |
-| Cluster                               | A Kubernetes cluster manages the infrastructure resources needed to run containers in a Kubernetes container platform, and is associated with various resources such as multiple nodes, load balancers, and private networks. <br>A single-point cluster has only one control node, while a highly available cluster has at least 3 control nodes. |
-| Node                                  | A node in a cluster is divided into two types: control nodes (Master) and compute nodes (Node).<br>Control nodes are responsible for running kube-apiserver, kube-scheduler, kube-controller-manager, etcd, container networks, and some management components of the platform.<br>Compute nodes are the nodes in a Kubernetes cluster that bear the workload, and can be virtual or physical machines. Compute nodes are responsible for actual Pod scheduling and communication with management nodes. |
+| Cluster                               | A Kubernetes cluster manages the infrastructure resources needed to run containers in a Kubernetes container platform, and is associated with various resources such as multiple nodes, load balancers, and private networks. <br/>A single-point cluster has only one control node, while a highly available cluster has at least 3 control nodes. |
+| Node                                  | A node in a cluster is divided into two types: control nodes (Master) and compute nodes (Node).<br/>Control nodes are responsible for running kube-apiserver, kube-scheduler, kube-controller-manager, etcd, container networks, and some management components of the platform.<br/>Compute nodes are the nodes in a Kubernetes cluster that bear the workload, and can be virtual or physical machines. Compute nodes are responsible for actual Pod scheduling and communication with management nodes. |
 | Project      | The platform's projects (tenants) can be flexibly divided into independent and isolated resource spaces, and each project has an independent project environment, which can represent different subsidiaries, departments, or project teams within an enterprise. Through project management, it is easy to achieve resource isolation between project teams and quota management within tenants. |
 | Namespace    | Kubernetes Namespace is a smaller resource space that is isolated from other namespaces in a project on the platform, and is also a workspace for users to implement job production. Multiple namespaces can be created under one project, and the total resource quota that can be occupied cannot exceed the project quota. By subdividing resource quotas into smaller namespaces, the size of containers (CPU, memory) under the namespace is also limited, effectively improving resource utilization. |
 | Image    | A container image is a standard format for packaging container applications. When deploying containerized applications, images can be specified, which can come from Docker Hub, the company's DevOps platform image repository, or a user's private image repository. The image ID can be uniquely confirmed by the URI of the image repository and the image tag (default is latest). |
@@ -51,4 +43,4 @@ The following are proprietary terms, terminology, and abbreviations that appear 
 | Service Topology | Service topology refers to the visualized topology diagram of service call relationships on the platform. By viewing the service topology, you can understand the service calls and their performance on the platform within a specified time range. |
 | API Group | API grouping is a dimension for managing services and service APIs in the service gateway management project. It aggregates a group of access resources with common scenarios and uniformly manages and monitors them. |
 | Envoy | Envoy is an L7 proxy and communication bus designed for large modern SOA (Service-Oriented Architecture) architecture. It is one of the core components of Istio and runs with services in a sidecar manner to intercept and forward traffic for services. It provides capabilities such as traffic routing and traffic control. [Learn more](https://www.envoyproxy.io/docs/envoy/latest/intro/what_is_envoy) |
-| EnvoyFilter | EnvoyFilter provides a mechanism to customize Envoy configuration generated by Istio Pilot. EnvoyFilter can modify the values of specific fields, add special filters, or add entirely new listeners, clusters, and so on. This feature should be used with caution as incorrect configuration may break the entire service mesh. <br> EnvoyFilter resources on the platform are project resources and can be shared among services in multiple service meshes and namespaces within the project. |
+| EnvoyFilter | EnvoyFilter provides a mechanism to customize Envoy configuration generated by Istio Pilot. EnvoyFilter can modify the values of specific fields, add special filters, or add entirely new listeners, clusters, and so on. This feature should be used with caution as incorrect configuration may break the entire service mesh. <br/> EnvoyFilter resources on the platform are project resources and can be shared among services in multiple service meshes and namespaces within the project. |
