@@ -1,0 +1,78 @@
+---
+weight: 10
+title: Allow or Deny Access to Services (Alpha)
+---
+
+You can set up blacklists or whitelists to allow or deny access to services.
+
+For example, by setting up blacklists or whitelists for core services, you can ensure that only trusted services within the mesh can call those services, thus mitigating the risk of data leakage or malicious attacks.
+
+* **Whitelist**: Allows calls from any downstream service specified in the whitelist rules; otherwise, calls are denied.
+
+* **Blacklist**: Denies calls from any downstream service specified in the blacklist rules; otherwise, calls are allowed.
+
+**Note**:
+
+* Service-level blacklists and whitelists control access permissions between services within the service mesh only and do not affect calls from external services to services within the mesh.
+
+* When Service A calls Service B, it means A depends on B. We refer to A as B's downstream service, and B as A's upstream service.
+
+## Setting Rule Status
+
+The rule status (Enabled/Disabled) switch can uniformly control whether the blacklist and whitelist rules under the service are effective, including newly added rules after setting the switch status.
+
+* Switch On: All blacklist and whitelist rules under the service will take effect.
+
+* Switch Off: All blacklist and whitelist rules under the service will not take effect, and by default, all services in the mesh are allowed to access the current service.
+
+### Steps
+
+1. In the left navigation bar, click **Service List**.
+
+2. Click the ***Service Name*** for which you want to set blacklist and whitelist rules.
+
+3. Under the **Blacklist/Whitelist** tab, click **Set Rule Status**.
+
+4. Select **Enable/Disable**.
+
+## Adding a Whitelist
+
+You can add whitelist rules to services that have not set any rules or have already set whitelist rules. Once the rules are enabled, only the downstream services specified in the whitelist rules can call the service.
+
+**Note**: After adding a whitelist, make sure the rule status switch is turned on for the whitelist to take effect.
+
+### Steps
+
+1. In the left navigation bar, click **Service List**.
+
+2. Click the ***Service Name*** for which you want to set blacklist and whitelist rules.
+
+3. Under the **Blacklist/Whitelist** tab, click **Add Whitelist**.
+
+4. Add (select, input) one or more downstream services to be added to the whitelist.
+
+    **Downstream services**: Services that depend on the current service under the namespace managed by the current service mesh.
+    **Note**: You can input services that are not in the current project/namespace but belong to the current service mesh.
+
+5. Click **Confirm**.
+
+## Adding a Blacklist
+
+You can add blacklist rules to services that have not set any rules or have already set blacklist rules. Once the rules are enabled, the downstream services specified in the blacklist rules will be denied access to the service.
+
+**Note**: After adding a blacklist, make sure the rule status switch is turned on for the blacklist to take effect.
+
+### Steps
+
+1. In the left navigation bar, click **Service List**.
+
+2. Click the ***Service Name*** for which you want to set blacklist and whitelist rules.
+
+3. Under the **Blacklist/Whitelist** tab, click **Add Blacklist**.
+
+4. Add (select, input) one or more downstream services to be added to the blacklist.
+
+    **Downstream services**: Services that depend on the current service under the namespace managed by the current service mesh.
+    **Note**: You can input services that are not in the current project/namespace but belong to the current service mesh.
+
+5. Click **Confirm**.

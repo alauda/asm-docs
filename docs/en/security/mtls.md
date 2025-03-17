@@ -1,0 +1,35 @@
+---
+weight: 5
+title: mTLS
+---
+
+Mutual Transport Layer Security (mTLS) is a protocol that allows for mutual authentication between two parties. It is the default authentication mode in some protocols (IKE, SSH) and optional in others (TLS). You can use mTLS without changing your application or service code. TLS is entirely handled by the service mesh infrastructure and processed between the two sidecar proxies.
+
+By default, mTLS is enabled in the Service Mesh and set to permissive mode. In this mode, sidecars in the Service Mesh accept both plaintext traffic and connections encrypted with mTLS. If services in the mesh are configured to use strict mTLS for communication with services outside the mesh, the communication might be disrupted because strict mTLS requires mutual authentication between the client and server. Use permissive mode when migrating workloads to the Service Mesh. Then, you can enable strict mTLS between the mesh, namespaces, or applications.
+
+## <span id="anquan">Create Security Policies</span>
+
+### Steps
+
+1. In the left navigation bar, click **Service List**.
+
+2. Click the ***Service Name*** for which you want to create security rules.
+
+3. Under the **Policies** tab, click **Create Policy** > **Security** on the right side of the cluster.
+    
+4. In the **Rules** section, select **Permissive Mode** or **Strict Mode**.
+    
+    * **Permissive Mode**: Allows the service to accept both plaintext traffic and mutual TLS traffic.
+
+    * **Strict Mode**: Allows the service to accept only mutual TLS traffic. The service will only process traffic encrypted by the sidecar, and unencrypted traffic will be rejected.
+
+    
+    **Note**: Enabling **Permissive Mode** allows the service to accept both plaintext and mutual TLS traffic simultaneously, greatly enhancing the ease of adopting mutual TLS.
+       
+   For example: When operations personnel want to migrate a service to Istio with mutual TLS enabled, many issues can arise with non-Istio clients and servers communicating. Typically, operations personnel cannot install Istio sidecars on all clients simultaneously, nor do they have the permissions to do so. Even if Istio sidecars are installed on the server, they cannot enable mutual TLS without disrupting existing connections.
+   
+   **Permissive Mode** addresses this scenario flexibly. The Istio sidecar installed in the service immediately accepts mutual TLS traffic without disrupting existing plaintext traffic. Therefore, operations personnel can gradually install and configure client Istio sidecars to send mutual TLS traffic. Once the clients are configured, the server can be configured to **Strict Mode** (TLS-only mode).
+
+
+5. Click **Create**.
+    When creating security policies, the system will automatically create client rules and enable TLS by default.
