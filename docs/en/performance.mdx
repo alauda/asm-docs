@@ -3,80 +3,57 @@ weight: 75
 sourceSHA: 7066d37c3170b24f6ecd47530c0611fc832a72c8d843ca821f8af104554a6f6e
 ---
 
-:::tip
 
-Provide an in-depth yet accessible introduction to complex concepts.
-
-You can visit the [in-depth understanding of concept documentation example](https://product-doc-guide.alauda.cn/template/concept/insight_example.html) to see corresponding documentation examples.
-
-:::
 
 # Performance
 
-Add a paragraph that briefly explains the meaning of \<Name>, giving users an initial understanding of \<Name>.
+Sidecar performance depends on many factors, for example:
 
-## Terminology (Optional)
+* Number of client connections
 
-Use a table to briefly introduce the terminology that appears in this document; users must understand these terms in order to comprehend this document.
+* Target request rate
 
-## Why \<Name> Is Needed
+* Request size and response size
 
-You can add the following sections here:
+* Number of proxy worker threads
 
-1. **First Section**: Explain the background in which \<Name> arose or what problem it solves. You can write using the following methods:
+* Protocol
 
-   - **Using Comparison**: In traditional scenarios, how is \<Name> functioning, and what issues have arisen?
-   - **Using Narrative**: In what context did the concept of \<Name> naturally emerge in response to new challenges or problems?
+* CPU cores
 
-2. **Second Section**: Briefly describe how \<Name> addresses the aforementioned problems; or how it enables new features, which is why we need \<Name>.
+Number and types of proxy filters, specifically telemetry v2 related filters.
+The latency, throughput, and the proxies' CPU and memory consumption are measured as a function of these factors.
 
-## Advantages (Optional)
+   
+## CPU and memory consumption
 
-Use a list to outline the advantages of \<Name>.
 
-## Applicable Scenarios
+Since the sidecar proxy performs additional work on the data path, it consumes CPU and memory. As of Istio 1.12.3, a proxy consumes about 0.5 vCPU per 1000 requests per second.
 
-Introduce one or more scenarios where users might use this feature, allowing them to judge whether they need to use it.
+The memory consumption of the proxy depends on the total configuration state the proxy holds. A large number of listeners, clusters, and routes can increase memory usage.
 
-## Constraints and Limitations (Optional)
+Since the proxy normally doesn’t buffer the data passing through, request rate doesn’t affect the memory consumption.
 
-List the usage constraints and limitations of \<Name>, which may include:
+## Additional latency
 
-- Operating system limitations
-- Network limitations
-- Security limitations
-- Other limitations (e.g., conditions that must be met to use this feature)
 
-## Principles
+Since Istio injects a sidecar proxy on the data path, latency is an important consideration. Istio adds an authentication filter, a telemetry filter, and a metadata exchange filter to the proxy. Every additional filter adds to the path length inside the proxy and affects latency.
 
-Add a schematic diagram and an introduction to the principles. Through this content, users can gain an in-depth understanding of the functionality and implementation process of \<Name>, making better use of the platform's capabilities.
+The Envoy proxy collects raw telemetry data after a response is sent to the client. The time spent collecting raw telemetry for a request does not contribute to the total time taken to complete that request. However, since the worker is busy handling the request, the worker won’t start handling the next request immediately. This process adds to the queue wait time of the next request and affects average and tail latencies. The actual tail latency depends on the traffic pattern.
 
-## Configuration Example (Optional)
+Inside the mesh, a request traverses the client-side proxy and then the server-side proxy. In the default configuration of Istio 1.12.3 (that is, Istio with telemetry v2), the two proxies add about 1.7 ms and 2.7 ms to the 90th and 99th percentile latency, respectively, over the baseline data plane latency.
 
-Include configuration examples to help users visually understand the functionality of \<Name>.
 
-## Important Parameter Explanations Related to \<Name> (Optional)
+## Adjusting sidecar resource quotas (CPU and memory)
 
-For certain functionalities, some parameters are very important and cannot be clearly described in a single sentence, so a separate section should be added that specifically introduces these parameters.
+### Cluster Dimension
 
-### Parameter 1
+At the cluster level configuration of the service mesh, you can set the default Sidecar resource quotas (CPU and memory) for the cluster. When users add services, this configuration will be used as the Sidecar's resource quota by default.
 
-Add a paragraph that simply describes the parameter in one sentence.
+Users with platform management permissions can navigate to the service mesh details page and, under the **Configuration** tab, adjust the default Sidecar resource quotas by updating the **Cluster Dimension Configuration**.
 
-#### Applicable Scenarios
+### Specifying services
 
-#### Constraints and Limitations (Optional)
+* When adding a new service, set specific Sidecar resource quotas (CPU and memory).
 
-#### Principles/Parameter Explanation
-
-#### Configuration Example (Optional)
-
-...
-
-### Parameter N
-
-## References (Optional)
-
-List useful references associated with \<Name> to help users better understand the concept of \<Name>. Usable reference materials include:
-
-- Official documentation links
+* After accessing the details page of an already added service, navigate to the **Details** tab and update the Sidecar configuration in the **Sidecar** 
