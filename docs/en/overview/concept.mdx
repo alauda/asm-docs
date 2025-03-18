@@ -1,0 +1,87 @@
+---
+weight: 10
+---
+
+## Service Mesh
+
+A Service Mesh is an independent and configurable infrastructure layer added to an application. It is used to manage and control communication between microservices applications, providing capabilities for service traffic management, service monitoring, service access security control, and service release.
+
+In traditional microservices architecture, communication between services is usually handled directly by application code, increasing complexity and coupling. The service mesh inserts a lightweight proxy (Envoy, deployed as a sidecar container in each service pod) to manage and control inter-service communication. These proxies are separate from the application code and handle tasks such as request routing, load balancing, fault recovery, traffic control, and security authentication, allowing developers to focus on business logic without worrying about the underlying communication mechanisms and functionalities.
+
+By introducing a service mesh, developers can better manage and control communication between microservices applications and add new features without modifying application code. Service mesh supports multiple infrastructures such as virtual machines and containers and can be integrated with container orchestration platforms (e.g., Kubernetes) to provide a better containerized microservices architecture experience in the cloud-native era.
+
+## Istio
+
+[Istio](https://istio.io/latest/about/service-mesh/) is an open-source service mesh that integrates transparently into existing distributed applications to provide traffic management, policy enforcement, telemetry collection, and security assurance. Istio offers comprehensive service governance capabilities for microservices architecture, supporting multiple languages and primarily using Kubernetes as the service registry.
+
+Istio provides powerful features to protect, connect, and monitor services in a unified and efficient way. With Istio, you can achieve load balancing, inter-service authentication, and monitoring with minimal or no service code changes. It offers the following key features:
+
+- Secure inter-service communication within the cluster, including TLS encryption, identity-based authentication, and authorization.
+- Automatic load balancing for HTTP, gRPC, WebSocket, and TCP traffic.
+- Fine-grained control over traffic behavior with rich routing rules, retries, failovers, and fault injection.
+- Pluggable policy layer and configuration API for access control, rate limiting, and quota management.
+- Automatic collection of metrics, logs, and traces from all traffic within the cluster, including ingress and egress traffic.
+- Scalability to meet various deployment needs. The control plane runs on Kubernetes, and you can add applications deployed in the cluster to the mesh, extend the mesh to other clusters, and even connect to virtual machines or other endpoints outside Kubernetes.
+
+Istio's architecture is shown below.
+
+<img src="/zh/img/33servicemesh.svg" width = "600" />
+
+**Control Plane**
+
+The Istio control plane is responsible for managing and configuring the proxies. It communicates with the data plane proxies (Envoy) to send configurations and instructions to control service traffic, manage security, and collect and process telemetry data. It allows administrators and developers to manage the entire service mesh in a centralized manner with flexible configuration.
+
+**Data Plane**
+
+The Istio data plane consists of a set of intelligent proxies (Envoy) deployed and running as sidecar containers in service pods. These proxies are responsible for intercepting, processing, and forwarding all traffic between services.
+
+The data plane performs traffic management, fault recovery, security policy enforcement, and other functions to ensure the reliability and security of inter-service communication. It also provides rich monitoring and tracing capabilities, helping developers understand and debug service communication behavior.
+
+**Envoy**
+
+[Envoy](https://istio.io/latest/docs/ops/deployment/architecture/#envoy) is used as the proxy for the Istio data plane and is the only Istio component that interacts with data plane traffic.
+
+Envoy is deployed and runs as a sidecar in service pods, handling and forwarding all inbound and outbound traffic for services in the service mesh, providing network functionalities and management features such as traffic control, load balancing, fault recovery, and security.
+
+**Sidecar**
+
+The sidecar pattern is widely used in microservices and containerized applications to enhance application functionality and performance by adding auxiliary containers or proxies next to the main application container.
+
+Envoy, which forms the Istio data plane, is deployed as a sidecar container in service pods.
+
+**Service Gateway**
+
+Service gateways include the Egress Gateway and Ingress Gateway, running at the edge of the service mesh to manage traffic entering and leaving the mesh. They allow you to specify the traffic that is allowed to leave or enter the mesh.
+
+## OpenTelemetry
+
+OpenTelemetry is an open-source observability framework aimed at generating, processing, and transmitting telemetry data, including metrics, logs, and traces. Developed by the Cloud Native Computing Foundation (CNCF), it provides a set of standard protocols and tools to send data to any observability backend. The core components of OpenTelemetry include:
+
+- Collector: Receives, processes, and exports telemetry data.
+- Language SDKs: Allow generating telemetry data using OpenTelemetry APIs in specific languages.
+- Instrumentation Libraries: Automatically or manually instrument applications to collect telemetry data.
+
+OpenTelemetry supports multiple languages and third-party registries, providing observability data for JVM and middleware. It defines industry-standard data specifications, facilitating better integration with various open-source observability tools.
+
+## Technical Comparison Between Istio and OpenTelemetry
+
+| Feature/Capability | Istio | OpenTelemetry |
+| ------------------ | ----- | ------------- |
+| **Protocol Support** | Supports gRPC, HTTP, TCP protocols. | Supports HTTP, TCP, and various RPC protocols such as Dubbo, Redis, etc. |
+| **Service Governance** | Provides load balancing, circuit breaking, connection pool, timeout retry, etc. | No governance capabilities. |
+| **Service Routing** | Provides rich routing rules and strategies, such as weight routing, request header routing, traffic mirroring, fault injection, etc. | No routing capabilities. |
+| **Topology and Call Chains** | Displays all nodes within the mesh, including services, ingress gateways, service entries, egress gateways, excluding middleware nodes.<br/>Call chains include HTTP call spans for services with injected sidecars, containing data such as URL, status code, etc. | Displays nodes including services and middleware, excluding ingress and egress gateways.<br/>The call chain includes HTTP link data, internal method call chain data, and service-to-middleware link data. Span data can also be actively reported via the SDK. |
+| **Monitoring Data** | Provides complete ingress and egress traffic metrics for services. | Provides complete ingress and egress traffic metrics for services, and JVM metrics. |
+| **Registry Compatibility** | Supports Kubernetes as a service registry. | Supports third-party registries and Kubernetes registry. |
+| **Trace ID Propagation** | Requires code changes to implement trace ID propagation. | Implements automatic trace ID propagation. |
+| **Resource Requirements** | May require more computing resources since each service instance needs an Envoy proxy. | Requires fewer additional resources, no need for a proxy alongside each service instance. |
+
+### Selection Recommendations
+
+- **Service Governance**: If service governance is needed, Istio is a better choice.
+- **Observability**: If strong observability support is needed, especially for JVM monitoring, OpenTelemetry is more suitable.
+- **Resource-Constrained Environments**: In resource-limited environments, OpenTelemetry may be a more lightweight choice, as it does not require a proxy alongside each service instance.
+- **Multi-language and Registry Support**: For scenarios requiring multi-language support and the use of third-party registries, OpenTelemetry offers more flexibility.
+- **Non-intrusive Trace ID propagation**: If you are using a Java application and wish to achieve non-intrusive Trace ID propagation for full-stack tracing, using OpenTelemetry for Java Agent is an excellent choice.
+
+Each technology has its unique advantages and applicable scenarios. The choice should be based on specific business needs, technology stack, and considerations for future scalability and integration. In some cases, both can be used together to achieve comprehensive service governance and observability solutions.
