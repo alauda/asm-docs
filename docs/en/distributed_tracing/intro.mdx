@@ -6,7 +6,7 @@ weight: 10
 
 Distributed tracing is a key module in the observability system, used for achieving end-to-end tracing and analysis of distributed systems. This module provides a complete solution from data collection, storage to visual analysis, helping developers and operations personnel to quickly locate service call anomalies, analyze performance bottlenecks, and trace the entire lifecycle behavior of requests.
 
-By integrating with open-source technology stacks and self-developed components, this module supports end-to-end distributed tracing capabilities: applications generate tracing data through automatic injection or SDK integration methods, which are then uniformly collected and stored in Elasticsearch, ultimately realized through a customized UI for multi-dimensional visual analysis. Users can conduct precise searches using rich conditions such as `TraceID`, service name, tags, and more.
+By integrating with open-source technology stacks and self-developed components, this module supports end-to-end distributed tracing capabilities: applications generate tracing data through injection or SDK integration methods, which are then uniformly collected and stored in Elasticsearch, ultimately realized through a customized UI for multi-dimensional visual analysis. Users can conduct precise searches using rich conditions such as `TraceID`, service name, tags, and more.
 
 ## Advantages
 
@@ -16,7 +16,7 @@ The core advantages of tracing are as follows:
   Supports complete tracing restoration across services, processes, and container boundaries, accurately presenting complex call relationships in microservice architectures.
 
 - **Flexible Data Collection Methods**\
-  Provides dual modes of automatic injection (no code modification) and SDK integration, compatible with mainstream language applications such as Java/Python/Go.
+  Supports service mesh-based automatic tracing through Istio's sidecar proxy injection, which captures service-to-service communication data without any code changes. Additionally provides dual modes of OpenTelemetry automatic injection (no code modification) and SDK integration, compatible with mainstream language applications such as Java/Python/Go.
 
 - **High-Performance Storage Solutions**\
   Utilizes Elasticsearch as the storage backend, supporting the writing and fast retrieval of massive span data.
