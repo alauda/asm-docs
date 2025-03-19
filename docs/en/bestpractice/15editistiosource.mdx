@@ -1,0 +1,110 @@
+---
+weight: 20
+---
+
+# How to customize and apply configuration changes to Istio resources?
+
+## Overview
+
+### Background information
+
+The platform provides Istio capabilities through encapsulating CRDs or operating on Istio resources (DestinationRule, VirtualService, etc.). Ways to operate (add, delete, modify) Istio resources on the platform include:
+
+* Users performing actions on the platform UI.
+  
+    * Executing operations in specific functional pages. For example, on the **Routes** tab of the service details page, creating a virtual service resource by **Create Route**.
+  
+    * Directly editing the YAML file of Istio resources on the **Resources** page of the clusters. Administrators can create, modify, or delete YAML operations on Kubernetes resources, including Istio resources.
+
+* The service mesh component Controller (global-asm-controller/asm-controller) automatically tunes according to CRDs or APIs, and during tuning, the Controller automatically updates Istio resources.
+  
+    For example, after creating a load balancing policy for a service on the platform through the UI, the Controller automatically creates the corresponding DestinationRule resource; conversely, after deleting the load balancing policy, the Controller automatically deletes the corresponding DestinationRule resource.
+
+
+### Solution overview
+
+When the product UI does not meet your expectations for functionality and native Istio support, you can refer to this document to customize and apply changes to Istio resources' YAML files on the **Platform Management** > **Clusters** > **Resources** page, temporarily using the capabilities provided by native Istio.
+
+
+The method to customize and apply changes to Istio resource configurations is as follows:
+
+1. Add the annotation `asm.cpaas.io/user-managed: "true"` to the Istio resources to detach them from Controller control, avoiding the restoration or modification of custom changes by the Controller component.
+
+2. Customize the YAML configuration based on the configuration reference provided by [Istio](https://istio.io/latest/docs/reference/config/).
+
+## Constraints and limitations
+
+* Istio resources configured using this method are no longer controlled by the Controller component and require manual management by users.
+
+* If the modified YAML configuration does not comply with Istio's design, there may be unknown issues affecting functionality.
+
+* When you upgrade to a new version of Istio in the future, the platform will not handle compatibility upgrades for unmanaged resources. You will need to assess compatibility and perform compatibility handling on your own.
+
+
+## Configuration example
+
+Below, we will use the scenario of modifying the DestinationRule resource to configure different load balancing policies for multiple ports of a service to illustrate the configuration method.
+
+### Scenario
+
+Service s1 has 2 ports `80` (HTTP protocol) and `81` (TCP protocol). When creating a load balancing policy for the service through the UI, it only supports configuring the same policy for all ports (e.g., the least request load balancing). You can modify the DestinationRule resource of s1 to configure different load balancing policies for ports `80` and `81` respectively.
+
+### Procedure
+
+1. After entering the Service Mesh platform, click on **Services** on the left navigation bar.
+
+2. Click on the ***service name*** to be configured.
+
+3. Under the **Policies** tab, click on **Create Policy** > **Load Balancer**.
+
+4. After selecting the **Minimum Request Load** policy, click **Create**.
+
+   **Tip**: After successfully creating the load balancing policy, the Controller component will automatically create a DestinationRule resource named `asm-<service name>`. You can view the YAML file of this resource in the **Resources**.
+
+5. Click on the product view switching entrance in the top navigation bar to switch to **Platform Management**.
+
+6. On the left navigation bar, click on **Clusters** > **Resources**.
+
+   **Tip**: You can switch clusters through the top navigation.
+
+7. In the namespace where the service is located, search for the DestinationRule resource named `asm-<service name>`.
+
+8. Click <img src="/en/003point.png" alt="003point" style={{display: "inline"}} /> > **Update** on the right of DestinationRule.
+
+   Referencing the example below, add the annotation `asm.cpaas.io/user-managed: "true"` and configure [load balancing policies](https://istio.io/latest/docs/reference/config/networking/destination-rule/) for the service's ports separately.
+
+   ```yaml
+   apiVersion: networking.istio.io/v1alpha3
+   kind: DestinationRule
+   metadata:
+     annotations:
+       asm.cpaas.io/user-managed: "true"  # Add annotation
+       cpaas.io/operator: admin@cpaas.io
+       cpaas.io/updated-at: 2024-03-08T03:17:00Z
+     creationTimestamp: 2024-03-07T10:22:11Z
+     generation: 2
+     labels:
+       asm.cpaas.io/creator: asm-controller
+       asm.cpaas.io/hostname: s1
+       servicemesh.cpaas.io/resource: microservice
+     name: asm-s1
+     namespace: foo-ovn
+     ownerReferences:
+       - apiVersion: v1
+         kind: Endpoints
+         name: s1
+         uid: b8ae24ba-b0ae-4432-a42c-09619a798963
+     resourceVersion: "24795213"
+     uid: 99fddf65-4812-4948-a92b-62de33fa3b4f
+   spec:
+     host: s1
+     trafficPolicy:
+       loadBalancer:
+         simple: LEAST_CONN  # Default to the least request load balancing policy for all ports of the service
+       portLevelSettings: # Configure session affinity load balancing policy based on user source IP for port 81
+         - loadBalancer:
+             consistentHash:
+               useSourceIp: true
+           port:
+             number: 81
+   ```

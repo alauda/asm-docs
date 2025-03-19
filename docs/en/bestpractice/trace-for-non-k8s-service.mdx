@@ -1,0 +1,122 @@
+---
+weight: 12
+---
+
+# Using OpenTelemetry to Provide Traceability for Non-Containerized Java Services
+
+## Overview  
+
+This solution will guide you on how to modify **non-containerized Java services** deployed on virtual machines or physical machines to view their invocation chains with containerized services on the platform. Please note that this solution only provides traceability functionality and does not support viewing logs.
+
+## Prerequisites  
+
+- Your Java service is deployed on virtual or physical machines and requires traceability functionality.
+- A service mesh has been created on the cluster.
+- You have access to the control nodes of the Kubernetes cluster, and the `kubectl` tool is installed.
+
+## Steps  
+
+### 1. Download and Configure the OpenTelemetry Java Agent  
+
+First, you need to copy the OpenTelemetry Java Agent jar file to the `./agent` directory on the **control node** of the cluster where the service mesh was created.
+
+___Select and execute the appropriate script based on the cluster's runtime component___
+
+- **Containerd Runtime Component**  
+
+    1. Install the `nerdctl` tool on the control node. [Download](https://github.com/containerd/nerdctl/releases/download/v1.6.0/nerdctl-1.6.0-linux-amd64.tar.gz) it, extract the package, grant execution permission, and copy it to the `/usr/local/bin` directory:
+
+        ```bash
+        chmod +x nerdctl  
+        cp ./nerdctl /usr/local/bin  
+        ```
+
+    2. Log in to the image repository used by the cluster, replacing `<image_registry_address>` with the actual address:
+
+        ```bash
+        nerdctl login <image_registry_address>  
+        ```
+
+    3. Run the following script to copy the Java Agent jar file from the image to the local system:
+
+        ```bash
+        #!/bin/sh  
+        TAG=$(kubectl -n istio-system get cm otel-java-agent -oyaml | grep versions -A1 | grep -v versions | awk '{print substr($0, 7)}')  
+        CONTAINERID=$(nerdctl run -d <image_registry_address>/asm/otel-java-instrumentation:$TAG sleep 9999)  
+        echo "copy agent from $CONTAINERID"  
+        mkdir -p agent  
+        nerdctl cp $CONTAINERID:/opentelemetry-javaagent-ext.jar ./agent/opentelemetry-javaagent-ext.jar  
+        nerdctl container stop $CONTAINERID  
+        ```
+
+- **Docker Runtime Component**
+
+    1. Log in to the image repository used by the cluster:
+
+        ```bash
+        docker login <image_registry_address>
+        ```
+
+    2. Run the following script to copy the Java Agent jar file from the image to the local system:
+
+        ```bash
+        #!/bin/sh  
+        TAG=$(kubectl -n istio-system get cm otel-java-agent -oyaml | grep versions -A1 | grep -v versions | awk '{print substr($0, 7)}')  
+        CONTAINERID=$(docker run -d <image_registry_address>/asm/otel-java-instrumentation:$TAG sleep 9999)  
+        echo "copy agent from $CONTAINERID"  
+        mkdir -p agent  
+        docker cp $CONTAINERID:/opentelemetry-javaagent-ext.jar ./agent/opentelemetry-javaagent-ext.jar  
+        docker container stop $CONTAINERID  
+        ```
+
+### 2. Distribute the Java Agent to Java Service Nodes  
+
+Copy the `opentelemetry-javaagent-ext.jar` obtained in step 1 to the `./agent` directory on all nodes running Java services.
+
+### 3. Set Environment Variables  
+
+Configure the following environment variables on all Java service nodes:
+
+| Environment Variable            | Description                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **OTEL_PROPAGATORS**            | The propagation format for trace data. Available values: `b3`, `b3multi`. Multiple values can be separated by commas.                                                                                                                                                                                                                                                                                                                  |
+| **OTEL_TRACES_EXPORTER**        | Trace data exporter. The value must be `otlp`.                                                                                                                                                                                                                                                                                                                                                                                         |
+| **OTEL_EXPORTER_OTLP_ENDPOINT** | The OTLP data reporting address in the format `http://<ASM_OTEL_COLLECTOR_IP>:4317`, where *ASM_OTEL_COLLECTOR_IP* is the IP accessible to the service mesh component.                                                                                                                                                                                                                                                                 |
+| **OTEL_RESOURCE_ATTRIBUTES**    | Custom tags. Required fields: `service.name`, `vm.name`. For example: `service.name=myservice.ns,vm.name=vm-test`. `vm.name` refers to the name of the virtual machine where the service is hosted, and `service.name` specifies the name displayed in the invocation chain. You may add other custom tags, and it is recommended to use the `vm` prefix to identify VM services. Multiple key-value pairs can be separated by commas. |
+
+### 4. Modify the Java Service Startup Script  
+
+In the startup script of the Java service, add the following parameter:
+
+```bash
+-javaagent:{AGENT_PATH}/opentelemetry-javaagent-ext.jar
+```
+
+### 5. Create a ConfigMap  
+
+In the namespace where you want to enable the traceability feature, create a ConfigMap to store the mapping between the addresses and names of non-containerized Java services. Example:
+
+```yaml
+apiVersion: v1
+data:
+  vms: |-
+    - host: 192.168.189.136
+      port: 8081
+      serviceName: otel-demo-consumer-vm
+    - host: 192.168.189.136
+      port: 9081
+      serviceName: otel-demo-provider-vm
+kind: ConfigMap
+metadata:
+  labels:
+    asm.cpaas.io/vm-config-enabled: "true"
+  name: virtualmachine-config
+```
+
+:::note
+- The `host`, `port`, and `serviceName` must correspond to the access address, port, and service name of the non-containerized services. The `serviceName` must match the `service.name` defined in the `OTEL_RESOURCE_ATTRIBUTES` environment variable.
+:::
+
+### 6. Restart the Java Service  
+
+After applying the above configurations, restart the Java service to make the changes take effect.
