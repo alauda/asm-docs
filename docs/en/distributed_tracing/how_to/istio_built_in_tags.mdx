@@ -1,0 +1,73 @@
+---
+weight: 20
+---
+
+# Using Istio Service Built-in Tags In Tracing
+
+## Feature Overview
+
+A Span Tag refers to key-value pair data attached to a Span, providing specific contextual information for each Span to help developers more easily understand and analyze the characteristics and impact of each operation.
+
+Tags consist of a `key` and a `value`, where the `key` must be of string type, and the `value` can be a string, boolean, or number.
+
+## Tag Categories
+
+### Metadata
+
+  | Key                      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                       | Example Value |
+        |--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+  | **error**                | Indicates whether the Span is an error.                                                                                                                                                                                                                                                                                                                                                                                                           | `true`        |
+  | **internal.span.format** | The data format of the Internal Span.                                                                                                                                                                                                                                                                                                                                                                                                             | `zipkin`      |
+  | **otel.status_code**     | The status of the Span.                                                                                                                                                                                                                                                                                                                                                                                                                           | `ERROR`       |
+  | **span.kind**            | The type of Span:<br />- **client**: Indicates that the Span is an outbound call (client operation), i.e., a client initiated a request to a service or resource.<br />- **server**: Indicates that the Span is an inbound call (server operation), i.e., a server received and processed a request from a client.<br />- **internal**: Indicates an internal operation within the application, not involving operations with a remote parent or child. | `client`      |
+
+### HTTP Request Information
+
+  | Key                   | Description                                                                                                                                                                   | Example Value                                                                                                           |
+        |-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+  | **guid:x-request-id** | The ID of the request.                                                                                                                                                        | `e02b2515-44bb-95c1-859a-ea13718252ad`                                                                                  |
+  | **http.method**       | The HTTP request method.                                                                                                                                                      | `GET`                                                                                                                   |
+  | **http.protocol**     | The protocol version used for the HTTP request.                                                                                                                               | `HTTP/1.1`                                                                                                              |
+  | **http.status_code**  | The HTTP status code.                                                                                                                                                         | `200`                                                                                                                   |
+  | **http.url**          | The URL of the request.                                                                                                                                                       | `http://details:9080/details/0`                                                                                         |
+  | **user_agent**        | The User-Agent request header is a characteristic string that lets the server and peers identify the requesting user's application, operating system, vendor, and/or version. | `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36` |
+  | **request_size**      | The size of the request in bytes.                                                                                                                                             | `0`                                                                                                                     |
+  | **response_flags**    | Envoy response flags (see [RESPONSE_FLAGS](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage#)).                                       | `UH`, `DC`, `FI`, `NC`, etc.                                                                                            |
+  | **response_size**     | The size of the response in bytes.                                                                                                                                            | `5300`                                                                                                                  |
+  | **upstreamURLPath**   | The request path of the API.                                                                                                                                                  | -                                                                                                                       |
+
+### gRPC Request Information
+
+  | Key                   | Description                                                                                                     | Example Value                  |
+        |-----------------------|-----------------------------------------------------------------------------------------------------------------|--------------------------------|
+  | **grpc.authority**    | The host of the target service for the gRPC request.                                                            | `grpc-svc-a:9090`              |
+  | **grpc.content_type** | The content type of the gRPC communication protocol.                                                            | `application/grpc`             |
+  | **grpc.message**      | Description of the request status.<br />**Note**: Only visible when a non-zero status code is returned.           | `DATA_LOSS`                    |
+  | **grpc.path**         | The request path for the interface.                                                                             | `/helloworld.Greeter/SayHello` |
+  | **grpc.status_code**  | Status code, ranging from `0` to `15`. A code of `0` indicates a correct state; other values indicate an error. | `15`                           |
+
+### Service
+
+  | Key                          | Description                                                                                                                   | Example Value                                                                                                                                                                                                     |
+        |------------------------------|-------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | **asm_upstream_cluster**     | The upstream service with canary release enabled, i.e., the service end actually accessed by the downstream service (client). | `details-canary.bookinfo-ns.svc.cluster.local` : Indicates that after enabling canary release for the `details` service, the downstream service actually accesses `details-canary.bookinfo-ns.svc.cluster.local`. |
+  | **component**                | The component that provides the service.                                                                                      | `proxy`                                                                                                                                                                                                           |
+  | **downstream_cluster**       | The downstream service, i.e., the client service.                                                                             | `outbound\|9080\|\|productpage.bookinfo-ns.svc.cluster.local`                                                                                                                                                     |
+  | **istio.canonical_revision** | The version of the service.                                                                                                   | `latest`                                                                                                                                                                                                          |
+  | **istio.canonical_service**  | The name of the service.                                                                                                      | `productpage`                                                                                                                                                                                                     |
+  | **istio.mesh_id**            | The name of the service mesh.                                                                                                 | `mesh-example`                                                                                                                                                                                                    |
+  | **istio.namespace**          | The name of the namespace where the service is located.                                                                       | `bookinfo-ns`                                                                                                                                                                                                     |
+  | **node_id**                  | The ID generated by Istio according to its own rules for the current service.                                                 | `sidecar~10.5.1.189~bookinfo-productpage-6b5b6c6bbd-vdtsp.bookinfo-ns~bookinfo-ns.svc.cluster.local`                                                                                                              |
+  | **peer.address**             | The IP address or domain name identifying the remote device (peer) communicating with the local device.                       | `10.5.1.189`                                                                                                                                                                                                      |
+  | **upstream_cluster**         | The upstream service, i.e., the server service.                                                                               | -`outbound\|9080\|\|details-canary.bookinfo-ns.svc.cluster.local` indicates the upstream service is `details-canary.bookinfo-ns.svc.cluster.local`.<br />- `inbound\|80\|\|` indicates no upstream service.         |
+  | **upstream_cluster.name**    | The name of the upstream service.                                                                                             | `outbound\|9080\|\|details-canary.bookinfo-ns.svc.cluster.local`                                                                                                                                                  |
+
+### Process
+
+  | Key                | Description                                             | Example Value                           |
+        |--------------------|---------------------------------------------------------|-----------------------------------------|
+  | **cluster.name**   | The name of the cluster.                                | `global`                                |
+  | **container.name** | The name of the Sidecar container.                      | `istio-proxy`                           |
+  | **host.name**      | The name of the Pod.                                    | `bookinfo-productpage-6b5b6c6bbd-vdtsp` |
+  | **ms.name**        | The name of the service.                                | `productpage`                           |
+  | **ms.namespace**   | The name of the namespace where the service is located. | `bookinfo-ns`                           |
