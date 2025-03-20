@@ -11,7 +11,7 @@ This architecture is built on the Istio, OpenTelemetry and Jaeger technology sta
 ## Core Components
 
 1. **Istio System**
-   - **istio-sidecar**\
+   - **istio-proxy**\
      A sidecar proxy that automatically captures and generates trace data for service-to-service communication without code modification.
    - **istiod**\
      Controls the configuration and lifecycle of istio-proxy, including the tracing configuration for service mesh.
@@ -39,7 +39,7 @@ This architecture is built on the Istio, OpenTelemetry and Jaeger technology sta
 ## Data Flow
 
 - **Istio Writing Process**\
-  `Application -> istio-proxy -> jaeger-collector -> Elasticsearch`
+  `Application -> jaeger-collector -> Elasticsearch`
 
   The istio-proxy automatically captures trace data from service-to-service communication, which is then sent directly to the jaeger-collector for persistence in Elasticsearch.
 

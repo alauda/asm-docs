@@ -49,17 +49,17 @@ Core values:
   | **Service**        | The service or ingress gateway initiating/receiving call requests (input required). Format as `<service/gateway name>.<namespace name>`, e.g., `bookinfo-gw.bookinfo-ns`. |
   | **Client**         | The client service or ingress gateway initiating the call request (input required). Format as `<service/gateway name>.<namespace name>`.  |
   | **Server**        | The server service or ingress gateway responding to the call request (input required). Format as `<service/gateway name>.<namespace name>`.  |
-  | **API**           | The API added for the service in **Traffic Monitoring > API Management**.       |
-  | **Tag**           | You can filter the query results by inputting tags (Tag). Supported tags include tags found in the Span details. |
-  | **Span Duration >** | Spans that have a duration greater than or equal to *input value* (ms).                                    |
-  | **Only Search Error Spans** | Error Spans refer to Spans whose Tag value of **error** is `true`.                                             |
-  | **Span Type**      | **Root Span**: Searches for root Spans initiated by the configured **service**. This search mode is used when the configured service is the initiator of the entire call request. <br />**Service Entry Span**: Searches for the first Span generated when the configured **service** is called as a server.         |
-  | **Max Query Count**  | The maximum number of Spans that can be queried, with a default of `200`. <br />**Tip**: For performance reasons, the platform can display a maximum of 1000 Spans at a time. If the number of Spans that meet the query conditions exceeds the **maximum query count**, you can refine the query conditions or narrow the time range for phased queries.   |
+  | **API**           | The API added for the service in **Services > API**.       |
+  | **Tags**           | You can filter the query results by inputting tags (Tag). Supported tags include tags found in the Span details. |
+  | **Span duration >** | Spans that have a duration greater than or equal to *input value* (ms).                                    |
+  | **Only error traces** | Error Spans refer to Spans whose Tag value of **error** is `true`.                                             |
+  | **Span kind**      | **Root Span**: Searches for root Spans initiated by the configured **service**. This search mode is used when the configured service is the initiator of the entire call request. <br />**Service Entry Span**: Searches for the first Span generated when the configured **service** is called as a server.         |
+  | **Max query count**  | The maximum number of Spans that can be queried, with a default of `200`. <br />**Tip**: For performance reasons, the platform can display a maximum of 1000 Spans at a time. If the number of Spans that meet the query conditions exceeds the **maximum query count**, you can refine the query conditions or narrow the time range for phased queries.   |
 
   ### Step 2: Execute Query
 
-  - Once you select the query conditions and enter the respective values, click the **Add to Query Conditions** button, and the current conditions will be displayed in the **Query Conditions** result area, triggering the query.
-  - You can also expand **Common Query Conditions** to quickly add recently used search conditions.
+  - Once you select the query conditions and enter the respective values, click the **Add to query** button, and the current conditions will be displayed in the **Query** result area, triggering the query.
+  - You can also expand **Common search condition** to quickly add recently used search conditions.
 </Steps>
 
 ## Query Result Analysis
