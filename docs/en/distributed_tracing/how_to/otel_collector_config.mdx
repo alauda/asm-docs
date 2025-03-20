@@ -1,0 +1,963 @@
+---
+weight: 40
+---
+
+# Configuring OpenTelemetry Collector
+
+## Feature Overview
+
+You can configure the OpenTelemetry Collector to meet your observability needs. Before diving into the workings of Collector configuration, it's important to familiarize yourself with the following:
+
+- [Data Collection Concepts](https://opentelemetry.io/docs/concepts/components/#collector) to understand the repository applicable to the OpenTelemetry Collector.
+- [Security Guidelines](https://github.com/open-telemetry/opentelemetry-collector/blob/main/docs/security-best-practices.md).
+
+## Configuration Structure
+
+The structure of any Collector configuration file consists of four types of pipeline components that interact with telemetry data:
+
+- **[Receivers](#receivers)**
+- **[Processors](#processors)**
+- **[Exporters](#exporters)**
+- **[Connectors](#connectors)**
+
+Once each pipeline component is configured, you must enable it through a pipeline defined in the [service section](#service-section) of the configuration file.
+
+In addition to pipeline components, you can configure [Extensions](#extensions), which provide additional functionalities that can be added to the Collector, such as diagnostic tools. Extensions do not need direct access to telemetry data and are enabled through the [service section](#service-section).
+
+Below is an example of a Collector configuration that includes receivers, processors, exporters, and three extensions.
+
+**Important Note:** While it’s common to bind endpoints to `localhost` when all clients are local, our sample configuration uses the "unspecified" address `0.0.0.0` for convenience. The Collector currently defaults to using `localhost`. For detailed information on these endpoint configuration values, see the [Security Measures to Prevent Denial of Service Attacks](https://github.com/open-telemetry/opentelemetry-collector/blob/main/docs/security-best-practices.md#safeguards-against-denial-of-service-attacks).
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: otelcol:4317
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+Note that receivers, processors, exporters, and pipelines are defined using a component identifier in the `type[/name]` format, such as `otlp` or `otlp/2`. As long as the identifier is unique, you can define the same type of component multiple times. For example:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  otlp/2:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:55690
+
+processors:
+  batch:
+  batch/test:
+
+exporters:
+  otlp:
+    endpoint: otelcol:4317
+  otlp/2:
+    endpoint: otelcol2:4317
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    traces/2:
+      receivers: [otlp/2]
+      processors: [batch/test]
+      exporters: [otlp/2]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+The configuration can also include other files, allowing the Collector to merge them into a single in-memory YAML configuration:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+exporters: ${file:exporters.yaml}
+
+service:
+  extensions: []
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: []
+      exporters: [otlp]
+```
+
+The `exporters.yaml` file might contain:
+
+```yaml
+otlp:
+  endpoint: otelcol.observability.svc.cluster.local:443
+```
+
+The resulting in-memory configuration would be:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+exporters:
+  otlp:
+    endpoint: otelcol.observability.svc.cluster.local:443
+
+service:
+  extensions: []
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: []
+      exporters: [otlp]
+```
+
+## Receivers
+
+Receivers collect telemetry data from one or more sources. They can be either pull-based or push-based and may support one or more [data sources](https://opentelemetry.io/docs/concepts/signals/).
+
+Typically, a receiver ingests data in a specified format, converts it to an internal format, and then passes it to the processors and exporters defined in the applicable pipeline.
+
+Receivers are configured in the `receivers` section. By default, no receivers are configured. You must configure one or more receivers. Many receivers come with default settings, so specifying the receiver name may be sufficient. If you need to customize or modify the default configuration, you can do so in this section. Any settings you specify will override the defaults (if they exist).
+
+**Note:** Configuring a receiver does not enable it. A receiver is enabled by adding it to the appropriate pipeline in the [service section](#service-section).
+
+Below are common receiver configuration examples.
+
+**Tip:** For more detailed receiver configurations, refer to the [receiver README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/README.md).
+
+### __OTLP Receiver__
+
+The OTLP receiver ingests traces, metrics, and logs using the OpenTelemetry Protocol (OTLP).
+
+**YAML Example**
+
+```yaml
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+            tls:
+              ca_file: ca.pem
+              cert_file: cert.pem
+              key_file: key.pem
+              client_ca_file: client.pem
+              reload_interval: 1h
+          http:
+            endpoint: 0.0.0.0:4318
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+        metrics:
+          receivers: [otlp]
+```
+
+**`protocols` Parameter Descriptions**
+
+| Parameter | Description |
+| ---- | ---- |
+| `grpc.endpoint` | OTLP gRPC endpoint. If omitted, defaults to 0.0.0.0:4317. |
+| `grpc.tls` | Server-side TLS configuration. Defines paths to TLS certificates. If omitted, TLS is disabled. |
+| `grpc.tls.client_ca_file` | Path to the TLS certificate used by the server to verify client certificates. This sets `ClientCAs` and `ClientAuth` to `RequireAndVerifyClientCert` in the TLSConfig. For more details, see the [Golang TLS Package Config](https://godoc.org/crypto/tls#Config). |
+| `grpc.tls.reload_interval` | Specifies the interval for reloading certificates. If not set, certificates will never be reloaded. The `reload_interval` field accepts a string with valid time units such as ns, us (or µs), ms, s, m, h. |
+| `http.endpoint` | OTLP HTTP endpoint. Defaults to 0.0.0.0:4318. |
+| `http.tls` | Server-side TLS configuration. Configured similarly to `grpc.tls`. |
+
+### __Jaeger Receiver__
+
+The Jaeger receiver ingests traces in the Jaeger format.
+
+**YAML Example**
+
+```yaml
+  config: |
+    receivers:
+      jaeger:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:14250
+          thrift_http:
+            endpoint: 0.0.0.0:14268
+          thrift_compact:
+            endpoint: 0.0.0.0:6831
+          thrift_binary:
+            endpoint: 0.0.0.0:6832
+
+    service:
+      pipelines:
+        traces:
+          receivers: [jaeger]
+```
+
+**`protocols` Parameter Description**
+
+| Parameter | Description |
+| --------- | ----------- |
+| `grpc.endpoint` | The Jaeger gRPC endpoint. If omitted, the default is 0.0.0.0:14250. |
+| `thrift_http.endpoint` | The Jaeger Thrift HTTP endpoint. If omitted, the default is 0.0.0.0:14268. |
+| `thrift_compact.endpoint` | The Jaeger Thrift Compact endpoint. If omitted, the default is 0.0.0.0:6831. |
+| `thrift_binary.endpoint` | The Jaeger Thrift Binary endpoint. If omitted, the default is 0.0.0.0:6832. |
+| `tls` | The server-side TLS configuration. Refer to the OTLP Receiver's `protocols.grpc.tls` for configuration details. |
+
+### __Zipkin Receiver__
+
+The Zipkin receiver ingests traces in both Zipkin v1 and v2 formats.
+
+**YAML Example**
+
+```yaml
+  config: |
+    receivers:
+      zipkin:
+        endpoint: 0.0.0.0:9411
+
+    service:
+      pipelines:
+        traces:
+          receivers: [zipkin]
+```
+
+**`zipkin` Parameter Description**
+
+| Parameter | Description |
+| --------- | ----------- |
+| `endpoint` | The Zipkin HTTP endpoint. If omitted, the default is 0.0.0.0:9411. |
+| `tls` | The server-side TLS configuration. Refer to the OTLP Receiver's `protocols.grpc.tls` for configuration details. |
+
+## Processors
+
+Processors modify or transform data collected by receivers before sending it to exporters. Data processing is based on the rules or settings defined for each processor, which may include filtering, deleting, renaming, or recalculating telemetry data. The order of processors in the pipeline determines the sequence in which the Collector applies processing operations to signals.
+
+Processors are optional, but some are [recommended](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor#recommended-processors).
+
+You can configure processors in the `processors` section of the Collector configuration file. Any settings you specify will override default values (if they exist).
+
+**Note:** Configuring a processor does not enable it. A processor must be enabled by adding it to the appropriate pipeline in the [service section](#service-section). By default, no processors are enabled.
+
+Below are examples of common processor configurations.
+
+**Tip:** You can find a complete list of processors by combining the lists from [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor) and [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor). For more detailed processor configurations, refer to the [processor README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/README.md).
+
+### __Batch Processor__
+
+The Batch Processor batches and compresses spans, metrics, or logs based on size or time. Batching can help reduce the number of submission requests made by exporters and help regulate the flow of telemetry from multiple or single receivers in the pipeline.
+
+**YAML Example**
+
+```yaml
+  config: |
+    processor:
+      batch:
+        timeout: 5s
+        send_batch_max_size: 10000
+    service:
+      pipelines:
+        traces:
+          processors: [batch]
+        metrics:
+          processors: [batch]
+```
+
+**`batch` Parameter Description**
+
+| Parameter | Description |
+| --------- | ----------- |
+| `timeout` | Sends batches after a specific time duration, regardless of batch size. |
+| `send_batch_size` | Sends batches of telemetry data after a specified number of spans or metrics. |
+| `send_batch_max_size` | The maximum allowed size of a batch. Must be equal to or greater than `send_batch_size`. |
+| `metadata_keys` | When enabled, creates a batch instance for each unique set of values found in client.Metadata. |
+| `metadata_cardinality_limit` | When `metadata_keys` is populated, this configuration limits the number of different combinations of metadata key-value pairs processed over the process duration. |
+
+### __Memory Limiter Processor__
+
+The Memory Limiter Processor periodically checks the Collector's memory usage and pauses data processing when it reaches a soft memory limit, preventing out-of-memory scenarios. This processor supports spans, metrics, and logs. It is typically the first component after receivers, expecting retries to send the same data and possibly applying back pressure to incoming data. When memory usage exceeds the hard limit, the Memory Limiter Processor enforces garbage collection.
+
+**YAML Example**
+
+```yaml
+  config: |
+    processor:
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 4000
+        spike_limit_mib: 800
+    service:
+      pipelines:
+        traces:
+          processors: [batch]
+        metrics:
+          processors: [batch]
+```
+
+**`memory_limiter` Parameter Description**
+
+| Parameter | Description |
+| --------- | ----------- |
+| `check_interval` | The time interval between memory usage measurements. The optimal value is 1 second. For highly fluctuating traffic patterns, you can reduce `check_interval` or increase `spike_limit_mib`. |
+| `limit_mib` | The hard limit, i.e., the maximum amount of memory allocated on the heap (in MiB). Typically, the total memory usage of the OpenTelemetry Collector is about 50 MiB larger than this value. |
+| `spike_limit_mib` | The spike limit, i.e., the expected maximum value for memory usage spikes (in MiB). The optimal value is about 20% of `limit_mib`. The soft limit is calculated by subtracting `spike_limit_mib` from `limit_mib`. |
+| `limit_percentage` | Same as `limit_mib`, but expressed as a percentage of the total available memory. The `limit_mib` setting takes precedence over this setting. |
+| `spike_limit_percentage` | Same as `spike_limit_mib`, but expressed as a percentage of the total available memory. It is intended to be used together with the `limit_percentage` setting. |
+
+### __Filter Processor__
+
+The Filter Processor filters spans, metrics, or logs based on the conditions you define in its configuration. A typical use case for the Filter Processor is to discard telemetry data irrelevant to the observability system, such as non-critical logs or spans, to reduce noise in the data.
+
+Filtering works with allow and deny lists, which include or exclude telemetry based on regular expressions and resource attributes. You can also use the OpenTelemetry Transformation Language (OTTL) to better describe the signals you want to filter. The processor supports all pipeline types.
+
+| Signal | Criteria and Matching Types |
+| ------ | --------------------------- |
+| **Spans** | OTTL conditions, span names (strict or regex), and resource attributes (strict or regex). Span event filtering only supports OTTL conditions. |
+| **Metrics** | OTTL conditions, metric names (strict or regex), and metric attributes (expressions). Data points filtering only supports OTTL conditions. |
+| **Logs** | OTTL conditions, resource attributes (strict or regex). |
+
+**YAML Example**
+
+```yaml
+config: |
+  processors:
+    filter/ottl:
+      error_mode: ignore
+      traces:
+        span:
+          - 'attributes["container.name"] == "app_container_1"'
+          - 'resource.attributes["host.name"] == "localhost"'
+```
+
+**`filter/ottl` Parameter Description**
+
+| Parameter | Description |
+| --------- | ----------- |
+| `error_mode` | Defines the error mode. When set to ignore, it ignores errors returned by conditions. When set to propagate, it returns errors to the upper layers of the pipeline. Errors will result in the loss of loads from the Collector. |
+| `span[0]` | Filters spans with the attribute `container.name == app_container_1`. |
+| `span[1]` | Filters spans with the resource attribute `host.name == localhost`. |
+
+### __Metrics Transform Processor__
+
+The Metrics Transform Processor shares some features with the Attributes Processor and is typically used to perform the following tasks:
+- Add, rename, or delete label keys and values.
+- Scale and aggregate metrics based on labels or label values.
+- The processor only supports renaming and aggregation within a single batch of metrics. It does not perform any cross-batch aggregation, so do not use it to aggregate metrics from multiple sources, such as multiple nodes or clients.
+
+For a complete list of supported operations, see [Available Operations](#available-ops).
+
+**YAML Example**
+
+```yaml
+config: |
+  processors:
+    metricstransform/rename:
+      transforms:
+        include: system.cpu.usage
+        action: update
+        new_name: system.cpu.usage_time
+```
+
+The Metrics Transform processor also supports the use of regular expressions, allowing transformation rules to be applied to multiple metric names or metric labels simultaneously. The following example renames `cluster_name` to `cluster-name` across all metrics:
+
+```yaml
+config: |
+  processors:
+    metricstransform/clustername:
+      transforms:
+        - include: ^.*$
+          match_type: regexp
+          action: update
+          operations:
+            - action: update_label
+              label: cluster_name
+              new_label: cluster-name
+```
+
+**<span id="available-ops">Available Operations</span>**
+
+The processor can perform the following operations:
+
+- Rename metrics. For example, renaming `system.cpu.usage` to `system.cpu.usage_time`.
+- Add labels. For instance, you can add a new label `identifier` with a value of `1` to all points.
+- Rename label keys. For example, renaming the label `state` to `cpu_state`.
+- Rename label values. For example, renaming the value `idle` to `-` within the `state` label.
+- Delete data points. For instance, removing all points where the `state` label has a value of `idle`.
+- Switch data types. You can change `int` data points to `double` data points.
+- Scale values. For example, multiplying values by 1000 to convert from seconds to milliseconds.
+- Aggregate across label sets. For example, retaining only the `state` label and averaging all points with the same value for this label.
+- Aggregate across label values. For example, summing points with the values `user` or `system` in the `state` label as `used = user + system`.
+
+The following rules apply:
+
+- You can only apply operations to one or more metrics using a `strict` or `regexp` filter.
+- Using the `action` property, you can:
+  - Update your metrics in place (`update`).
+  - Duplicate and update the duplicated metrics (`insert`).
+  - Combine your metrics into a newly inserted metric by merging all data points from a set of matched metrics into a single metric (`combine`). The original matched metrics are also removed.
+- When renaming metrics, the capture groups in the `regexp` filter will be expanded.
+
+### __Transform Processor__
+
+The Transform Processor modifies matched spans, metrics, or logs through statements. Use cases include, but are not limited to, converting metrics to different types, replacing or removing keys, and setting fields based on predefined conditions.
+
+Statements are functions in the OpenTelemetry Transformation Language (OTTL) and are applied to telemetry data according to their order in the list. The transform processor includes additional functions for converting metric types. Statements transform data according to the OTTL context you define, such as Span or DataPoint.
+
+Supported contexts for the transform processor:
+
+| Signal   | Supported Contexts                         |
+| -------- | ------------------------------------------ |
+| **Traces** | resource → scope → span → spanevent          |
+| **Metrics** | resource → scope → metric → datapoint       |
+| **Logs**    | resource → scope → logs                    |
+
+Statements can transform telemetry data of higher contexts. For example, a statement applied to a data point can access the metric and resource of that data point. Lower contexts cannot be accessed; for example, you cannot use a span statement to transform individual span events. Typically, statements are associated with the context you want to transform.
+
+Example of using the transform processor to set the status of a span. The following example sets the span status to `Ok` when the `http.request.status_code` attribute is 400:
+
+**YAML Example**
+
+```yaml
+config: |
+  transform:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(status.code, STATUS_CODE_OK) where attributes["http.request.status_code"] == 400
+```
+
+The `error_mode` field describes how the processor reacts to errors when processing statements:
+- `"error_mode: ignore"` tells the processor to ignore errors and continue execution. This is the default error mode.
+- `"error_mode: propagate"` tells the processor to return an error. As a result, the collector will drop the data.
+
+### Advanced Features
+
+- You can also use the transform processor to modify span names based on span attributes or extract span attributes from the span name. For examples, see the transform processor's example [configuration file](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/9b28f76c02c18f7479d10e4b6a95a21467fd85d6/processor/transformprocessor/testdata/config.yaml).
+- The [transform processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor) also offers advanced attribute transformation capabilities. The transform processor allows end users to specify transformations for metrics, logs, and traces using the [OpenTelemetry Transformation Language (OTTL)](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl).
+- For more information on OTTL functions and syntax, see:
+  - OTTL Syntax: [https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/README.md](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/README.md)
+  - OTTL Functions: [https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/ottlfuncs](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/ottlfuncs)
+  - OTTL Contexts: [https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/contexts](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/contexts)
+
+## Exporters
+
+Exporters send data to one or more backends or destinations. Exporters can be pull-based or push-based and may support one or more [data sources](https://opentelemetry.io/docs/concepts/signals/).
+
+You can configure exporters in the `exporters` section of the Collector configuration file. Most exporters require at least a destination and security settings like authentication tokens or TLS certificates. Any settings you specify will override the defaults (if they exist).
+
+**Note**: Configuring an exporter does not enable it. An exporter needs to be enabled by adding it to the appropriate pipeline in the [service section](#service-section). By default, no exporters are enabled.
+
+The Collector requires one or more exporters. Below are common examples of exporter configurations:
+
+**Tip**: Some exporters require x.509 certificates to establish a secure connection, as described in [Setting up Certificates](#configuring-certificates). For more detailed exporter configurations, refer to the [exporter README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/README.md).
+
+### __OTLP Exporter__
+
+The OTLP exporter sends metrics, traces, and logs using the OTLP format over gRPC. Supported pipeline types include spans, metrics, and logs. By default, this exporter requires TLS and offers queue retry functionality.
+To send OTLP data over HTTP, use the OTLP/HTTP exporter. See the OTLP/HTTP exporter for instructions.
+
+**YAML Example**
+
+```yaml
+config: |
+  exporters:
+    otlp:
+      endpoint: tempo-ingester:4317
+      tls:
+        ca_file: ca.pem
+        cert_file: cert.pem
+        key_file: key.pem
+        insecure: false
+        insecure_skip_verify: false
+        reload_interval: 1h
+        server_name_override: <name>
+      headers:
+        X-Scope-OrgID: "dev"
+  service:
+    pipelines:
+      traces:
+        exporters: [otlp]
+      metrics:
+        exporters: [otlp]
+```
+
+**`otlp` Parameter Description**
+
+| Parameter                  | Description                                                                 |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `endpoint`                 | The OTLP gRPC endpoint. If an `https://` scheme is used, client transport security is activated and overrides insecure settings in `tls`. |
+| `tls`                      | Client TLS configuration. Defines the paths to TLS certificates.            |
+| `tls.insecure`             | When set to `true`, disables client transport security. Default is `false`. |
+| `tls.insecure_skip_verify` | When set to `true`, skips certificate verification. Default is `false`.     |
+| `tls.reload_interval`      | Specifies the interval at which the certificates are reloaded. If unset, certificates are never reloaded. Accepts a string with valid time units like `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`. |
+| `tls.server_name_override` | Overrides the authoritative virtual hostname, such as the `authority` header field in requests. Can be used for testing. |
+| `headers`                  | Headers sent with every request during the established connection.           |
+
+### __OTLP HTTP Exporter__
+
+The OTLP HTTP Exporter exports traces and metrics using the OpenTelemetry Protocol (OTLP).
+
+**YAML Example**
+
+```yaml
+  config: |
+    exporters:
+      otlphttp:
+        endpoint: http://tempo-ingester:4318
+        tls:
+        headers:
+          X-Scope-OrgID: "dev"
+        disable_keep_alives: false
+
+    service:
+      pipelines:
+        traces:
+          exporters: [otlphttp]
+        metrics:
+          exporters: [otlphttp]
+```
+
+**`otlphttp` Parameter Description**
+
+| Parameter | Description |
+| ---- | ---- |
+| `endpoint` | OTLP HTTP endpoint. If the `https://` scheme is used, client transport security is activated and overrides any insecure settings in `tls`. |
+| `tls` | Client TLS configuration. Defines the path for TLS certificates. |
+| `headers` | Headers sent with each HTTP request. |
+| `disable_keep_alives` | If set to `true`, HTTP keep-alives are disabled. Only a single HTTP request will be made per connection to the server. |
+
+### __Debug Exporter__
+
+The Debug Exporter outputs telemetry data to the console for debugging purposes.
+
+**YAML Example**
+
+```yaml
+  config: |
+    exporters:
+      debug:
+        verbosity: detailed
+    service:
+      pipelines:
+        traces:
+          exporters: [logging]
+        metrics:
+          exporters: [logging]
+```
+
+The `debug.verbosity` field controls the detail level of logged exports (`detailed|normal|basic`). When set to `detailed`, pipeline data is logged in detail.
+
+### __Load Balancing Exporter__
+
+The Load Balancing Exporter can export spans, metrics, and logs to multiple backends. Supported pipeline types include metrics, spans, and logs. The Load Balancing Exporter can use routing policies to send telemetry data to multiple backends simultaneously. You can configure `routing_key` to use routing policies to classify telemetry data into groups and map these groups to specific endpoints.
+
+Using the Load Balancing Exporter, you can also send data to other running OpenTelemetry Collector instances via collector endpoints. For example, you could send all traces to one running collector instance and all logs to another instance. This allows you to process or manipulate your data in different collector environments.
+
+**YAML Example**
+
+```yaml
+  config: |
+    exporters:
+      loadbalancing:
+        routing_key: "service"
+        protocol:
+          otlp:
+            timeout: 1s
+        resolver:
+          static:
+            hostnames:
+            - backend-1:4317
+            - backend-2:4317
+          dns:
+            hostname: otelcol-headless.observability.svc.cluster.local
+          k8s:
+            service: lb-svc.kube-public
+            ports:
+              - 15317
+              - 16317
+```
+
+**`loadbalancing` Parameter Description**
+
+| Parameter | Description |
+| ---- | ---- |
+| `routing_key` | `"routing_key: service"` exports spans with the same service name to the same Collector instance for accurate aggregation. `"routing_key: traceID"` exports spans based on their TraceID. The implicit default is TraceID-based routing. |
+| `protocol.otlp` | OTLP is the only supported load balancing protocol. All options for the OTLP exporter are supported. |
+| `resolver` | Only one resolver can be configured. |
+| `resolver.static` | The static resolver distributes the load across the listed endpoints. |
+| `resolver.dns` | The DNS resolver is only applicable to Kubernetes Headless services. |
+| `resolver.k8s` | The Kubernetes resolver is recommended. |
+
+### __Prometheus Exporter__
+
+The Prometheus Exporter exports metric data in Prometheus or OpenMetrics format, allowing Prometheus servers to scrape the data. Below are the details for configuring and using the Prometheus Exporter.
+
+**Required Configuration**
+
+- **endpoint**: Specifies the address for exposing metric data, with the path `/metrics`. This must be configured and does not have a default value.
+  
+**Optional Configuration**
+
+- **const_labels**: Key-value pair labels applied to each exported metric, default is not set.
+- **namespace**: If set, all exported metrics will use this namespace, with no default value.
+- **send_timestamps**: Whether to send timestamps for metric samples in the response, default is `false`.
+- **metric_expiration**: Defines how long metrics are exposed without updates, default is `5m`.
+- **resource_to_telemetry_conversion**:
+  - `enabled`: Default is `false`. When enabled, resource attributes are converted to metric labels.
+- **enable_open_metrics**: Default is `false`. When enabled, metrics are exported using the OpenMetrics format.
+- **add_metric_suffixes**: Default is `true`. Whether to add type and unit suffixes.
+
+**TLS Configuration**
+
+TLS certificates can be set using `ca_file`, `cert_file`, and `key_file` to ensure secure communication.
+
+**Example YAML Configuration**
+
+Below is an example configuration for the Prometheus Exporter:
+
+```yaml
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    tls:
+      ca_file: "/path/to/ca.pem"
+      cert_file: "/path/to/cert.pem"
+      key_file: "/path/to/key.pem"
+    namespace: "prefix"
+    const_labels:
+      label1: "value1"
+    send_timestamps: true
+    metric_expiration: "180m"
+    enable_open_metrics: true
+    add_metric_suffixes: false
+    resource_to_telemetry_conversion:
+      enabled: true
+```
+
+This configuration exposes Prometheus metrics at `0.0.0.0:8889/metrics` and configures TLS certificates and other parameters.
+
+**Usage Recommendations**
+
+1. In OpenTelemetry, metric names and labels are standardized to comply with Prometheus naming conventions.
+2. By default, resource attributes are added to the `target_info` metric. You can use Prometheus queries to select and group these attributes as metric labels.
+3. To simplify queries and grouping, it is recommended to use the `transform processor` to directly convert commonly used resource attributes into metric labels.
+
+## Connectors
+
+Connectors link two pipelines, acting both as exporters and receivers. A connector consumes data as an exporter at the end of one pipeline and sends data as a receiver at the start of another pipeline. The consumed and sent data can be of the same or different types. You can use connectors to aggregate, duplicate, or route data.
+
+You can configure one or more connectors in the `connectors` section of the Collector configuration file. By default, no connectors are configured. Each type of connector is designed to handle a combination of one or more data types and can only be used for connecting the corresponding data type pipelines.
+
+**Note**: Configuring a connector does not enable it. Connectors need to be enabled by adding them to the relevant pipelines in the [service section](#service-section).
+
+**Tip**: For more detailed connector configuration, refer to the [connector README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/connector/README.md).
+
+### __ASM Service Graph Connector__
+
+The ASM Service Graph Connector builds a map representing the relationships between various services in a system. This connector analyzes spans data and generates metrics describing the relationships between services. These metrics can be used by data visualization applications (such as Grafana) to draw a service graph.
+
+**Note:** This component is a custom version of the community component Service Graph Connector and cannot be directly replaced with the community-native component. Specific parameter differences are explained below.
+
+Service topologies are very useful in many use cases:
+
+- Inferring the topology of a distributed system. As distributed systems grow, they become increasingly complex. Service graphs help you understand the structure of the system.
+- Providing a high-level overview of system health. Service graphs display error rates, latency, and other relevant data.
+- Offering a historical view of the system topology. Distributed systems change frequently, and service graphs provide a way to view how these systems evolve over time.
+
+**YAML Example**
+
+```yaml
+  config: |
+    connectors:
+      asmservicegraph:
+        dimensions: []
+        extra_dimensions:
+          mesh_id:
+          cluster_name:
+        store:
+          ttl: 5s
+          max_items: 500
+```
+
+**`asmservicegraph` Parameter Description**
+
+| Parameter | Description |
+| ---- | ---- |
+| `dimensions` | Additional dimensions (labels) to add to the metrics extracted from resource and span attributes. |
+| `extra_dimensions` | Attributes added by the ASM platform. |
+| `extra_dimensions.mesh_id` | Mesh ID. The ASM platform deploys an Istio service mesh, and the mesh_id reflects the ID of the Istio mesh. |
+| `extra_dimensions.cluster_name` | Cluster name. The name of the cluster where the OTel Collector is located within the ASM platform. |
+| `store.ttl` | The lifetime of temporary data in memory storage. |
+| `store.max_items` | The maximum number of span data entries that can be temporarily stored in memory. |
+
+## Extensions
+
+Extensions add capabilities to the Collector. For example, extensions can automatically add authentication features to receivers and exporters.
+
+Extensions are optional components used to extend the functionality of the Collector for tasks unrelated to processing telemetry data. For example, you can add extensions for health monitoring, service discovery, or data forwarding.
+
+You can configure extensions in the `extensions` section of the Collector configuration file. Most extensions come with default settings, so you only need to specify the name of the extension to configure it. Any specified settings will override the default values (if any).
+
+**Note**: Configuring an extension does not enable it. Extensions must be enabled in the [service section](#service-section). By default, no extensions are configured.
+
+**Tip**: For more detailed extension configuration, refer to the [extension README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/extension/README.md).
+
+## Service Section
+
+The `service` section is used to enable components in the Collector based on the configuration in the `receivers`, `processors`, `exporters`, and `extensions` sections. If a component is configured but not defined in the `service` section, it will not be enabled.
+
+The `service` section includes three subsections:
+
+1. **Extensions**: A list of required extensions to be enabled. For example:
+
+   ```yaml
+   service:
+     extensions: [health_check, pprof, zpages]
+   ```
+
+2. **Pipelines**: Configures pipelines, which can be of the following types:
+
+   - **traces**: Collects and processes trace data.
+   - **metrics**: Collects and processes metric data.
+   - **logs**: Collects and processes log data.
+
+   A pipeline consists of a set of `receivers`, `processors`, and `exporters`. Before including a `receiver`, `processor`, or `exporter` in a pipeline, ensure its configuration is defined in the respective sections.
+
+   You can use the same `receiver`, `processor`, or `exporter` in multiple pipelines. When a processor is referenced in multiple pipelines, each pipeline gets a separate instance of that processor.
+
+   Here is an example of pipeline configuration. Note that the order of processors determines the processing sequence of the data:
+
+   ```yaml
+   service:
+     pipelines:
+       metrics:
+         receivers: [opencensus, prometheus]
+         processors: [batch]
+         exporters: [opencensus, prometheus]
+       traces:
+         receivers: [opencensus, jaeger]
+         processors: [batch, memory_limiter]
+         exporters: [opencensus, zipkin]
+   ```
+
+3. **Telemetry**: The `telemetry` configuration section is used to set up the observability of the Collector itself. It consists of `logs` and `metrics` subsections. For information on how to configure these signals, see [Activating Internal Telemetry in the Collector](https://opentelemetry.io/docs/collector/internal-telemetry/#activate-internal-telemetry-in-the-collector).
+
+## Additional Information
+
+### Environment Variables
+
+Collector configurations support using and extending environment variables. For example, to use values stored in `DB_KEY` and `OPERATION` environment variables, you can write:
+
+```yaml
+processors:
+  attributes/example:
+    actions:
+      - key: ${env:DB_KEY}
+        action: ${env:OPERATION}
+```
+
+Use `$$` to represent a literal `$`. For example, to represent `$DataVisualization`, you can write:
+
+```yaml
+exporters:
+  prometheus:
+    endpoint: prometheus:8889
+    namespace: $$DataVisualization
+```
+
+### Proxy Support
+
+Exporters using the [net/http](https://pkg.go.dev/net/http) package support the following proxy environment variables:
+
+- **HTTP_PROXY**: Address of the HTTP proxy.
+- **HTTPS_PROXY**: Address of the HTTPS proxy.
+- **NO_PROXY**: Addresses that should bypass the proxy.
+
+If these variables are set when the Collector starts, exporters will proxy or bypass proxy traffic according to these environment variables, regardless of the protocol.
+
+### Authentication
+
+Most `receivers` exposing HTTP or gRPC ports can be protected using the Collector's authentication mechanisms. Similarly, most `exporters` using HTTP or gRPC clients can add authentication to outgoing requests.
+
+The authentication mechanism in the Collector uses the extension mechanism, allowing custom authenticators to be integrated into the Collector distribution. Each authentication extension can be used in two ways:
+
+1. As a client authenticator for `exporters`, adding authentication data to outgoing requests.
+2. As a server authenticator for `receivers`, authenticating incoming connections.
+
+For a list of known authenticators, see the [Registry](https://opentelemetry.io/ecosystem/registry/?s=authenticator&component=extension).
+
+To add a server authenticator to a `receiver` in the Collector, follow these steps:
+
+1. Add the authenticator extension and its configuration under `.extensions`.
+2. Add a reference to the authenticator under `.services.extensions` so the Collector loads it.
+3. Add a reference to the authenticator under `.receivers.<your-receiver>.<http-or-grpc-config>.auth`.
+
+The following example uses an OIDC authenticator on the receiving side, suitable for remote Collectors receiving data via the OpenTelemetry Collector as a proxy:
+
+```yaml
+extensions:
+  oidc:
+    issuer_url: http://localhost:8080/auth/realms/opentelemetry
+    audience: collector
+
+receivers:
+  otlp/auth:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        auth:
+          authenticator: oidc
+
+processors:
+
+exporters:
+  # Note: Use `logging` instead of `debug` before v0.86.0.
+  debug:
+
+service:
+  extensions:
+    - oidc
+  pipelines:
+    traces:
+      receivers:
+        - otlp/auth
+      processors: []
+      exporters:
+        - debug
+```
+
+On the proxy side, this example configures the OTLP exporter to obtain OIDC tokens and add them to each RPC sent to the remote Collector:
+
+```yaml
+extensions:
+  oauth2client:
+    client_id: agent
+    client_secret: some-secret
+    token_url: http://localhost:8080/auth/realms/opentelemetry/protocol/openid-connect/token
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+
+exporters:
+  otlp/auth:
+    endpoint: remote-collector:4317
+    auth:
+      authenticator: oauth2client
+
+
+
+service:
+  extensions:
+    - oauth2client
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors: []
+      exporters:
+        - otlp/auth
+```
+
+### Configuring certificates
+
+For secure communication in production environments, use TLS certificates or mTLS for mutual authentication. Follow these steps to generate a self-signed certificate, or use your current certificate provider for production certificates.
+
+Install [cfssl](https://github.com/cloudflare/cfssl) and create the following `csr.json` file:
+
+```json
+{
+  "hosts": ["localhost", "127.0.0.1"],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "O": "OpenTelemetry Example"
+    }
+  ]
+}
+```
+
+Then run the following commands:
+
+```bash
+cfssl genkey -initca csr.json | cfssljson -bare ca
+cfssl gencert -ca ca.pem -ca-key ca-key.pem csr.json | cfssljson -bare cert
+```
+
+This will create two certificates:
+
+1. A certificate authority (CA) named "OpenTelemetry Example" stored in `ca.pem`, with the associated key in `ca-key.pem`.
+2. A client certificate stored in `cert.pem`, signed by the OpenTelemetry Example CA, with the associated key in `cert-key.pem`.
+
+## Overriding Settings
+
+You can override Collector settings using the `--set` option. Settings defined this way will be merged into the final configuration after all `--config` sources are resolved and merged.
+
+The following example shows how to override settings in nested sections:
+
+```bash
+otelcol --set "exporters::debug::verbosity=detailed"
+otelcol --set "receivers::otlp::protocols::grpc={endpoint:localhost:4317, compression: gzip}"
+```
+
+**Important Note**: The `--set` option does not support setting keys containing dots (.) or equals signs (=).

@@ -1,0 +1,95 @@
+---
+weight: 30
+---
+
+# Using OpenTelemetry Service Built-in Tags In Tracing
+
+## Feature Overview
+
+A Span Tag refers to key-value pair data attached to a Span, providing specific contextual information for each Span to help developers more easily understand and analyze the characteristics and impact of each operation.
+
+Tags consist of a `key` and a `value`, where the `key` must be of string type, and the `value` can be a string, boolean, or number.
+
+## Tag Categories
+
+### Metadata
+
+  | Key                      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                       | Example Value |
+        |--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+  | **internal.span.format** | The data format of the Internal Span.                                                                                                                                                                                                                                                                                                                                                                                                             | `otlp`        |
+  | **otel.status_code**     | The status of the Span.                                                                                                                                                                                                                                                                                                                                                                                                                           | `ERROR`       |
+  | **span.kind**            | The type of Span:<br />- **client**: Indicates that the Span is an outbound call (client operation), i.e., a client initiated a request to a service or resource.<br />- **server**: Indicates that the Span is an inbound call (server operation), i.e., a server received and processed a request from a client.<br />- **internal**: Indicates an internal operation within the application, not involving operations with a remote parent or child. | `client`      |
+
+### HTTP Request Information
+
+  | Key                              | Description                                                                                                                                                                          | Example Value                       |
+        |----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------|
+  | **http.flavor**                  | The version of the HTTP protocol.                                                                                                                                                    | `1.1`                               |
+  | **http.method**                  | The HTTP request method.                                                                                                                                                             | `GET`                               |
+  | **http.response_content_length** | A field in the HTTP request header that specifies the length of the request or response body in bytes.                                                                               | `12`                                |
+  | **http.route**                   | The API.                                                                                                                                                                             | `/get/{code}`                       |
+  | **http.scheme**                  | The type of HTTP protocol.                                                                                                                                                           | `http`                              |
+  | **http.status_code**             | The HTTP status code.                                                                                                                                                                | `200`                               |
+  | **http.target**                  | The target path of the HTTP request, typically including the path of the resource and possible query parameters.                                                                     | `/get/200?foo=bar`                  |
+  | **http.url**                     | The URL of the request.<br />**Note**: Only visible for the `client` Span kind.                                                                                                        | `http://calendar-app:9090/calendar` |
+  | **http.user_agent**              | The User-Agent request header, a characteristic string that helps the server and peers identify the application, operating system, vendor, and version of the requesting user agent. | `okhttp/4.10.0`                     |
+  | **upstreamURLPath**              | The URL path of the upstream service, specifying the path of the resource that should be handled by the upstream service, including possible query parameters.                       | `/get/200?foo=bar`                  |
+
+### Service
+
+  | Key                           | Description                                              | Example Value          |
+        |-------------------------------|----------------------------------------------------------|------------------------|
+  | **inner.client.cluster.name** | The name of the cluster.                                 | `global`               |
+  | **inner.client.env.type**     | The type of service.                                     | `vm`, `k8s`            |
+  | **inner.client.ms.name**      | The name of the service.                                 | `notes-app`            |
+  | **inner.client.ms.namespace** | The namespace where the service is located.              | `otel-ns`              |
+  | **net.host.name**             | The network host name.                                   | `calendar-app`         |
+  | **net.host.port**             | The network host port.                                   | `9090`                 |
+  | **net.sock.host.addr**        | The address of the host connected by the network socket. | `10.3.0.118`           |
+  | **net.sock.peer.addr**        | The peer address of the network socket.                  | `10.3.0.117`           |
+  | **net.sock.peer.port**        | The peer port number of the network socket.              | `44794`                |
+  | **net.transport**             | The network transport protocol.                          | `ip_tcp`               |
+  | **thread.id**                 | The unique identifier of the thread.                     | `30`                   |
+  | **thread.name**               | The name of the thread.                                  | `http-nio-9090-exec-9` |
+
+### Middleware
+
+| Key                      | Description                                                                                                                                                                                    | Example Value                                                                                                               |
+|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| **db.system**            | Type of middleware. Currently supported types include: **mysql**, **oracle**, **postgresql**, **redis**.                                                                                       | `mysql`                                                                                                                     |
+| **db.connection_string** | Connection string. This is an expression containing parameters needed for application to connect with a database server, including server instance, database name, and authentication details. | `oracle:thin://oracle11g:1521`                                                                                              |
+| **dn.name**              | Database name.                                                                                                                                                                                 | `db1`                                                                                                                       |
+| **db.sql.table**         | Name of the database table.                                                                                                                                                                    | `students`                                                                                                                  |
+| **db.operation**         | Type of database operation.                                                                                                                                                                    | `SELECT`                                                                                                                    |
+| **db.statement**         | Database query statement.                                                                                                                                                                      | `SET redis ?`<br />`select student0_.id as id1_0_0_, student0_.age as age2_0_0_ from students student0_ where student0_.id=?` |
+| **net.peer.name**        | Name of the middleware service.                                                                                                                                                                | `pg.ns`                                                                                                                     |
+| **net.peer.port**        | Port of the middleware service.                                                                                                                                                                | `5432`                                                                                                                      |
+| **net.sock.peer.name**   | Name of the Redis service.                                                                                                                                                                     | `redis`                                                                                                                     |
+| **net.sock.peer.addr**   | IP address of the Redis service.                                                                                                                                                               | `10.4.199.164`                                                                                                              |
+| **net.sock.peer.port**   | Port of the Redis service.                                                                                                                                                                     | `6379`                                                                                                                      |
+
+### Process
+
+| Key                             | Description                                         | Example Value                                                                                                                                                      |
+|---------------------------------|-----------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **cluster.name**                | Name of the cluster.                                | `global`                                                                                                                                                           |
+| **container.id**                | ID of the container.                                | `b960b4f13d0e28fdc296195c4c7c57152fa4e689bb473bf8718ec817a7eea481`                                                                                                 |
+| **container.name**              | Name of the container.                              | `notes-app`                                                                                                                                                        |
+| **host.arch**                   | Architecture of the host.                           | `amd64`                                                                                                                                                            |
+| **host.name**                   | Name of the host.                                   | `notes-app-deploy-5f6557bc88-zk7cz`                                                                                                                                |
+| **ms.name**                     | Name of the service.                                | `notes-app`                                                                                                                                                        |
+| **ms.namespace**                | Name of the namespace where the service is located. | `otel-ns`                                                                                                                                                          |
+| **os.description**              | Description of the operating system.                | `Linux 3.10.0-1160.11.1.el7.x86\_64`                                                                                                                               |
+| **os.type**                     | Type of the operating system.                       | `linux`                                                                                                                                                            |
+| **otel.library.name**           | Name of the Java library.                           | `io.opentelemetry.tomcat-7.0`                                                                                                                                      |
+| **otel.library.version**        | Version of the Java library.                        | `1.24.0-alpha`                                                                                                                                                     |
+| **process.command_line**        | Command line parameters of the Java process.        | `/usr/local/openjdk-11/bin/java \-javaagent:/agent-22wwn/opentelemetry-javaagent-ext.jar -Dotel.instrumentation.runtime-metrics.experimental-metrics.enabled=true` |
+| **process.executable.path**     | Executable file path of the Java process.           | `/usr/local/openjdk-11/bin/java`                                                                                                                                   |
+| **process.pid**                 | Identifier of the process.                          | `7`                                                                                                                                                                |
+| **process.runtime.description** | Description of the process' runtime environment.    | `Oracle Corporation OpenJDK 64-Bit Server VM 11.0.16+8`                                                                                                            |
+| **process.runtime.name**        | Name of the process' runtime environment.           | `OpenJDK Runtime Environment`                                                                                                                                      |
+| **process.runtime.version**     | Version of the process' runtime environment.        | `11.0.16+8`                                                                                                                                                        |
+| **telemetry.auto.version**      | Version of the Telemetry Auto.                      | `1.24.0`                                                                                                                                                           |
+| **telemetry.sdk.language**      | Language of the Telemetry SDK.                      | `java`                                                                                                                                                             |
+| **telemetry.sdk.name**          | Name of the Telemetry SDK.                          | `opentelemetry`                                                                                                                                                    |
+| **telemetry.sdk.version**       | Version of the Telemetry SDK.                       |                                                                                                                                                                    |
