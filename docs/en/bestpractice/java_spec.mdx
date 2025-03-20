@@ -1,0 +1,87 @@
+---
+weight: 10
+title: Java Application Containerization Specification
+---
+
+**Note: Applicable to ACP v3.14.3, v3.16.2, v3.18 and above.**
+
+Only when a Java application uses the JAVA_TOOL_OPTIONS environment variable, the following containerization specifications must be followed to ensure that the application's own configuration of the JAVA_TOOL_OPTIONS environment variable takes effect. Specifically, when deploying in a Container Platform, the application's Deployment should explicitly declare the JAVA_TOOL_OPTIONS environment variable. An example is as follows:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: your-java-app
+spec:
+  template:
+    spec:
+      containers:
+        - env: # Configuration examples
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Xmx1024m -Xms512m"
+          name: your-java-app
+```
+
+Reason: When a Java application (Deployment) is added to the platform as a service (OpenTelemetry governance), the Java Agent is automatically injected by appending the `-javaagent` parameter to the pod `JAVA_TOOL_OPTIONS` environment variable, e.g. `-javaagent:/otel-auto-instrumentation-java/javaagent.jar`. This may be overridden if `JAVA_TOOL_OPTIONS` is configured in any other way.
+
+### <span id="java-old">Java Application Containerization Specification (Old)</span>
+
+**Note: Applicable to ACP versions other than the new specifications above.**
+
+To ensure the platform's governance capabilities can be effectively applied to your Java applications, please follow the following Java application containerization specification during the development and building process:
+
+#### **Base Image Selection**
+
+It is recommended to use versions of JDK 8u212 or later as the base image.
+
+#### **Dockerfile Template**
+
+Please refer to the Dockerfile template and instructions provided in this document and modify the Dockerfile file used in your Java application project accordingly.
+
+The Dockerfile template is as follows:
+
+```bash
+FROM eclipse-temurin:8-alpine
+
+VOLUME /tmp
+
+# Set the container's timezone and add the admin account, also create its home directory.
+# Note: The instruction to set the timezone may vary depending on the OS of the base image.
+# Note: This step requires accessing the internet to download dependencies. If you are in an isolated internal network, consider using a public base image to complete this step.
+RUN apk update \
+    && apk add --no-cache tzdata \
+    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone \
+    && adduser -D admin
+
+# The WORKDIR instruction makes it easier to use relative paths in subsequent instructions to simplify the script.
+WORKDIR /home/admin/
+
+# For security reasons, use a non-root account to avoid running commands like apt-get.
+USER admin
+
+# The COPY --chown option eliminates the need to run chown again.
+# Note: Ensure that start.sh has executable permissions.
+COPY --chown=admin:admin start.sh \
+     target/app.jar \
+     /home/admin/
+
+# Start the container by executing the script.
+ENTRYPOINT ["./start.sh"]
+```
+
+The content of the **start.sh** script referenced in the Dockerfile template is as follows. Please save the script file in the same directory as the Dockerfile.
+
+```bash
+#!/bin/sh
+
+# -e Exit immediately if a command exits with a non-zero status.
+# -x Display commands and their arguments as they are executed.
+set -ex
+
+# Use the value of the JAVA_OPTS environment variable as the startup parameter for the JAVA service, automatically replacing it with the value of the JAVA_OPTS environment variable in the current environment at runtime.
+# Use exec so that the Java program can receive the SIGTERM signal.
+exec /usr/bin/java ${JAVA_OPTS} \
+     -Djava.security.egd=file:/dev/./urandom \
+     -jar /home/admin/app.jar ${RUN_ARGS} "$@"
+```
