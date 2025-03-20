@@ -1,0 +1,66 @@
+---
+title: Accessing Bookinfo
+weight: 30
+---
+
+This guide will walk you through accessing Bookinfo via the Istio Ingress Gateway and verifying its functionality. The Ingress Gateway in this guide uses the classic Istio `VirtualService` API.
+
+**Before you begin, please ensure:**
+
+- The [Bookinfo sample application has been deployed].
+- A [service mesh has been created].
+- You will need platform administrator privileges. Please ensure your account has the platform administrator role assigned.
+
+To simplify the setup process, this tutorial uses the `NodePort` method to access the Ingress Gateway, eliminating the need for a `LoadBalancer`. Access to the Bookinfo application will be through the node IP and node port.
+
+## Step 1: Deploying the Ingress Gateway
+
+1. **Creating Projects and Namespaces**
+   Navigate to the **Project Management** page, click **Create Project**, name it `platform`, and select the cluster where the Bookinfo application resides.
+   In the project details, under the left navigation panel, click **Namespaces** and create a namespace named `platform-gateway`.
+
+2. **Deploying the Ingress Gateway**
+   Go to **Platform Management**, navigate to **Service Mesh** > **Gateways**, and click **Deploy Gateway**. Fill in the gateway parameters:
+
+   - Basic Info: Name it `public-ingressgw`, gateway type is `Ingress Gateway`, gateway type selection is `Shared`, leave other parameters as default.
+   - Deployment Configuration: Select namespace `platform-gateway`, node label select `ingress:true`, leave other parameters as default.
+   - Network Configuration: Select `NodePort`, set HTTP protocol host port to `30665`, HTTPS host port to `30666`.
+   - Check Port Availability: Execute the following command to ensure the ports are not occupied:
+
+     ```bash
+     kubectl get svc --all-namespaces -o custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,TYPE:.spec.type,NODEPORT:.spec.ports[*].nodePort' | grep NodePort
+     ```
+
+## Step 2: Creating Gateway Configuration
+
+1. Navigate to the gateway details page, switch to the **Gateway configuration** tab, and click **Create Gateway Configuration**.
+2. Name it `public-ingressgw-gateway`, select `HTTP` port `80`, set Host to `*`, and click create.
+
+## Step 3: Creating Virtual Services
+
+1. Switch to the **Virtual Services** tab, click **Create Routing configuration**.
+2. Name it `public-ingressgw-vs`, select namespace `platform-gateway`, route destination select `Namespace: demo-dev`, `Service: productpage`, `Port: 9080`.
+
+## Testing Ingress Traffic
+
+1. Obtain `GATEWAY_IP_PORT`:
+   - First, find the node IP address where the Ingress Gateway is located by executing the following command:
+
+     ```bash
+     kubectl get nodes -o wide
+     ```
+
+   - Use the node IP combined with port `30665` to form `GATEWAY_IP_PORT`, for example, `192.168.130.0:30665`.
+
+2. Execute the following command to verify the Ingress Gateway is functioning correctly:
+
+   ```bash
+   export GATEWAY_IP_PORT=<node_IP>:30665
+   curl -k -s http://$GATEWAY_IP_PORT/productpage | grep -o "<title>.*</title>"
+   ```
+
+3. Expected output should resemble:
+
+   ```bash
+   <title>Simple Bookstore App</title>
+   ```
