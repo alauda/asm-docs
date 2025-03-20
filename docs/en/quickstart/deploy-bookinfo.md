@@ -1,0 +1,94 @@
+---
+title: Deploying Bookinfo
+weight: 20
+---
+
+This guide will help you deploy the Bookinfo application in your environment and verify the success of the deployment.
+
+Before you begin, ensure that:
+
+- You have a **Customer Portal** account with download access to the **App Market**. If you don’t have an account, contact technical support.
+
+## Step 1: Create the Bookinfo project and namespace
+
+1. **Create a project and namespace**     
+   In **Project Management**, click **Create Project**, name it `demo`, and select the cluster where you plan to deploy the Bookinfo application.
+   After the project is created, go to the project details page. In the left navigation panel, click **Namespaces**, and then **Create Namespace**, naming it `demo-dev`.   
+   If you already have a project and namespace suitable for the Bookinfo deployment, you can skip this step and replace the namespace in the following commands with your own namespace.
+
+   **Note**: Creating a project requires platform administrator permissions. If you don't have the necessary access, please contact the administrator for assistance.
+
+## Step 2: Download Bookinfo Resources
+
+1. **Login and download**  
+   Log in to **Customer Portal**, search for "Bookinfo" in the App Market, and download the resources.
+
+## Step 3: Push the Images
+
+1. **Upload and extract the package**  
+   Upload the downloaded package to a server or PC that can connect to your image registry. Extract the package to obtain the following files:
+
+   ```bash
+   tar -xzvf <package>
+   ```
+
+   - `bookinfo-images-arm64.tar`: ARM architecture Bookinfo images.
+   - `bookinfo-images-amd64.tar`: x86 architecture Bookinfo images.
+   - `push-images.sh`: Image push script that automatically updates image references in `bookinfo.yaml`.
+   - `bookinfo.yaml`: YAML file for Bookinfo deployment, including Service and Deployment configurations.
+
+2. **Set script permissions**  
+   Assign execution permission to the script:
+
+   ```bash
+   chmod +x push-images.sh
+   ```
+
+3. **Run the script to push images**  
+   Execute the following command to push the images to your target registry:
+
+   ```bash
+   # Example ./push-images.sh ./bookinfo-images-amd64.tar 192.168.143.0:32767 true admin 'Aa123!@#' bookinfo-demo
+   ./push-images.sh <source-image> <target-registry> <requires-auth> [username] [password] [harbor-project]
+   ```
+
+   **Parameter Explanation**:   
+   - `source-image`: The path to the image file.
+   - `target-registry`: The address and port of the image registry. **Note**: The prefix should not include `https://` or `http://`.
+   - `requires-auth`: Whether authentication is required. If not required, enter `false`; if required, enter `true` and provide the `username` and `password`.
+   - `username`: The username for the image registry.
+   - `password`: The password for the image registry. **Recommendation**: Enclose it in single quotes to avoid command line parsing errors caused by special characters in the password.
+   - `harbor-project`: If using a Harbor image registry, enter the project name in Harbor; if using Docker Registry, this parameter can be left empty.
+
+## Step 4: Deploy the Bookinfo Application
+
+1. **Deploy using kubectl**  
+   Open the container platform or platform management page, then click the `kubectl` tool at the bottom-right corner.
+
+2. **Apply the YAML file**  
+   Use `vi` or another terminal editor to paste the contents of `bookinfo.yaml` and run the following command:
+
+   ```bash
+   kubectl apply -f bookinfo.yaml -n <your-namespace>
+   ```
+
+3. **Verify successful deployment**
+
+   - Check that all Pods are in the `Running` state:
+
+     ```bash
+     kubectl get pods -n <your-namespace>
+     ```
+
+   - Verify the application is accessible:
+
+     ```bash
+     kubectl exec "$(kubectl get pod -n <your-namespace> -l app=ratings -o jsonpath='{.items[0].metadata.name}')" \
+         -n <your-namespace> -c ratings -- curl -s productpage:9080/productpage | \
+         grep -o "<title>.*</title>"
+     ```
+     Expected output:
+
+     ```bash
+     <title>Simple Bookstore App</title>
+     ```
