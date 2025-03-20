@@ -1,0 +1,44 @@
+---
+weight: 10
+---
+
+# Core Concepts
+
+## Telemetry
+
+Telemetry refers to the data emitted by systems and their behaviors, including traces, metrics, and logs.
+
+## Trace
+
+**Trace** records the path of a request (whether from an application or end-user) as it propagates through a multi-service architecture (such as microservices and serverless applications).
+
+A trace consists of one or more spans. The first span is known as the root span, which represents the entire lifecycle of a request from start to finish. Child spans beneath the root span provide more detailed contextual information about the request process (or the various steps that constitute the request).
+
+Without traces, identifying the root cause of performance issues in distributed systems would be quite challenging. Traces make it easier to debug and understand distributed systems by breaking down the flow of requests through them.
+
+## Span
+
+**Span** is the fundamental building block of distributed tracing, representing a specific operation or work unit. Each span records specific actions within a request, helping us understand the details of what occurred during the operation's execution.
+
+A span contains a name, time-related data, structured log messages, and other metadata (attributes) that collectively illustrate the complete picture of the operation.
+
+Depending on the Span's position in the trace, two special types of Spans can be distinguished:
+* **Root Span**: The Root Span (Trace Root Span) is the first Span in the trace (located at the top) and marks the starting point of the request.
+* **Service Entry Span**: The Service Entry Span is the first Span generated when a service is called as a server, i.e., when the request enters the service.
+
+## Span Tags
+
+In distributed systems, Span Tags are key key-value pair information attached to each Span, providing operation details, resource identifiers, performance metrics, and error information. They provide the necessary context for understanding and analyzing service performance and behavior, and are essential tools for debugging and optimizing distributed applications.
+
+## OperationName
+OperationName is an attribute of a span, specifying the name of the specific operation within the span. This name is typically used to identify the specific business logic or system call represented by the span, such as an HTTP request's method plus URL path, a brief description of a database query, or the name of an internal function call.
+
+## Jaeger
+
+**Jaeger** is an open-source **distributed tracing system**. It is designed to monitor and diagnose complex distributed systems based on microservices architecture, helping developers visualize request traces, analyze performance bottlenecks, and troubleshoot anomalies. Jaeger is compatible with the **OpenTracing** standard (now part of OpenTelemetry), supports multiple programming languages and storage backends, and is a key observability tool in the cloud-native space.
+
+## OpenTelemetry Collector
+
+OpenTelemetry Collector is a vendor-agnostic agent that can receive, process, and export telemetry data. It supports receiving telemetry data in various formats (such as OTLP, Jaeger, Prometheus, and many commercial/proprietary tools) and sending that data to one or more backends. It also supports processing and filtering telemetry data before exporting.
+
+For more information, see [Collector](https://opentelemetry.io/docs/collector/).

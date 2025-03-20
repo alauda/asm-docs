@@ -2,24 +2,53 @@
 weight: 20
 ---
 
-:::tip
-撰写「功能架构」文档的目的是帮助用户理解功能的核心流程和概念。
+# Architecture
 
-在架构中引入的「概念」建议链接到下文「核心概念」对应的章节。如果引入的「概念」较为简单且无需单独文档介绍，则可在架构文档中进行简要说明。
+This architecture is built on the Istio, OpenTelemetry and Jaeger technology stacks, achieving the full lifecycle management of distributed tracing. The system comprises five core modules: data collection, transmission, storage, querying, and visualization.
 
-对于复杂的流程，建议在当前目录下单独撰写「深入理解 XXXX」文章，以便深入浅出地进行介绍。
+![](./assets/asm_tracing_architecture.drawio.png)
 
-可以访问[架构文档示例](https://product-doc-guide.alauda.cn/template/arch/module_arch_example.html)查看示例文档。
-:::
+## Core Components
 
-# 架构
+1. **Istio System**
+   - **istio-proxy**\
+     A sidecar proxy that automatically captures and generates trace data for service-to-service communication without code modification.
+   - **istiod**\
+     Controls the configuration and lifecycle of istio-proxy, including the tracing configuration for service mesh.
 
-请增加一张或多张关于该功能的技术架构图，图中可以包含以下内容：
+2. **OpenTelemetry System**
+   - **opentelemetry-operator**\
+     A cluster-level Operator responsible for deploying and managing the otel-collector component, providing OTel automatic injection capability.
+   - **otel-collector**\
+     Receives tracing data from applications, filters and batches it, and then forwards it to the jaeger-collector.
+   - **Tracing UI**\
+     A self-developed visualization interface that integrates with the jaeger-query API, supporting multi-dimensional query conditions.
 
-- 核心组件：例如 Operator、任务、中间件等，并在图中描绘出各个组件之间的联系及其作用。
-- 数据流程：例如引入的资源、资源之间的依赖关系，以及资源被消费的流程等。
-- 部署架构：例如多集群部署、高可用设计等。
+3. **Jaeger System**
+   - **jaeger-operator**\
+     Deploys and manages the jaeger-collector and jaeger-query components.
+   - **jaeger-collector**\
+     Receives trace data forwarded and processed by the otel-collector, performs format conversion, and writes it to Elasticsearch.
+   - **jaeger-query**\
+     Provides a trace query API, supporting multi-condition retrieval including TraceID and labels.
 
-在架构图下方增加对该图片的描述，说明图片的含义及其中各部分的作用。
+4. **Storage Layer**
+   - **Elasticsearch**\
+     A distributed storage engine that supports efficient writing and retrieval of massive Span data.
 
-对架构图中引入的概念进行简要介绍。如果某个概念需要更详细的说明，请链接到「核心概念」对应的章节。
+## Data Flow
+
+- **Istio Writing Process**\
+  `Application -> jaeger-collector -> Elasticsearch`
+
+  The istio-proxy automatically captures trace data from service-to-service communication, which is then sent directly to the jaeger-collector for persistence in Elasticsearch.
+
+- **OpenTelemetry Writing Process**\
+  `Application -> otel-collector -> jaeger-collector -> Elasticsearch`
+
+  The application generates Span data via SDK or automatic injection, which is standardized by the otel-collector and subsequently persisted to Elasticsearch by the jaeger-collector.
+
+- **Query Process**\
+  `User -> Tracing UI -> jaeger-query -> Elasticsearch`
+
+  The user submits query conditions through the UI, and jaeger-query retrieves data from Elasticsearch; the UI visualizes the results based on the return data.
