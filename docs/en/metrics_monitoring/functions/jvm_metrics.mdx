@@ -1,0 +1,50 @@
+---
+weight: 40
+---
+
+# JVM Metrics
+
+The JVM monitoring page displays JVM (Java Virtual Machine) metrics data collected by the OpenTelemetry Java Agent. Metrics include GC (Garbage Collection), heap memory, non-heap memory, JVM threads, Java classes, etc. You can use the real-time monitoring data presented in the monitoring charts for performance analysis, quickly identifying memory leaks, thread anomalies, and other issues.
+
+To meet different monitoring metrics analysis scenarios, the following features are also supported:
+
+- When there are multiple Pods for a service, you can compare the monitoring data of two Pods side by side.
+- Flexibly filter the monitoring metrics to be displayed.
+
+## Prerequisites
+
+The service has been injected with a Java Agent, please refer to [Adding Services](../../microservice/todo-add-otel-service.md) for implementation.
+
+## Steps
+
+1. In the left navigation bar, click **Monitoring**.
+2. Select the service and time range for which you want to view monitoring data.
+
+   **Note**: The query time range is limited by the retention period of Prometheus monitoring data. For example, if monitoring data is retained for up to 7 days and the set time range is for the last 30 days, the statistical data will cover only 7 days.
+
+3. Click the **JVM Monitoring** tab to view the JVM monitoring data for the service Pod.
+
+   **Tip**: When there are multiple Pods for a service, click to check **Monitoring Data Comparison** to analyze and compare the monitoring data of 2 Pods.
+
+   The monitoring charts display the trend statistics of JVM monitoring metrics for the specified service Pod within the query time range. Statistical data includes maximum, allocated, and used memory for various classes; CPU usage; GC counts and duration; active thread count; number of loaded/unloaded classes, etc.
+
+## JVM Monitoring Chart Explanation
+
+The monitoring charts display the trend statistics of JVM monitoring metrics for the specified service Pod within the query time range. The explanation of monitoring metrics is provided in the table below.
+
+**Tip**: During data viewing, you can refer to [Regular Operations](./otel_traffic_metrics.mdx#regular-operations) to refresh monitoring data, hide data corresponding to the legend, or view the monitoring chart in large.
+
+| Monitoring Metrics              | Description                                                                                                                                                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Young Gen GC Count/Duration** | Number of garbage collections and the time spent in the Young Generation for the Pod.                                                                                                                   |
+| **Old Gen GC Count/Duration**   | Number of garbage collections and the time spent in the Old Generation for the Pod.                                                                                                                     |
+| **System/Pod CPU Usage**        | **System**: CPU usage rate within the Pod's system (used CPU amount / total CPU amount allocated to the Pod)<br />**Pod**: Pod's CPU usage rate (used CPU amount / total CPU amount allocated to the Pod) |
+| **Heap Memory**                 | Statistics on available heap memory and heap memory usage for the Pod, including: **peak available heap memory**, **current available heap memory**, **used heap memory**.                              |
+| **Heap Memory Details**         | Statistics on memory usage in various heap partitions for the Pod, including: **Young Gen Eden area**, **Old Gen area**, **Young Gen Survivor area**, **total used heap memory**.                       |
+| **Non-Heap Memory**             | Statistics on available non-heap memory and non-heap memory usage for the Pod, including: **peak available non-heap memory**, **current available non-heap memory**, **used non-heap memory**.          |
+| **Metaspace Memory**            | Statistics on available Metaspace memory and Metaspace memory usage for the Pod, including: **total Metaspace size**, **used Metaspace size**.                                                          |
+| **Direct Buffer Memory**        | Statistics on available direct buffer memory and direct buffer memory usage for the Pod, including: **total direct buffer size**, **used direct buffer size**.                                          |
+| **Daemon Threads**              | Number of daemon threads in the Pod.                                                                                                                                                                    |
+| **Active Threads**              | Number of active threads in the Pod.                                                                                                                                                                    |
+| **JAVA Class Usage**            | Number of Java classes loaded by the Pod.                                                                                                                                                               |
+| **Unloaded Class Count**        | Number of Java classes unloaded by the Pod.                                                                                                                                                             |

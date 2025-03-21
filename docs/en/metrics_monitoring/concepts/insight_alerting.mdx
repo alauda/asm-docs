@@ -1,0 +1,55 @@
+---
+weight: 30
+---
+
+# In-depth Understanding of Alerting
+
+## Basic Principles of Alerting
+
+The operation of an alert system is based on the following core steps:
+
+1. Data Collection:
+  * The alert system first needs to collect data from various resources. This data usually includes hardware performance metrics (such as CPU utilization, memory usage), software performance metrics (such as response time, error rate), and network activity.
+  * Data sources may include specialized monitoring software (such as Prometheus), log files, etc.
+2. Data Analysis and Processing:
+  * The collected data needs to be analyzed and processed to detect any metrics that exceed normal ranges.
+3. Alert Triggering:
+  * When the monitored data metrics exceed preset thresholds or are identified as abnormal patterns, the alert system will trigger an alert.
+  * Alert silencing can be used to decide whether to trigger an alert, thus avoiding frequent alert noise.
+4. Notification Sending:
+  * Once an alert is triggered, the system will send notifications to the relevant personnel or teams through predetermined communication channels (such as email, SMS, platform app notifications, etc.).
+  * Notifications typically include detailed information about the alert, such as the type of alert, affected resources, current metric values, timestamps, and possible resolution suggestions.
+
+The ASM platform allows users to set alert policies (i.e., a set of alert rules) for services and computational components based on preset monitoring metrics, custom monitoring metrics, and platform log and event data. When resources exhibit anomalies or reach a pre-warning state, the system automatically triggers an alert.
+
+Combined with the platform's notification functionality, alert information can be directly pushed to operations personnel or developers, ensuring they can respond and address issues in a timely manner, thus ensuring smooth operation of platform business.
+
+## Types of Alerts
+
+Depending on the monitoring target, the platform defines the following types of alerts:
+
+* **Metric Alerts**: The platform refines common monitoring metrics that meet the needs of most customers. Users can configure alerts by selecting monitoring metrics and setting trigger conditions. Alerts are triggered when monitoring data meets the trigger conditions of the alert rules.
+
+* **Custom Alerts**: Customers add enterprise-specific metric rules according to their own usage scenarios, better meeting the advanced needs of enterprises for alerts.
+
+* **Log Alerts** (only for computational components): Alerts triggered by the number of specific log contents (Error, Warning, etc.) found within a specified time range for computational components.
+
+* **Event Alerts** (only for computational components): Alerts triggered by the number of event Reasons (reasons for the component's current state, such as BackOff, Pulling, Failed, etc.) found within a specified time range.
+
+## Alert Status Explanation
+
+After you set alert policies, the system will track the platform condition in real-time based on your selected monitoring metrics. For each alert policy, depending on the specific situation of the current platform, it will be in one of the following states:
+
+* **Alert Status**
+
+  * **Alert**: At least one rule in the alert policy has triggered an alert.
+
+  * **Processing**: At least one rule in the alert policy has query data that has reached or exceeded the alert threshold, and is about to trigger an alert, which is an intermediate state.
+
+  * **Normal**: None of the rules in the alert policy have triggered an alert.
+
+* **Silent Status** (silence must be set for this alert policy)
+
+  * **Silence Waiting**: The state before silence begins after setting silence. In this state, if a rule in the policy triggers an alert, notifications will be sent normally.
+
+  * **Silencing**: The state from the start of silence until the end of silence. In this state, if a rule in the policy triggers an alert, no notifications will be sent.

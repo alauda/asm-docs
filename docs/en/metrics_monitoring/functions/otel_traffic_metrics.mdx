@@ -1,0 +1,47 @@
+---
+weight: 20
+---
+
+# OpenTelemetry Traffic Metrics
+
+The platform offers a wealth of traffic metrics data, allowing users to analyze the quality of service traffic from multiple dimensions.
+
+## Service Traffic Monitoring
+
+### Viewing Service Traffic Quality
+
+**Prerequisites**
+
+The service has been injected with a Java Agent, please refer to [Adding Services](../../microservice/todo-add-otel-service.md) for implementation.
+
+**Steps**
+
+1. In the left navigation bar, click **Monitoring**.
+2. Select the service and time range for which you want to view monitoring data.
+
+   **Note**: The query time range is limited by the retention period of Prometheus monitoring data. For example, if monitoring data is retained for up to 7 days and the set time range is for the last 30 days, the statistical data will cover only 7 days.
+
+3. Click the respective tabs to view the service's traffic monitoring data and JVM monitoring data.
+
+### Regular Operations
+
+- **Refresh Data**: The monitoring statistics on the current page are automatically refreshed only once when the page is opened. To refresh again, you can use the following two methods:
+
+  - Manual Refresh: Click the <img src="../assets/metric_refresh.png" style={{display: "inline", verticalAlign: "middle"}} /> in the bottom right corner of the page to manually refresh the data.
+
+  - Set Auto Refresh (default is off): Click the <img src="../assets/metric_auto_refresh.png" style={{display: "inline", verticalAlign: "middle"}} /> to set the interval for auto-refreshing the data.
+
+- **View/Set Legend**: Click the <img src="../assets/legend.png" style={{display: "inline", verticalAlign: "middle"}} /> in the top right corner of the chart to expand the legend in the monitoring chart. Click on the legend to hide/show the corresponding curve in the chart.
+
+- **View Monitoring Chart in Large**: Click the <img src="../assets/big_chart.png" style={{display: "inline", verticalAlign: "middle"}} /> in the top right corner of the chart to view an enlarged, more detailed monitoring chart in the pop-up dialog.
+
+### Monitoring Data Explanation
+
+| Monitoring Metrics                | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Average Response Time**         | Average response time within the query time range (total response time/total number of responses).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Average Incoming/Outgoing RPS** | Average value of incoming/outgoing RPS (Requests Per Second) during the query time range.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Response Time**                 | Response time between services or within a service itself, displayed as average, TP 50, TP 95, TP 99.<br />TP (Top Percentile) xx indicates the minimum duration required for xx percent of network requests, commonly used in system performance monitoring scenarios.<br />Hover over the curve to view the response time for a particular period.                                                                                                                                                                                                                                                                                                                                |
+| **Incoming/Outgoing RPS**         | Total incoming/outgoing traffic RPS and error incoming/outgoing traffic RPS within the query time range.<br />**RPS = Number of requests during the query time / Query duration (s)**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **Incoming/Outgoing Traffic**     | Total incoming/outgoing request volume within the query time range, and traffic proportion by HTTP return codes (normal/2xx, 3xx, 4xx, 5xx).<br />Hover over the bar chart to view the traffic proportion for each category.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **Client Traffic Comparison**     | **Client** refers to the client service (downstream service) that makes requests to the current service (upstream service). **Client Traffic Comparison** will compare and display the **Response Time**, **Incoming RPS**, and incoming **RPS Error Rate** (Error RPS/RPS) of different clients calling the current service.<br /><br />**Explanation**:<br />- **unknown client** refers to the collection of clients (HTTP protocol) within the service mesh that call the current service and whose traffic is not managed by OpenTelemetry.<br />- If the client belongs to the current namespace, clicking the **Trace** next to the client name will redirect to the trace page. |
