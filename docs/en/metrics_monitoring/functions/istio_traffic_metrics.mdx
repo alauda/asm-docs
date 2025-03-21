@@ -1,0 +1,83 @@
+---
+weight: 10
+---
+
+# Istio Traffic Metrics
+
+The platform offers a wealth of traffic metrics data, allowing users to analyze service traffic quality from multiple dimensions.
+
+## Prerequisites
+
+The service has been injected with Sidecar, please refer to [Adding Services](../../microservice/add-service.md) for details.
+
+## Quick Start
+
+1. In the left navigation bar, click **Monitoring**.
+2. Select the service you want to view monitoring data for and the time range.
+
+   **Note**: The query time range is limited by the retention period of Prometheus monitoring data. For example: if monitoring data is retained for up to 7 days and the set time range is for the last 30 days, the statistical data will cover only 7 days.
+3. Click the respective tabs to view traffic monitoring data and API traffic monitoring data for the service.
+
+   **Explanation**: When the service mesh manages multiple clusters, and there are **services with the same namespace and name** (non-Dubbo protocol services) in multiple clusters, the traffic monitoring panel displays the aggregated monitoring data of services across multiple clusters.<br />Use the **Cluster Traffic Comparison** panel to compare monitoring data of the service in each cluster.
+
+
+## Service Traffic Monitoring
+
+### Regular Operations
+
+* **Refresh Data**: The monitoring statistics on the current page are automatically refreshed only once when the page is opened. To refresh again, you can use the following two methods:
+
+  * Manual refresh: Click the <img src="../assets/metric_refresh.png" style={{display: "inline", verticalAlign: "middle"}} /> in the bottom right corner of the page to manually refresh the data.
+
+  * Set auto-refresh (default is off): Click the <img src="../assets/metric_auto_refresh.png" style={{display: "inline", verticalAlign: "middle"}} /> to set the interval for auto-refreshing the data.
+
+
+* **View/Set Legend**: Click the <img src="../assets/legend.png" style={{display: "inline", verticalAlign: "middle"}} /> in the top right corner of the chart to expand the legend in the monitoring chart. Click on the legend to hide/show the corresponding curve in the chart.
+
+* **View Monitoring Chart in Large**: Click the <img src="../assets/big_chart.png" style={{display: "inline", verticalAlign: "middle"}} /> in the top right corner of the chart to view an enlarged, more detailed monitoring chart in the pop-up dialog.
+
+### Monitoring Data Explanation
+
+#### HTTP/HTTP2/gRPC, Dubbo Protocols
+
+
+| Monitoring Metrics        | Description                                                                                                                                                                                                                                                                                                 |
+|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Average Response Time**      | Average response time within the query time range (total response time/total number of responses).                                                                                                                                                                                                           |
+| **Average Incoming/Outgoing RPS** | Average value of incoming/outgoing RPS (Requests Per Second) during the query time range.                                                                                                                                                                                                                  |
+| **Response Time**        | Response time between services or within a service itself, displayed as average, TP 50, TP 95, TP 99.<br />TP (Top Percentile) xx indicates the minimum duration required for xx percent of network requests, commonly used in system performance monitoring scenarios.<br />Hover over the curve to view the response time for a particular period. |
+| **Incoming/Outgoing RPS**   | Total incoming/outgoing traffic RPS and error incoming/outgoing traffic RPS within the query time range.<br />**RPS = Number of requests during the query time / Query duration (s)**.                                                                                                                      |
+| **Incoming/Outgoing Traffic**     | Total incoming/outgoing request volume within the query time range, and traffic proportion by HTTP return codes (normal/2xx, 3xx, 4xx, 5xx).<br />Hover over the bar chart to view the traffic proportion for each category.                                                                                                                                            |
+| **Client Traffic Comparison**     | **Client** refers to the client service (downstream service) that makes requests to the current service (upstream service). **Client Traffic Comparison** will compare and display the **Response Time**, **Incoming RPS**, and incoming **RPS Error Rate** (Error RPS/RPS) of different clients calling the current service.<br /><br />**Explanation**:<br />- **Unknown client** refers to the collection of clients (HTTP protocol) within the service mesh that call the current service and whose traffic is not managed by Sidecar.<br />- If the client belongs to the current namespace, clicking the **Trace** next to the client name will redirect to the trace page.<br />- When there are two versions in a canary release service, aggregate data of both versions is displayed. |
+
+#### TCP Protocol
+
+| Monitoring Metrics                    | Description                                                                                                                                                                                                                                                                 |
+|---------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Incoming/Outgoing Traffic**         | Byte stream size of incoming and outgoing traffic within the query time range.                                                                                                                                                                                              |
+| **Average Incoming/Outgoing Traffic** | Average value of incoming/outgoing traffic (traffic/duration) within the query time range.                                                                                                                                                                                  |
+| **Incoming/Outgoing**                 | Byte stream transmission rate of incoming and outgoing service network (bytes per second).                                                                                                                                                                                  |
+| **TCP Connections**                   | Total number of connections.<br />**Error Rate** = Number of failed connections / Total connections<br />**Success Rate** = Number of successful connections / Total connections<br />Hover over different colored bar charts to view the number of connections in each category. |
+| **Client Traffic Comparison**         | Compares the network incoming byte stream transmission rate between the service and the client services accessing the current service.                                                                                                                                      |
+
+
+## API Traffic Monitoring
+
+To ensure the performance of the monitoring system, you first need to [declare service API](./create_api.mdx) on the platform. Subsequently, the platform will distinguish the declared API traffic quality in the service's traffic metrics.
+
+After successfully declaring a service API, you can select the API under that service in the API Traffic Monitoring tab.
+
+### Monitoring Data Explanation
+
+**Tip**: During data viewing, you can refer to [Regular Operations](#regular-operations) to refresh monitoring data or hide data corresponding to the legend.
+
+* Average Response Time: Average response time within the selected time range (total response time/total number of responses).
+
+* Response Time: Displayed as average, TP 50, TP 95, TP 99. Supports viewing the response time for a single value. Move the mouse over the curve to view the response time for a particular period.
+  TP xx indicates the minimum duration required for xx percent of network requests, commonly used in system performance monitoring scenarios.
+
+* Average Incoming RPS: Average value of RPS within the selected time range.
+
+* Incoming RPS: Requests per second, displaying the traffic curve. Supports viewing the total traffic RPS, or click to select the error traffic RPS.
+
+* Traffic: Displays the total number of visits, average success rate, and average error rate within the selected time range. Colors represent different HTTP status codes: dark green for successful status (2XX), light green for redirection (3XX), orange for client request errors (4XX), and red for server errors (5XX). Average error rate = (4XX+5XX) / total traffic × 100%.

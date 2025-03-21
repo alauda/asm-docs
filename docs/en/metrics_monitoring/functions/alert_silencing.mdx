@@ -1,0 +1,36 @@
+---
+weight: 60
+---
+
+# Alert Silencing
+
+## Rules in Alert Silencing
+
+By setting silencing for a specified alert policy, you can control that all rules under the alert policy do not send alert notification messages to the notification targets during the set silence period.
+
+**Use Cases**: During platform upgrades or maintenance, many resource statuses will be abnormal, and related alerts will be triggered. Operations personnel will frequently receive alert notifications before the upgrade or maintenance is completed. By setting silence for the alert policy, such situations can be avoided.
+
+**Note**: Setting silence does not affect the triggering of alerts, and you can still view the alert status on the **Alert Policies** / **Implement Alerts** page. Permanent silence and custom time silence settings are supported; once the end time of the custom time silence has expired, the silence setting will be automatically cleared.
+
+**Steps**
+
+1. In the left navigation bar, click **Alerts** > **Alert Policies**.
+
+2. Click the <img src="../assets/three_point.png" style={{display: "inline", verticalAlign: "middle"}} /> next to the alert policy to be silenced > **Set Silence**.
+
+3. Click to turn on the **Alert Silence** switch.
+
+   **Tip**: This switch is used to control whether to make the silence setting effective. To cancel the silence, simply turn off the switch.
+
+4. Refer to the following instructions to configure related parameters.
+
+   **Tip**: If no resource name is selected, the default is **Any**, i.e., when **deleting/adding** resources subsequently, the platform will **delete silence/add silence** to the alert policy; if **Select All** is chosen, it only applies to the currently selected resources, subsequent **deletion/addition** of resources will not be processed.
+
+   | Parameter      | Description                                                                                                                                           |
+         |----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+   | **Silence Target** | The resource object targeted by the silence setting.<br /> You can select some of the computational components associated with the alert policy, up to 30; when selecting **All Computational Components**, the silence target includes future components of the same type added under the current namespace. |
+   | **Silence Duration** | The time range of the alert silence. The alert enters a silent state from the start time of the silence, and if the alert policy is still in an alert state or triggers an alert after the silence end time, the alert notifications will resume.<br />**Permanent**: After the silence setting, the alert remains in a silent state until the alert policy is deleted.<br />**Custom**: Set the start and end times of the silence customarily, with a minimum interval of 5 minutes. |
+
+5. Click **Set**.
+
+   **Tip**: From the time the silence is set until the silence begins, the alert policy's silence status is **Silence Waiting**, during which, if a rule in the policy triggers an alert, notifications will be sent normally; from the start of the silence until the end of the silence, the alert policy's silence status is **Silencing**, during which, if a rule in the policy triggers an alert, no notifications will be sent.
