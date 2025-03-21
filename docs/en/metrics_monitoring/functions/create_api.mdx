@@ -1,3 +1,53 @@
 ---
 weight: 30
 ---
+
+# Import API for Microservices
+
+This document aims to help you quickly declare APIs for microservices to more effectively monitor and manage your APIs.
+
+## Select Service
+
+In the left navigation bar, click **Service List** and enter the service for which you want to declare APIs.
+
+## Declare Service's API
+
+Navigate to the **API** Tab page.
+
+There are two ways to declare the service's API:
+
+* **Batch Import API** - Declare the service's API by importing an API description file that conforms to the Swagger specification.
+* **Manual Import API** - When a few APIs need to be added to the API list, you can manually add the service's API on the platform.
+
+### Batch Import API
+
+Batch import APIs by uploading an API description file that supports the Swagger specification (`.yaml` or `.json` files), or by entering an API document URL that conforms to the OpenAPI 3.0 specification.
+
+**Note**:
+
+* When batch importing APIs, the existing APIs in the API list that were set through batch import at the **Service Port** will be cleared first. If you want to retain existing APIs, manually import only the new APIs needed.
+* The uploaded API description file size must not exceed 5 MB; the number of APIs imported in batch must not exceed 2000.
+
+**Parameter Explanation**
+
+Refer to the following explanations to configure related parameters.
+
+| Parameter        | Description                                                                                                                                                                                                                                                          |
+   |------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Service Port** | The listening port on which the service receives API requests. This port is the service's internal route, exposing the port number of the associated Deployment within the cluster.<br />When there are multiple service ports, the default is the first service port. |
+| **File Import**  | Batch import APIs contained in the uploaded file by uploading a file that supports the Swagger specification (`.yaml` or `.json` files) from local storage.                                                                                                          |
+| **Auto Load**    | Batch import APIs contained in the document by entering an online API document URL that conforms to the OpenAPI 3.0 specification. For example: `http://<domain>:<port>/v3/example/api-docs`.                                                                        |
+
+### Manual Import of API
+
+**Parameter Explanation**
+
+Refer to the following explanations to configure related parameters.
+
+| Parameter        | Description                                                                                                                                                                                                                                                                                                                                                                 |
+   |------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Service Port** | The listening port on which the service receives API requests. This port is the service's internal route, exposing the port number of the associated Deployment within the cluster.<br />When there are multiple service ports, the default is the first service port.                                                                                                        |
+| **API**          | **API Request Path**: Enter the request path according to the selected matching method.<br />Precise Match: For example, `/path` will precisely match that API query data;<br />Regex Match: For example, `/path/{param}/path`, where `{param}` is a variable in the API.<br /><br />**API Request Method**: Single selection, supports GET, PUT, POST, DELETE, PATCH, HEAD, OPTIONS. |
+
+## Results and Verification
+Whether you use **Batch Import** or **Manual Import**, once successfully declared, you can view the declared APIs in the API list below.
