@@ -1,0 +1,85 @@
+---
+weight: 11
+title: 将 OpenTelemetry 可观察数据集成到平台
+description: >-
+  本文档解释了如何将 OpenTelemetry 可观察数据集成到平台，包括配置 OTel Collector 接收器和集成支持 OpenTelemetry
+  的用户开发服务或外部软件，从而启用平台的数据可视化功能。
+sourceSHA: a39b516f2f1bad5aa7d7c8ea2fa8897171639fccf903322c001a59cd74c62977
+---
+
+## 概述
+
+当前产品通过 OTel Java Agent 提供对 Java 服务的指标监控和分布式追踪能力。此外，用户可以将使用 OTel SDK 开发的服务或来自 OpenTelemetry 兼容系统（如 Harbor 和 GitLab）的可观察数据集成到平台中，利用其数据可视化功能。
+
+本文档旨在指导用户如何将这些可观察数据集成到平台。
+
+## 先决条件
+
+确保服务或系统所在的集群已经部署了服务网格。
+
+## 步骤
+
+### 1. 配置 OTel Collector 接收器
+
+OTel Collector 的接收器负责接收和解析来自各种来源的数据。根据数据源和集成协议，OTel Collector 提供多种接收器。
+
+以下是平台上**默认启用**的接收器及其使用场景：
+
+#### OTLP 接收器
+
+OTLP（OpenTelemetry Protocol）是 OpenTelemetry 推荐的标准协议，用于接收追踪、指标和日志数据，支持 gRPC 和 HTTP 传输协议。
+
+| 协议    | 集群地址                           |
+| ------- | ---------------------------------- |
+| HTTP    | asm-otel-collector.cpaas-system:4318 |
+| GRPC    | asm-otel-collector.cpaas-system:4317 |
+
+#### Zipkin 接收器
+
+Zipkin 接收器用于接收 Zipkin 格式的追踪数据，支持来自 Zipkin 客户端的 HTTP 协议传输。
+
+| 协议    | 集群地址                           |
+| ------- | ---------------------------------- |
+| Zipkin  | asm-otel-collector.cpaas-system:9411 |
+
+---
+
+- **如何选择合适的接收器？**
+
+  1. 确认要收集的数据类型（追踪、指标、日志）和支持的协议。
+
+  2. 根据外部服务使用的数据格式和传输协议，从平台支持的 OTel Collector 接收器列表中选择合适的接收器。
+
+### 2. 将数据集成到平台
+
+#### 用户开发的服务
+
+集成 OpenTelemetry SDK，将由您的服务生成的可观察数据（如追踪、指标和日志）发送到 OTel Collector。具体步骤如下：
+
+1. 导入 OpenTelemetry SDK。
+2. 初始化 OpenTelemetry。
+3. 生成并发送追踪数据。
+
+OpenTelemetry 社区为不同语言提供了 SDK 使用示例；请参阅官方文档：
+
+- [Java 示例](https://opentelemetry.io/docs/languages/java/getting-started/)
+- [Golang 示例](https://opentelemetry.io/docs/languages/go/getting-started/)
+
+#### 可观察软件的集成
+
+外部服务（如 GitLab 和 Harbor）通常已有导出数据的能力。您可以参考相应软件的文档以了解具体的配置方法。
+
+在配置中，您需要将 OTel Collector 的接收器地址设置为以下内容：
+
+1. 如果软件部署在与服务网格相同的集群中：
+   - 确保平台上已启用所需接收器。
+   - 有关支持的接收器的完整列表，请参阅 \[平台支持的接收器列表]。
+
+2. 如果软件无法直接使用集群地址访问 OTel Collector，则可能需要设置负载均衡器以允许外部服务访问。请联系您的管理员以获取进一步配置帮助。
+
+### 3. 验证数据集成
+
+1. 启动外部服务并进行适当测试以生成追踪数据。
+
+2. 验证是否已成功接收和处理由 OTel Collector 处理的追踪数据。
+   - 使用平台的**追踪**查询分布式追踪数据，以验证外部数据集成的成功性。

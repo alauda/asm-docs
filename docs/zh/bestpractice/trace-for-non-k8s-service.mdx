@@ -1,0 +1,124 @@
+---
+weight: 12
+title: 使用 OpenTelemetry 为非容器化 Java 服务提供可追溯性
+description: 本方案将指导您如何为非容器化 Java 服务集成可追溯性，以便其与其他服务的调用链可以在平台上查看。
+sourceSHA: e4850ed603035e5b9359495d979da267fab405b968ea882556ecf5a8fc6180ba
+---
+
+## 概述
+
+本方案将指导您如何修改部署在虚拟机或物理机上的 **非容器化 Java 服务**，以便在平台上查看其与容器化服务的调用链。请注意，本方案仅提供可追溯性功能，不支持查看日志。
+
+## 前提条件
+
+- 您的 Java 服务部署在虚拟或物理机器上，并需要可追溯性功能。
+- 已在集群中创建了服务网格。
+- 您可以访问 Kubernetes 集群的控制节点，并且已安装 `kubectl` 工具。
+
+## 步骤
+
+### 1. 下载并配置 OpenTelemetry Java Agent
+
+首先，您需要将 OpenTelemetry Java Agent jar 文件复制到集群 **控制节点** 的 `./agent` 目录中，该集群创建了服务网格。
+
+***根据集群的运行时组件选择并执行相应的脚本***
+
+- **Containerd 运行时组件**
+
+  1. 在控制节点上安装 `nerdctl` 工具。[下载](https://github.com/containerd/nerdctl/releases/download/v1.6.0/nerdctl-1.6.0-linux-amd64.tar.gz) 该工具，解压包，授予执行权限，并将其复制到 `/usr/local/bin` 目录：
+
+     ```bash
+     chmod +x nerdctl  
+     cp ./nerdctl /usr/local/bin  
+     ```
+
+  2. 登录集群使用的镜像仓库，将 `<image_registry_address>` 替换为实际地址：
+
+     ```bash
+     nerdctl login <image_registry_address>  
+     ```
+
+  3. 运行以下脚本，从镜像中复制 Java Agent jar 文件到本地系统：
+
+     ```bash
+     #!/bin/sh  
+     TAG=$(kubectl -n istio-system get cm otel-java-agent -oyaml | grep versions -A1 | grep -v versions | awk '{print substr($0, 7)}')  
+     CONTAINERID=$(nerdctl run -d <image_registry_address>/asm/otel-java-instrumentation:$TAG sleep 9999)  
+     echo "copy agent from $CONTAINERID"  
+     mkdir -p agent  
+     nerdctl cp $CONTAINERID:/opentelemetry-javaagent-ext.jar ./agent/opentelemetry-javaagent-ext.jar  
+     nerdctl container stop $CONTAINERID  
+     ```
+
+- **Docker 运行时组件**
+
+  1. 登录集群使用的镜像仓库：
+
+     ```bash
+     docker login <image_registry_address>
+     ```
+
+  2. 运行以下脚本，从镜像中复制 Java Agent jar 文件到本地系统：
+
+     ```bash
+     #!/bin/sh  
+     TAG=$(kubectl -n istio-system get cm otel-java-agent -oyaml | grep versions -A1 | grep -v versions | awk '{print substr($0, 7)}')  
+     CONTAINERID=$(docker run -d <image_registry_address>/asm/otel-java-instrumentation:$TAG sleep 9999)  
+     echo "copy agent from $CONTAINERID"  
+     mkdir -p agent  
+     docker cp $CONTAINERID:/opentelemetry-javaagent-ext.jar ./agent/opentelemetry-javaagent-ext.jar  
+     docker container stop $CONTAINERID  
+     ```
+
+### 2. 将 Java Agent 分发到 Java 服务节点
+
+将第一步获得的 `opentelemetry-javaagent-ext.jar` 文件复制到所有运行 Java 服务的节点上的 `./agent` 目录中。
+
+### 3. 设置环境变量
+
+在所有 Java 服务节点上配置以下环境变量：
+
+| 环境变量                             | 描述                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **OTEL\_PROPAGATORS**              | 追踪数据的传播格式。可用值：`b3`, `b3multi`。多个值可以用逗号分隔。                                                                                                                                                                                                                                                                                                                  |
+| **OTEL\_TRACES\_EXPORTER**         | 追踪数据导出器。值必须为 `otlp`。                                                                                                                                                                                                                                                                                                                                                                                         |
+| **OTEL\_EXPORTER\_OTLP\_ENDPOINT** | OTLP 数据报告地址，格式为 `http://<ASM_OTEL_COLLECTOR_IP>:4317`，其中 *ASM\_OTEL\_COLLECTOR\_IP* 是可以被服务网格组件访问的 IP。                                                                                                                                                                                                                                                              |
+| **OTEL\_RESOURCE\_ATTRIBUTES**     | 自定义标签。必填字段：`service.name`, `vm.name`。例如：`service.name=myservice.ns,vm.name=vm-test`。`vm.name` 指服务托管的虚拟机名称，`service.name` 指在调用链中显示的名称。您可以添加其他自定义标签，建议使用 `vm` 前缀以识别 VM 服务。多个键值对可以用逗号分隔。 |
+
+### 4. 修改 Java 服务启动脚本
+
+在 Java 服务的启动脚本中添加以下参数：
+
+```bash
+-javaagent:{AGENT_PATH}/opentelemetry-javaagent-ext.jar
+```
+
+### 5. 创建 ConfigMap
+
+在您希望启用可追溯性功能的命名空间中，创建 ConfigMap 来存储非容器化 Java 服务的地址与名称之间的映射。示例：
+
+```yaml
+apiVersion: v1
+data:
+  vms: |-
+    - host: 192.168.189.136
+      port: 8081
+      serviceName: otel-demo-consumer-vm
+    - host: 192.168.189.136
+      port: 9081
+      serviceName: otel-demo-provider-vm
+kind: ConfigMap
+metadata:
+  labels:
+    asm.cpaas.io/vm-config-enabled: "true"
+  name: virtualmachine-config
+```
+
+:::note
+
+- `host`、`port` 和 `serviceName` 必须对应于非容器化服务的访问地址、端口和服务名称。`serviceName` 必须与 `OTEL_RESOURCE_ATTRIBUTES` 环境变量中定义的 `service.name` 相匹配。
+:::
+
+### 6. 重启 Java 服务
+
+应用上述配置后，重启 Java 服务以使更改生效。

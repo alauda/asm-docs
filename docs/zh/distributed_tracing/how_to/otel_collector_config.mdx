@@ -1,0 +1,964 @@
+---
+weight: 40
+sourceSHA: 52204ef1b12e2906059865bf5954364bf030810e22d28809fdd9353aca7c7845
+---
+
+# 配置 OpenTelemetry Collector
+
+## 功能概述
+
+您可以配置 OpenTelemetry Collector 以满足您的可观察性需求。在深入理解 Collector 配置的工作原理之前，首先熟悉以下内容：
+
+- [数据收集概念](https://opentelemetry.io/docs/concepts/components/#collector) 以了解适用于 OpenTelemetry Collector 的存储库。
+- [安全指南](https://github.com/open-telemetry/opentelemetry-collector/blob/main/docs/security-best-practices.md)。
+
+## 配置结构
+
+任何 Collector 配置文件的结构由四种类型的管道组件组成，这些组件与遥测数据交互：
+
+- **[接收器](#receivers)**
+- **[处理器](#processors)**
+- **[出口](#exporters)**
+- **[连接器](#connectors)**
+
+一旦配置了每个管道组件，您必须通过在配置文件的 [服务部分](#service-section) 中定义的管道来启用它。
+
+除了管道组件外，您还可以配置 [扩展](#extensions)，这些扩展提供了可以添加到 Collector 的附加功能，例如诊断工具。扩展不需要直接访问遥测数据，并通过 [服务部分](#service-section) 启用。
+
+以下是一个包含接收器、处理器、出口和三个扩展的 Collector 配置示例。
+
+**重要说明：** 虽然通常将端点绑定到 `localhost` 当所有客户端都是本地时，但我们的示例配置使用了“未指定”地址 `0.0.0.0` 以便于使用。Collector 当前默认使用 `localhost`。有关这些端点配置值的详细信息，请参见 [防止拒绝服务攻击的安全措施](https://github.com/open-telemetry/opentelemetry-collector/blob/main/docs/security-best-practices.md#safeguards-against-denial-of-service-attacks)。
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: otelcol:4317
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+请注意，接收器、处理器、出口和管道使用 `type[/name]` 格式的组件标识符进行定义，例如 `otlp` 或 `otlp/2`。只要标识符是唯一的，您可以多次定义同一类型的组件。例如：
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  otlp/2:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:55690
+
+processors:
+  batch:
+  batch/test:
+
+exporters:
+  otlp:
+    endpoint: otelcol:4317
+  otlp/2:
+    endpoint: otelcol2:4317
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    traces/2:
+      receivers: [otlp/2]
+      processors: [batch/test]
+      exporters: [otlp/2]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+配置还可以包含其他文件，使 Collector 能够将它们合并为单个内存中的 YAML 配置：
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+exporters: ${file:exporters.yaml}
+
+service:
+  extensions: []
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: []
+      exporters: [otlp]
+```
+
+`exporters.yaml` 文件可能包含：
+
+```yaml
+otlp:
+  endpoint: otelcol.observability.svc.cluster.local:443
+```
+
+最终的内存配置将是：
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+exporters:
+  otlp:
+    endpoint: otelcol.observability.svc.cluster.local:443
+
+service:
+  extensions: []
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: []
+      exporters: [otlp]
+```
+
+## 接收器
+
+接收器从一个或多个来源收集遥测数据。它们可以是基于拉取或推送，并且可能支持一个或多个 [数据源](https://opentelemetry.io/docs/concepts/signals/)。
+
+通常，接收器以指定格式接收数据，将其转换为内部格式，然后将其传递给在适用管道中定义的处理器和出口。
+
+接收器在 `receivers` 部分进行配置。默认情况下，没有配置接收器。您必须配置一个或多个接收器。许多接收器附带默认设置，因此指定接收器名称可能就足够了。如果您需要自定义或修改默认配置，可以在此部分进行设置。您所指定的任何设置将覆盖默认值（如果存在）。
+
+**注意：** 配置接收器并不会启用它。通过将其添加到 [服务部分](#service-section) 中的适当管道来启用接收器。
+
+以下是常见接收器配置示例。
+
+**提示：** 有关更详细的接收器配置，请参阅 [接收器 README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/README.md)。
+
+### **OTLP 接收器**
+
+OTLP 接收器使用 OpenTelemetry 协议 (OTLP) 吸收跟踪、度量和日志。
+
+**YAML 示例**
+
+```yaml
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+            tls:
+              ca_file: ca.pem
+              cert_file: cert.pem
+              key_file: key.pem
+              client_ca_file: client.pem
+              reload_interval: 1h
+          http:
+            endpoint: 0.0.0.0:4318
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+        metrics:
+          receivers: [otlp]
+```
+
+**`protocols` 参数描述**
+
+| 参数                       | 描述                                                                                                                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `grpc.endpoint`            | OTLP gRPC 端点。如果省略，则默认为 0.0.0.0:4317。                                                                                                                                                      |
+| `grpc.tls`                 | 服务器端 TLS 配置。定义 TLS 证书的路径。如果省略，则禁用 TLS。                                                                                                                                      |
+| `grpc.tls.client_ca_file`  | 服务器用于验证客户端证书的 TLS 证书路径。这将 `ClientCAs` 和 `ClientAuth` 设置为 `RequireAndVerifyClientCert`。有关更多详细信息，请参见 [Golang TLS 包配置](https://godoc.org/crypto/tls#Config)。         |
+| `grpc.tls.reload_interval` | 指定重载证书的间隔。如果未设置，则证书不会被重新加载。`reload_interval` 字段接受一字符串，支持有效的时间单位，如 ns、us（或 µs）、ms、s、m、h。                                                            |
+| `http.endpoint`            | OTLP HTTP 端点。默认为 0.0.0.0:4318。                                                                                                                                                                   |
+| `http.tls`                 | 服务器端 TLS 配置。配置方式与 `grpc.tls` 相似。                                                                                                                                                      |
+
+### **Jaeger 接收器**
+
+Jaeger 接收器以 Jaeger 格式接收跟踪数据。
+
+**YAML 示例**
+
+```yaml
+  config: |
+    receivers:
+      jaeger:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:14250
+          thrift_http:
+            endpoint: 0.0.0.0:14268
+          thrift_compact:
+            endpoint: 0.0.0.0:6831
+          thrift_binary:
+            endpoint: 0.0.0.0:6832
+
+    service:
+      pipelines:
+        traces:
+          receivers: [jaeger]
+```
+
+**`protocols` 参数描述**
+
+| 参数                     | 描述                                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `grpc.endpoint`          | Jaeger gRPC 端点。如果省略，默认值为 0.0.0.0:14250。                                                              |
+| `thrift_http.endpoint`   | Jaeger Thrift HTTP 端点。如果省略，默认值为 0.0.0.0:14268。                                                      |
+| `thrift_compact.endpoint` | Jaeger Thrift Compact 端点。如果省略，默认值为 0.0.0.0:6831。                                                    |
+| `thrift_binary.endpoint`  | Jaeger Thrift Binary 端点。如果省略，默认值为 0.0.0.0:6832。                                                    |
+| `tls`                   | 服务器端 TLS 配置。有关配置详细信息，请参阅 OTLP 接收器的 `protocols.grpc.tls`。                                      |
+
+### **Zipkin 接收器**
+
+Zipkin 接收器以 Zipkin v1 和 v2 格式接收跟踪数据。
+
+**YAML 示例**
+
+```yaml
+  config: |
+    receivers:
+      zipkin:
+        endpoint: 0.0.0.0:9411
+
+    service:
+      pipelines:
+        traces:
+          receivers: [zipkin]
+```
+
+**`zipkin` 参数描述**
+
+| 参数      | 描述                                                                                                           |
+| --------- | ------------------------------------------------------------------------------------------------------------- |
+| `endpoint` | Zipkin HTTP 端点。如果省略，默认值为 0.0.0.0:9411。                                                                |
+| `tls`      | 服务器端 TLS 配置。有关配置详细信息，请参阅 OTLP 接收器的 `protocols.grpc.tls`。                                   |
+
+## 处理器
+
+处理器在将数据发送到出口之前修改或转换由接收器收集的数据。数据处理基于为每个处理器定义的规则或设置，这些设置可能包括过滤、删除、重命名或重新计算遥测数据。管道中处理器的顺序决定了 Collector 对信号应用处理操作的顺序。
+
+处理器是可选的，但一些处理器是 [推荐的](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor#recommended-processors)。
+
+您可以在 Collector 配置文件的 `processors` 部分配置处理器。您所指定的任何设置将覆盖默认值（如果存在）。
+
+**注意：** 配置处理器并不会启用它。必须通过将处理器添加到 [服务部分](#service-section) 中的适当管道来启用处理器。默认情况下，没有处理器被启用。
+
+以下是常见处理器配置的示例。
+
+**提示：** 您可以通过结合 [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor) 和 [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor) 的列表查找处理器的完整列表。有关更详细的处理器配置，请参见 [处理器 README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/README.md)。
+
+### **Batch 处理器**
+
+Batch 处理器根据大小或时间对跨度、度量或日志进行批处理和压缩。批处理可以帮助减少出口发送的提交请求数量，并帮助调节来自管道中多个或单一接收器的遥测流。
+
+**YAML 示例**
+
+```yaml
+  config: |
+    processor:
+      batch:
+        timeout: 5s
+        send_batch_max_size: 10000
+    service:
+      pipelines:
+        traces:
+          processors: [batch]
+        metrics:
+          processors: [batch]
+```
+
+**`batch` 参数描述**
+
+| 参数                           | 描述                                                                                                                                                       |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `timeout`                      | 在特定时间段后发送批次，无论批次大小。                                                                                                                     |
+| `send_batch_size`              | 在指定数量的跨度或度量后发送遥测数据的批次。                                                                                                                |
+| `send_batch_max_size`          | 批次允许的最大大小。必须大于或等于 `send_batch_size`。                                                                                                      |
+| `metadata_keys`                | 启用时，为在 client.Metadata 中找到的每个唯一值集创建批次实例。                                                                                            |
+| `metadata_cardinality_limit`   | 当 `metadata_keys` 被填充时，此配置限制在处理过程中处理的元数据键值对不同组合的数量。                                                                    |
+
+### **内存限制处理器**
+
+内存限制处理器定期检查 Collector 的内存使用情况，当达到软内存限制时暂停数据处理，以防止内存溢出场景。该处理器支持跨度、度量和日志。它通常是接收器之后的第一个组件，期望重试以发送相同数据，并可能对传入数据施加背压。当内存使用超过硬限制时，内存限制处理器强制执行垃圾回收。
+
+**YAML 示例**
+
+```yaml
+  config: |
+    processor:
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 4000
+        spike_limit_mib: 800
+    service:
+      pipelines:
+        traces:
+          processors: [batch]
+        metrics:
+          processors: [batch]
+```
+
+**`memory_limiter` 参数描述**
+
+| 参数                     | 描述                                                                                                                                                                       |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check_interval`         | 内存使用情况测量之间的时间间隔。最佳值为 1 秒。对于高度波动的流量模式，可以减少 `check_interval` 或增加 `spike_limit_mib`。                                          |
+| `limit_mib`             | 硬限制，即堆上分配的最大内存（以 MiB 为单位）。通常，OpenTelemetry Collector 的总内存使用量比此值大约多 50 MiB。                                                       |
+| `spike_limit_mib`       | 峰值限制，即内存使用峰值的最大期望值（以 MiB 为单位）。最佳值约为 `limit_mib` 的 20%。软限制通过从 `limit_mib` 中减去 `spike_limit_mib` 来计算。                  |
+| `limit_percentage`      | 与 `limit_mib` 相同，但以可用总内存的百分比表示。`limit_mib` 设置优先于此设置。                                                                                       |
+| `spike_limit_percentage` | 与 `spike_limit_mib` 相同，但以可用总内存的百分比表示。建议与 `limit_percentage` 设置一起使用。                                                                    |
+
+### **过滤器处理器**
+
+过滤器处理器根据您在其配置中定义的条件过滤跨度、度量或日志。过滤器处理器的一个典型用例是丢弃与可观察性系统无关的遥测数据，例如非关键日志或跨度，以减少数据中的噪声。
+
+过滤操作与允许和拒绝列表配合使用，基于正则表达式和资源属性包含或排除遥测数据。您还可以使用 OpenTelemetry 转换语言 (OTTL) 更好地描述想要过滤的信号。该处理器支持所有管道类型。
+
+| 信号       | 标准和匹配类型                                                                                                                                |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **跨度**   | OTTL 条件、跨度名称（严格或正则表达式）和资源属性（严格或正则表达式）。跨度事件过滤仅支持 OTTL 条件。                                                                                  |
+| **度量**   | OTTL 条件、度量名称（严格或正则表达式）和度量属性（表达式）。数据点过滤仅支持 OTTL 条件。                                                                                              |
+| **日志**   | OTTL 条件、资源属性（严格或正则表达式）。                                                                                                  |
+
+**YAML 示例**
+
+```yaml
+config: |
+  processors:
+    filter/ottl:
+      error_mode: ignore
+      traces:
+        span:
+          - 'attributes["container.name"] == "app_container_1"'
+          - 'resource.attributes["host.name"] == "localhost"'
+```
+
+**`filter/ottl` 参数描述**
+
+| 参数          | 描述                                                                                                                                                                                                 |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `error_mode`  | 定义错误模式。当设置为 ignore 时，它忽略条件返回的错误。当设置为 propagate 时，它将错误返回到管道的上层。错误将导致 Collector 丢失负载。                                                                                      |
+| `span[0]`     | 过滤具有属性 `container.name == app_container_1` 的跨度。                                                                                                                                              |
+| `span[1]`     | 过滤具有资源属性 `host.name == localhost` 的跨度。                                                                                                                                                    |
+
+### **度量转换处理器**
+
+度量转换处理器与属性处理器共享一些功能，通常用于执行以下任务：
+
+- 添加、重命名或删除标签键和值。
+- 基于标签或标签值对度量进行缩放和聚合。
+- 该处理器仅支持在单个度量批次内重命名和聚合。它不执行跨批次聚合，因此请勿使用它聚合来自多个源（例如，多个节点或客户端）的度量。
+
+有关支持的操作的完整列表，请参见 [可用操作](#available-ops)。
+
+**YAML 示例**
+
+```yaml
+config: |
+  processors:
+    metricstransform/rename:
+      transforms:
+        include: system.cpu.usage
+        action: update
+        new_name: system.cpu.usage_time
+```
+
+度量转换处理器还支持使用正则表达式，允许将转换规则同时应用于多个度量名称或度量标签。以下示例将 `cluster_name` 重命名为所有度量中的 `cluster-name`：
+
+```yaml
+config: |
+  processors:
+    metricstransform/clustername:
+      transforms:
+        - include: ^.*$
+          match_type: regexp
+          action: update
+          operations:
+            - action: update_label
+              label: cluster_name
+              new_label: cluster-name
+```
+
+**<span id="available-ops">可用操作</span>**
+
+该处理器可以执行以下操作：
+
+- 重命名度量。例如，将 `system.cpu.usage` 重命名为 `system.cpu.usage_time`。
+- 添加标签。例如，您可以向所有点添加一个新标签 `identifier`，值为 `1`。
+- 重命名标签键。例如，将标签 `state` 重命名为 `cpu_state`。
+- 重命名标签值。例如，将值 `idle` 重命名为标签 `state` 中的 `-`。
+- 删除数据点。例如，移除标签 `state` 的值为 `idle` 的所有点。
+- 切换数据类型。您可以将 `int` 数据点更改为 `double` 数据点。
+- 缩放值。例如，将值乘以 1000 以从秒转换为毫秒。
+- 跨标签集聚合。例如，仅保留 `state` 标签，并对具有相同标签值的所有点进行求平均。
+- 跨标签值聚合。例如，将标签 `state` 中值为 `user` 或 `system` 的点求和为 `used = user + system`。
+
+适用的规则如下：
+
+- 只能对使用 `strict` 或 `regexp` 过滤器的一种或多种度量应用操作。
+- 使用 `action` 属性，您可以：
+  - 就地更新您的度量（`update`）。
+  - 复制并更新复制的度量（`insert`）。
+  - 合并一组匹配度量中的所有数据点为一个新插入的度量（`combine`）。原始匹配度量也会被移除。
+- 在重命名度量时，`regexp` 过滤器中的捕获组将被扩展。
+
+### **转换处理器**
+
+转换处理器通过语句修改匹配的跨度、度量或日志。用例包括，但不限于，将度量转换为不同类型、替换或删除键，以及根据预定义条件设置字段。
+
+语句是 OpenTelemetry 转换语言 (OTTL) 中的函数，并根据它们在列表中的顺序应用于遥测数据。转换处理器包括额外的将度量类型转换的函数。语句根据您定义的 OTTL 上下文转换数据，例如 Span 或 DataPoint。
+
+转换处理器支持的上下文：
+
+| 信号       | 支持的上下文                          |
+| ---------- | ------------------------------------- |
+| **跟踪**   | resource → scope → span → spanevent   |
+| **度量**   | resource → scope → metric → datapoint |
+| **日志**   | resource → scope → logs               |
+
+语句可以转换更高上下文的遥测数据。例如，应用于数据点的语句可以访问该数据点的度量和资源。不能访问较低上下文；例如，您无法使用跨度语句转换单个跨度事件。通常，语句与您要转换的上下文相关联。
+
+使用转换处理器设置跨度状态的示例。以下示例在 `http.request.status_code` 属性为 400 时将跨度状态设置为 `Ok`：
+
+**YAML 示例**
+
+```yaml
+config: |
+  transform:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(status.code, STATUS_CODE_OK) where attributes["http.request.status_code"] == 400
+```
+
+`error_mode` 字段描述了处理器在处理语句时遇到错误的反应：
+
+- `"error_mode: ignore"` 告诉处理器忽略错误并继续执行。这是默认错误模式。
+- `"error_mode: propagate"` 告诉处理器返回一个错误。结果，Collector 将丢弃数据。
+
+### 高级特性
+
+- 您还可以使用转换处理器根据跨度属性修改跨度名称或从跨度名称中提取跨度属性。有关示例，请参见转换处理器的示例 [配置文件](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/9b28f76c02c18f7479d10e4b6a95a21467fd85d6/processor/transformprocessor/testdata/config.yaml)。
+- [转换处理器](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor) 还提供高级属性转换功能。转换处理器允许最终用户使用 [OpenTelemetry 转换语言 (OTTL)](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl) 指定度量、日志和跟踪的转换。
+- 有关 OTTL 函数和语法的更多信息，请参见：
+  - OTTL 语法：[https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/README.md](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/README.md)
+  - OTTL 函数：[https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/ottlfuncs](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/ottlfuncs)
+  - OTTL 上下文：[https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/contexts](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/contexts)
+
+## 出口
+
+出口将数据发送到一个或多个后端或目标。出口可以是基于拉取或推送，并且可能支持一个或多个 [数据源](https://opentelemetry.io/docs/concepts/signals/)。
+
+您可以在 Collector 配置文件的 `exporters` 部分配置出口。大多数出口至少需要目标和安全设置，例如身份验证令牌或 TLS 证书。您所指定的任何设置将覆盖默认值（如果存在）。
+
+**注意**：配置出口并不会启用它。出口需要通过将其添加到 [服务部分](#service-section) 中的适当管道来启用。默认情况下，没有出口被启用。
+
+Collector 需要一个或多个出口。以下是常见出口配置示例：
+
+**提示**：某些出口需要 x.509 证书才能建立安全连接，详见 [设置证书](#configuring-certificates)。有关更详细的出口配置，请参见 [出口 README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/README.md)。
+
+### **OTLP 出口**
+
+OTLP 出口使用 OTLP 格式通过 gRPC 发送度量、跟踪和日志。支持的管道类型包括跨度、度量和日志。默认情况下，此出口要求 TLS，并提供队列重试功能。
+要通过 HTTP 发送 OTLP 数据，请使用 OTLP/HTTP 出口。有关说明，请参见 OTLP/HTTP 出口。
+
+**YAML 示例**
+
+```yaml
+config: |
+  exporters:
+    otlp:
+      endpoint: tempo-ingester:4317
+      tls:
+        ca_file: ca.pem
+        cert_file: cert.pem
+        key_file: key.pem
+        insecure: false
+        insecure_skip_verify: false
+        reload_interval: 1h
+        server_name_override: <name>
+      headers:
+        X-Scope-OrgID: "dev"
+  service:
+    pipelines:
+      traces:
+        exporters: [otlp]
+      metrics:
+        exporters: [otlp]
+```
+
+**`otlp` 参数描述**
+
+| 参数                    | 描述                                                                                                                                                                                        |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `endpoint`             | OTLP gRPC 端点。如果使用 `https://` 方案，则客户端传输安全性被激活，并覆盖 `tls` 中的无效设置。                                                                                        |
+| `tls`                  | 客户端 TLS 配置。定义 TLS 证书的路径。                                                                                                                                                     |
+| `tls.insecure`         | 当设置为 `true` 时，禁用客户端传输安全性。默认值为 `false`。                                                                                                                            |
+| `tls.insecure_skip_verify` | 当设置为 `true` 时，跳过证书验证。默认值为 `false`。                                                                                                                                 |
+| `tls.reload_interval`  | 指定重载证书的间隔。如果未设置，则证书永不重新加载。接受有效时间单位的字符串，例如 `ns`、`us`（或 `µs`）、`ms`、`s`、`m`、`h`。                                                  |
+| `tls.server_name_override` | 覆盖授权虚拟主机名，例如请求中的 `authority` 头字段。可用于测试。                                                                                                                     |
+| `headers`              | 在建立连接的每个请求中发送的头。                                                                                                                                                        |
+
+### **OTLP HTTP 出口**
+
+OTLP HTTP 出口使用 OpenTelemetry 协议 (OTLP) 导出跟踪和度量。
+
+**YAML 示例**
+
+```yaml
+  config: |
+    exporters:
+      otlphttp:
+        endpoint: http://tempo-ingester:4318
+        tls:
+        headers:
+          X-Scope-OrgID: "dev"
+        disable_keep_alives: false
+
+    service:
+      pipelines:
+        traces:
+          exporters: [otlphttp]
+        metrics:
+          exporters: [otlphttp]
+```
+
+**`otlphttp` 参数描述**
+
+| 参数                   | 描述                                                                                                                               |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `endpoint`              | OTLP HTTP 端点。如果使用 `https://` 方案，则客户端传输安全性被激活，并覆盖 `tls` 中的无效设置。                                   |
+| `tls`                  | 客户端 TLS 配置。定义 TLS 证书的路径。                                                                                            |
+| `headers`              | 每个 HTTP 请求中发送的头。                                                                                                         |
+| `disable_keep_alives` | 如果设置为 `true`，则禁用 HTTP 保持活动。每个连接到服务器时仅发出一个 HTTP 请求。                                                 |
+
+### **调试出口**
+
+调试出口将遥测数据输出到控制台以进行调试。
+
+**YAML 示例**
+
+```yaml
+  config: |
+    exporters:
+      debug:
+        verbosity: detailed
+    service:
+      pipelines:
+        traces:
+          exporters: [logging]
+        metrics:
+          exporters: [logging]
+```
+
+`debug.verbosity` 字段控制已记录出口的详细级别（`detailed|normal|basic`）。设置为 `detailed` 时，管道数据被详细记录。
+
+### **负载均衡出口**
+
+负载均衡出口可以将跨度、度量和日志导出到多个后端。支持的管道类型包括度量、跨度和日志。负载均衡出口可以使用路由策略将遥测数据同时发送到多个后端。您可以配置 `routing_key` 以使用路由策略将遥测数据分类到组并将这些组映射到特定端点。
+
+使用负载均衡出口，您还可以通过 Collector 端点将数据发送到其他运行的 OpenTelemetry Collector 实例。例如，您可以将所有跟踪发送到一个运行的 Collector 实例，而将所有日志发送到另一个实例。这使您能够在不同的 Collector 环境中处理或操作数据。
+
+**YAML 示例**
+
+```yaml
+  config: |
+    exporters:
+      loadbalancing:
+        routing_key: "service"
+        protocol:
+          otlp:
+            timeout: 1s
+        resolver:
+          static:
+            hostnames:
+            - backend-1:4317
+            - backend-2:4317
+          dns:
+            hostname: otelcol-headless.observability.svc.cluster.local
+          k8s:
+            service: lb-svc.kube-public
+            ports:
+              - 15317
+              - 16317
+```
+
+**`loadbalancing` 参数描述**
+
+| 参数                | 描述                                                                                                                                                                                                                                                |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `routing_key`        | `"routing_key: service"` 将相同服务名称的跨度导出到相同的 Collector 实例以进行准确的聚合。`"routing_key: traceID"` 基于其 TraceID 导出跨度。隐含的默认是基于 TraceID 的路由。                                                                |
+| `protocol.otlp`      | OTLP 是唯一支持的负载均衡协议。支持 OTLP 出口的所有选项。                                                                                                                                                                                            |
+| `resolver`           | 只能配置一个解析器。                                                                                                                                                                                                                           |
+| `resolver.static`    | 静态解析器将负载分配到列出的端点。                                                                                                                                                                                                                 |
+| `resolver.dns`       | DNS 解析器仅适用于 Kubernetes Headless 服务。                                                                                                                                                                                                     |
+| `resolver.k8s`       | 推荐使用 Kubernetes 解析器。                                                                                                                                                                                                                    |
+
+### **Prometheus 出口**
+
+Prometheus 出口将度量数据以 Prometheus 或 OpenMetrics 格式导出，允许 Prometheus 服务器抓取这些数据。以下是配置和使用 Prometheus 出口的详细信息。
+
+**必需配置**
+
+- **endpoint**: 指定公开度量数据的地址，路径为 `/metrics`。这必须配置且没有默认值。
+
+**可选配置**
+
+- **const\_labels**: 应用于每个导出度量的键值对标签，默认未设置。
+- **namespace**: 如果设置，所有导出度量将使用该命名空间，没有默认值。
+- **send\_timestamps**: 是否在响应中发送度量样本的时间戳，默认为 `false`。
+- **metric\_expiration**: 定义不更新的情况下度量的曝光时间，默认为 `5m`。
+- **resource\_to\_telemetry\_conversion**:
+  - `enabled`: 默认值为 `false`。启用时，资源属性将转换为度量标签。
+- **enable\_open\_metrics**: 默认值为 `false`。启用时，度量将使用 OpenMetrics 格式导出。
+- **add\_metric\_suffixes**: 默认值为 `true`。是否添加类型和单位后缀。
+
+**TLS 配置**
+
+可以使用 `ca_file`、`cert_file` 和 `key_file` 设置 TLS 证书以确保安全通信。
+
+**示例 YAML 配置**
+
+以下是 Prometheus 出口的示例配置：
+
+```yaml
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    tls:
+      ca_file: "/path/to/ca.pem"
+      cert_file: "/path/to/cert.pem"
+      key_file: "/path/to/key.pem"
+    namespace: "prefix"
+    const_labels:
+      label1: "value1"
+    send_timestamps: true
+    metric_expiration: "180m"
+    enable_open_metrics: true
+    add_metric_suffixes: false
+    resource_to_telemetry_conversion:
+      enabled: true
+```
+
+该配置在 `0.0.0.0:8889/metrics` 公开 Prometheus 度量，并配置 TLS 证书和其他参数。
+
+**使用建议**
+
+1. 在 OpenTelemetry 中，度量名称和标签标准化以符合 Prometheus 命名约定。
+2. 默认情况下，资源属性添加到 `target_info` 度量中。您可以使用 Prometheus 查询选择和分组这些属性作为度量标签。
+3. 为简化查询和分组，建议使用 `transform processor` 直接将常用的资源属性转换为度量标签。
+
+## 连接器
+
+连接器链接两个管道，既充当出口又充当接收器。连接器在一个管道的末尾作为出口消耗数据，并在另一个管道的开头作为接收器发送数据。消费和发送的数据可以是相同或不同类型的。您可以使用连接器来聚合、重复或路由数据。
+
+您可以在 Collector 配置文件的 `connectors` 部分配置一个或多个连接器。默认情况下，未配置任何连接器。每种类型的连接器旨在处理一种或多种数据类型的组合，仅可用于连接相应数据类型的管道。
+
+**注意**：配置连接器并不会启用它。必须通过将连接器添加到 [服务部分](#service-section) 中的相关管道来启用连接器。
+
+**提示**：有关更详细的连接器配置，请参阅 [连接器 README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/connector/README.md)。
+
+### **ASM 服务图连接器**
+
+ASM 服务图连接器构建映射，表示系统中各个服务之间的关系。此连接器分析跨度数据并生成描述服务之间关系的度量。这些度量可供数据可视化应用程序（例如 Grafana）绘制服务图。
+
+**注意：** 该组件是社区组件服务图连接器的自定义版本，无法直接替换为社区本机组件。以下说明了特定参数的差异。
+
+服务拓扑在许多用例中非常有用：
+
+- 推断分布式系统的拓扑。随着分布式系统的发展，它们变得越来越复杂。服务图帮助您了解系统的结构。
+- 提供系统健康状态的高层次概述。服务图显示错误率、延迟和其他相关数据。
+- 提供系统拓扑的历史视图。分布式系统经常变化，服务图提供了一种查看这些系统随时间演变的方法。
+
+**YAML 示例**
+
+```yaml
+  config: |
+    connectors:
+      asmservicegraph:
+        dimensions: []
+        extra_dimensions:
+          mesh_id:
+          cluster_name:
+        store:
+          ttl: 5s
+          max_items: 500
+```
+
+**`asmservicegraph` 参数描述**
+
+| 参数                          | 描述                                                                                               |
+| ------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `dimensions`                   | 要添加到从资源和跨度属性中提取的度量的附加维度（标签）。                                         |
+| `extra_dimensions`             | ASM 平台添加的属性。                                                                               |
+| `extra_dimensions.mesh_id`     | Mesh ID。ASM 平台部署了一个 Istio 服务网格，mesh_id 反映 Istio 网格的 ID。                       |
+| `extra_dimensions.cluster_name` | 集群名称。OTel Collector 所在的集群的名称。                                                       |
+| `store.ttl`                    | 内存存储中临时数据的生命周期。                                                                     |
+| `store.max_items`              | 可以临时存储在内存中的最大跨度数据项数。                                                           |
+
+## 扩展
+
+扩展为 Collector 添加了能力。例如，扩展可以自动为接收器和出口添加身份验证功能。
+
+扩展是用于扩展 Collector 功能的可选组件，执行与处理遥测数据无关的任务。例如，您可以添加用于健康监测、服务发现或数据转发的扩展。
+
+您可以在 Collector 配置文件的 `extensions` 部分配置扩展。大多数扩展都带有默认设置，因此配置时只需指定扩展的名称。任何指定的设置将覆盖默认值（如果存在）。
+
+**注意**：配置扩展并不会启用它。必须在 [服务部分](#service-section) 中启用扩展。默认情况下，未配置任何扩展。
+
+**提示**：有关更详细的扩展配置，请参阅 [扩展 README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/extension/README.md)。
+
+## 服务部分
+
+`service` 部分用于根据 `receivers`、`processors`、`exporters` 和 `extensions` 部分中的配置启用 Collector 中的组件。如果组件已配置但未在 `service` 部分中定义，则不会启用它。
+
+`service` 部分包括三个子部分：
+
+1. **扩展**：要启用的所需扩展列表。例如：
+
+   ```yaml
+   service:
+     extensions: [health_check, pprof, zpages]
+   ```
+
+2. **管道**：配置管道，管道可以为以下类型：
+
+   - **traces**：收集和处理跟踪数据。
+   - **metrics**：收集和处理度量数据。
+   - **logs**：收集和处理日志数据。
+
+   管道由一组 `receivers`、`processors` 和 `exporters` 组成。在将 `receiver`、`processor` 或 `exporter` 包含在管道中之前，请确保在相应部分定义了其配置。
+
+   您可以在多个管道中使用相同的 `receiver`、`processor` 或 `exporter`。当一个处理器在多个管道中被引用时，每个管道会获得该处理器的单独实例。
+
+   以下是管道配置示例。请注意，处理器的顺序决定了数据处理的顺序：
+
+   ```yaml
+   service:
+     pipelines:
+       metrics:
+         receivers: [opencensus, prometheus]
+         processors: [batch]
+         exporters: [opencensus, prometheus]
+       traces:
+         receivers: [opencensus, jaeger]
+         processors: [batch, memory_limiter]
+         exporters: [opencensus, zipkin]
+   ```
+
+3. **遥测**：`telemetry` 配置部分用于设置 Collector 自身的可观察性。它由 `logs` 和 `metrics` 子部分组成。有关如何配置这些信号的信息，请参见 [在 Collector 中激活内部遥测](https://opentelemetry.io/docs/collector/internal-telemetry/#activate-internal-telemetry-in-the-collector)。
+
+## 其他信息
+
+### 环境变量
+
+Collector 配置支持使用和扩展环境变量。例如，要使用存储在 `DB_KEY` 和 `OPERATION` 环境变量中的值，可以写：
+
+```yaml
+processors:
+  attributes/example:
+    actions:
+      - key: ${env:DB_KEY}
+        action: ${env:OPERATION}
+```
+
+使用 `$$` 表示字面量 `$`。例如，要表示 `$DataVisualization`，您可以写：
+
+```yaml
+exporters:
+  prometheus:
+    endpoint: prometheus:8889
+    namespace: $$DataVisualization
+```
+
+### 代理支持
+
+使用 [net/http](https://pkg.go.dev/net/http) 包的出口支持以下代理环境变量：
+
+- **HTTP\_PROXY**：HTTP 代理的地址。
+- **HTTPS\_PROXY**：HTTPS 代理的地址。
+- **NO\_PROXY**：应绕过代理的地址。
+
+如果在 Collector 启动时设置了这些变量，则出口将根据这些环境变量代理或绕过代理流量，无论协议如何。
+
+### 身份验证
+
+大多数公开 HTTP 或 gRPC 端口的 `receivers` 可以使用 Collector 的身份验证机制进行保护。同样，大多数使用 HTTP 或 gRPC 客户端的 `exporters` 可以在发出的请求中添加身份验证。
+
+Collector 中的身份验证机制使用扩展机制，允许将自定义身份验证器集成到 Collector 发行版中。每个身份验证扩展可以以两种方式使用：
+
+1. 作为 `exporters` 的客户端身份验证器，将身份验证数据添加到发出的请求中。
+2. 作为 `receivers` 的服务器身份验证器，验证传入连接。
+
+有关已知身份验证器的列表，请参见 [注册表](https://opentelemetry.io/ecosystem/registry/?s=authenticator\&component=extension)。
+
+要将服务器身份验证器添加到 Collector 中的 `receiver`，请按照以下步骤进行：
+
+1. 在 `.extensions` 下添加身份验证器扩展及其配置。
+2. 在 `.services.extensions` 下添加对身份验证器的引用，以便 Collector 加载它。
+3. 在 `.receivers.<your-receiver>.<http-or-grpc-config>.auth` 下添加对身份验证器的引用。
+
+以下示例在接收端使用 OIDC 身份验证器，适用于通过 OpenTelemetry Collector 作为代理接收数据的远程 Collector：
+
+```yaml
+extensions:
+  oidc:
+    issuer_url: http://localhost:8080/auth/realms/opentelemetry
+    audience: collector
+
+receivers:
+  otlp/auth:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        auth:
+          authenticator: oidc
+
+processors:
+
+exporters:
+  # 注意：在 v0.86.0 之前使用 `logging` 而不是 `debug`。
+  debug:
+
+service:
+  extensions:
+    - oidc
+  pipelines:
+    traces:
+      receivers:
+        - otlp/auth
+      processors: []
+      exporters:
+        - debug
+```
+
+在代理端，以下示例配置 OTLP Exporter 以获取 OIDC 令牌并将其添加到发送到远程 Collector 的每个 RPC 中：
+
+```yaml
+extensions:
+  oauth2client:
+    client_id: agent
+    client_secret: some-secret
+    token_url: http://localhost:8080/auth/realms/opentelemetry/protocol/openid-connect/token
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+
+exporters:
+  otlp/auth:
+    endpoint: remote-collector:4317
+    auth:
+      authenticator: oauth2client
+
+service:
+  extensions:
+    - oauth2client
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors: []
+      exporters:
+        - otlp/auth
+```
+
+### 配置证书
+
+在生产环境中，为确保安全通信，使用 TLS 证书或 mTLS 进行相互身份验证。请遵循以下步骤生成自签名证书，或使用您当前证书提供者的生产证书。
+
+安装 [cfssl](https://github.com/cloudflare/cfssl)，并创建以下 `csr.json` 文件：
+
+```json
+{
+  "hosts": ["localhost", "127.0.0.1"],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "O": "OpenTelemetry Example"
+    }
+  ]
+}
+```
+
+然后运行以下命令：
+
+```bash
+cfssl genkey -initca csr.json | cfssljson -bare ca
+cfssl gencert -ca ca.pem -ca-key ca-key.pem csr.json | cfssljson -bare cert
+```
+
+这将生成两个证书：
+
+1. 一个名为“OpenTelemetry Example”的证书颁发机构 (CA)，存储在 `ca.pem` 中，相关联的密钥在 `ca-key.pem` 中。
+2. 一个客户端证书，存储在 `cert.pem` 中，由 OpenTelemetry Example CA 签发，相关联的密钥在 `cert-key.pem` 中。
+
+## 覆盖设置
+
+您可以使用 `--set` 选项覆盖 Collector 设置。以这种方式定义的设置将合并到最终配置中，所有 `--config` 源之后解析和合并。
+
+以下示例展示了如何在嵌套部分中覆盖设置：
+
+```bash
+otelcol --set "exporters::debug::verbosity=detailed"
+otelcol --set "receivers::otlp::protocols::grpc={endpoint:localhost:4317, compression: gzip}"
+```
+
+**重要说明**：`--set` 选项不支持设置包含点（.）或等号（=）的键。
