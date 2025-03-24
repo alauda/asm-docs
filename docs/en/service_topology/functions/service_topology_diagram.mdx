@@ -1,0 +1,112 @@
+---
+weight: 10
+---
+
+# Service Topology Diagram
+
+This article aims to help you quickly master the process of viewing service topology.
+
+## Prerequisites
+
+To view the service topology, you need either:
+- For Istio services: Ensure the service has been injected with a Sidecar. For details, see [Add ServiceMesh Service](../../microservice/add-service.md#add-servicemesh-service).
+- For OpenTelemetry services: Ensure the service has been injected with OpenTelemetry Java Agent. For details, see [Add OpenTelemetry Service](../../microservice/add-service.md#add-opentelemetry-service).
+
+## Quick Start
+
+In the left navigation bar, click **Service Topology**.
+
+## Basic Page Display
+
+The page clearly displays the calling relationships between services, where each node and connection line is distinguished by different colors.
+
+* Connection lines represent calls between services, with their color adjusted based on the success rate of the calls. Grey lines indicate no traffic for those calls during the selected time period.
+* Nodes represent individual services, with their color determined by the proportion of service Pods.
+
+For a detailed legend of node icons, color thresholds for nodes and connection lines, and their meanings, please refer to the legend provided in the top left corner of the topology diagram.
+
+When a service (and its Deployment, Pod) or an ingress gateway associated with an alarm rule triggers an alarm, the topology diagram will mark the alarming service or ingress gateway with **Alarming** (<img src="../assets/firing.png" style={{display: "inline", verticalAlign: "middle"}} />). Clicking on the <img src="../assets/firing.png" style={{display: "inline", verticalAlign: "middle"}} /> marker of the service will redirect you to the **Real-time Alarms** page to view the details of the alarming rule.
+
+By default, the topology diagram automatically refreshes every 5 seconds. You can manually refresh or set the auto-refresh interval:<br />**Manual Refresh**: Click on the <img src="../assets/metric_refresh.png" style={{display: "inline", verticalAlign: "middle"}} /> in the bottom right corner of the topology diagram to manually refresh the data;<br />**Set Auto-refresh Interval**: Click on the interval time next to the <img src="../assets/metric_refresh.png" style={{display: "inline", verticalAlign: "middle"}} /> in the bottom right corner to set the auto-refresh interval.
+
+## View Istio Cross-Cluster Topology
+
+If the current project is associated with multiple clusters managed by the service mesh, selecting **Cross-Cluster Topology** allows you to view the calling relationship topology diagram of services and ingress gateways that have injected Sidecars within all namespaces of the current service mesh and project, within the scope of account permissions.<br /><br />**Note**: The viewable range depends on the user's account data permissions; only services within the same namespace support viewing the Tracing.<br />For example: Clusters A and B are managed by the current service mesh, with namespaces an1 and bn1 existing under clusters A and B, respectively, and you have viewing permissions for an1 and bn1. When you enter an1 to view the service topology, by default, you can only view the calling topology diagram of all services within the an1 namespace; when you select **All Clusters**, you can view the calling topology diagram of all services within the an1 and bn1 namespaces, including the topology diagram of services in an1 calling services in bn1.
+
+## View the Calling Topology of Services Under a Specified Namespace
+
+Click and select the **Namespace** dropdown box above the topology diagram. You can view the calling topology of services in the specified namespace within the current cluster. The default setting is All Namespaces, displaying the calling relationships of all managed namespaces in the cluster.
+
+## View Local Topology Diagram
+
+You can **double-click** a node (except middleware nodes marked as “Host Unknown”) to expand the local topology centered on that node. This allows you to quickly view the status and data of all nodes in the upstream and downstream calling relationships of the target node, helping you focus more on analyzing the calling situation of a particular service.
+
+## View Detailed Information
+
+You can **click** on a node/connection line to expand the right-side detail panel, where you can perform multiple operations
+
+### View Tracing
+
+When you click on a **node** or **connection line**, the detail panel displays **View Tracing**, and you can go to the **Tracing** page to view the Tracing data for the current **service** or **calling relationship**.
+
+* Click node > View Tracing: This action queries all span data reported by the selected service within the current time range set in the topology diagram. For example, if you click on a service node named “client” and click **View Tracing**, the system will search for all spans belonging to the service named client within the current time range.
+* Click connection line > View Tracing: This action queries the span data corresponding to a specific calling relationship within the current time range set in the topology diagram. For example, if you click on the connection line from the service “client” to “server” and click **View Tracing**, the system will search for all spans where “client” is the caller and “server” is the callee within the current time range.
+
+**Note**: The View Tracing feature supports different types of services based on your service mesh implementation:
+- For Istio: Only **ServiceMesh Service**, **Ingress Gateway**, and **Egress Gateway** nodes are supported
+- For OpenTelemetry: **OpenTelemetry services** and **middleware** nodes (such as databases and message queues) are supported
+
+If you click on unsupported node types or connection lines that include unsupported nodes, you will not be able to navigate to the Tracing page.
+
+### View Service Traffic Monitoring
+
+When you click on **ServiceMesh Service**, **OpenTelemetry Service**, **Ingress Gateway**, or **Egress Gateway** nodes, click **View Traffic Monitoring** in the detail panel to navigate to the **Monitoring** page to view detailed monitoring data for the current service.
+
+### View Traffic Information
+
+**Note**:
+
+* The traffic information panel only aggregates traffic data managed by the Sidecar, excluding traffic data from communications with Unknown clients (traffic not managed by Sidecar). You can visit the **Service Details** or **Monitoring** page to view complete traffic data.
+
+* When the platform collects traffic data, if the client has a Sidecar injected, the traffic sampling rate is the same as the call chain sampling rate configured in the service mesh; otherwise, the sampling rate is 100%.
+
+* The query time range for traffic data depends on the data retention configuration of the monitoring system integrated with the service mesh. For example, if the monitoring system (such as Prometheus) is configured to retain data for the past 7 days, the system can only display traffic data for the most recent 7 days when the query time range exceeds 7 days.
+
+When you click on a **node** or **connection line**, you can view the traffic charts for the current **service** or **calling relationship** in the detail panel. The chart explanations for different protocols are as follows:
+
+#### HTTP/HTTP2/gRPC Protocols
+
+| Parameter                     | Description                                                                                                                                                                                                                                                                                                                                                     |
+|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Incoming/Outgoing Traffic** | Total incoming/outgoing request volume within the query time range, and the traffic proportion by HTTP status code (Normal/2xx, 3xx, 4xx, 5xx).<br />Hover over the bar chart to view the traffic proportion for each category.                                                                                                                                   |
+| **Incoming/Outgoing RPS**     | Total incoming/outgoing traffic RPS (Requests Per Second) and erroneous incoming/outgoing traffic RPS within the query time range.<br />**RPS = Number of requests during the query time / Query duration (s)**.                                                                                                                                                  |
+| **Traffic**                   | Total number of requests between services within the query time range, and the number and proportion of requests by HTTP status code (Normal/2xx, 3xx, 4xx, 5xx), NR (No Response).<br />Hover over the bar chart to view the number and proportion of requests for each category.                                                                                |
+| **RPS**                       | Total traffic RPS (Requests Per Second) and erroneous traffic RPS within the query time range.                                                                                                                                                                                                                                                                  |
+| **Response Time**             | Request response time between services or within the service itself, displayed as Average, TP 50, TP 95, TP 99.<br />TP (Top Percentile) xx indicates the minimum duration required to satisfy xx percent of network requests, commonly used in system performance monitoring scenarios.<br />Hover over the curve to view the response time for a specific period. |
+
+#### TCP Protocol
+
+| Parameter                     | Description                                                                                                                                                                                                                                                          |
+|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Incoming/Outgoing Traffic** | Total size of incoming/outgoing traffic in bytes within the query time range.                                                                                                                                                                                        |
+| **TCP Connections**           | Total number of connections.<br />**Error Rate = Number of failed connections / Total connections**<br />**Success Rate = Number of successful connections / Total connections**<br />Hover over the bar chart to view the number of connections for different categories. |
+| **Traffic**                   | Total size of traffic in bytes between services within the query time range.                                                                                                                                                                                         |
+| **Incoming/Outgoing (Bps)**   | Byte transmission rate (bytes per second) of incoming/outgoing service network traffic.                                                                                                                                                                              |
+
+#### **Middleware Information**
+
+When you click on a **connection line** that connects an **OpenTelemetry service** with a **middleware service**, you can view the following information:
+
+**Node Information**
+
+| Type              | Description                                                                                                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Database**      | Type: Database type, such as MySQL, Oracle, etc.<br />Host: Provides the database host address<br />Details: Provides database username, database name, and other information |
+| **Message Queue** | Type: Message queue type, such as RabbitMQ, Kafka, etc.                                                                                                                   |
+
+**Note** For a complete list of supported middleware types, please refer to [Node Types](../concepts/insight_node_types.mdx#opentelemetry-node-types).
+
+**Traffic Information**
+
+Refers to the total number of requests made by the OpenTelemetry service to the middleware within the query time range.
+
