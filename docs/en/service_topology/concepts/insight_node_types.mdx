@@ -1,0 +1,44 @@
+---
+weight: 20
+---
+
+# In-depth Understanding of Node Types
+
+:::note
+
+In the topology diagram, if a service calling relationship is identified that does not belong to the above clear classifications, it will be represented by an **Unknown Service** node icon to ensure the integrity and clarity of the topology calling relationships. This representation helps users comprehensively understand the structure of the entire service network.
+
+:::
+
+## Istio Node Types
+
+When governed by Service Mesh, the current platform supports the following node types:
+
+1. **ServiceMesh Service**
+
+2. **Ingress Gateway**
+
+3. **Egress Gateway**
+
+4. **External Services (ServiceEntry)**
+
+5. **PassthroughCluster** - For more information, please refer to the [official documentation](https://istio.io/v1.20/blog/2019/monitoring-external-service-traffic/).
+
+6. **BlackHoleCluster** - For more information, please refer to the [official documentation](https://istio.io/v1.20/blog/2019/monitoring-external-service-traffic/).
+
+## OpenTelemetry Node Types
+
+When governed by OpenTelemetry, the current platform supports the following node types:
+
+1. **OpenTelemetry Service**
+
+2. **Middleware**
+  - **Databases**
+    - Oracle
+    - Redis
+    - MySQL
+    - PostgreSQL
+  - **Message Queues**
+    - Kafka
+    - RabbitMQ
+    - RocketMQ
