@@ -7,8 +7,8 @@ This document will guide you through creating a ServiceMesh service or OpenTelem
 
 ## Prerequisites
 
-- The current namespace has been added to the service mesh. Please refer to [Add Namespaces]({{< ref "/add_namespaces" >}}) for instructions.
-- The workload type is a Deployment, and there is a one-to-one association with a Service.
+1.  The current namespace has been added to the service mesh. Please refer to [Add Namespaces](../add_namespaces)  for instructions.
+2. The workload type is a Deployment, and there is a one-to-one association with a Service.
 
 ## Add ServiceMesh service
 ### Steps
