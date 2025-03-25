@@ -1,0 +1,58 @@
+---
+weight: 10
+---
+
+# Configure and Validate Cross-Cluster Failover
+
+This document explains how to achieve cross-cluster failover for applications based on a multi-cluster service mesh using the Bookinfo application as an example.
+
+## Steps
+
+1. In the left navigation bar, click **Service Mesh** > **Mesh**.
+
+2. Click the ***name of the service mesh*** to be configured.
+
+3. On the **Mesh Policies** tab, click **Create Policy** > **Circuit Breaker** on the right side of cluster `c1`.
+
+    :::note
+
+    * If there are no special requirements, use the default parameters.
+    
+    * If a service is not configured with a **Circuit Breaker Policy**, the **Failover** configuration will not take effect for it, and ingress traffic will be randomly forwarded among service Pods across all clusters in the service mesh. If a service is configured with a **Circuit Breaker Policy**, ingress traffic will be routed within the service's cluster until all Pods in that cluster are tripped.
+
+    :::
+    
+4. On the **Mesh Policies** tab, click **Create Policy** > **Regional Load Balancing** on the right side of cluster `c1`.
+
+5. Select **Failover** as the **Policy Type** and configure the related parameters as described below.
+
+    | Parameter | Description |
+    | --------- | ----------- |
+    | **Failure Region** | The region of the cluster where the failed service Pods are located, i.e., the region of the cluster where the policy is configured. |
+    | **Disaster Recovery Region** | The region that provides load balancing for the cluster where the failed service Pods are located. |
+        
+    :::note
+    
+    After configuring the failover policy, when the service Pods in the failure region cluster are tripped and the health ratio of service Pods in the cluster is less than 71.43% (100/[Overprovisioning Factor](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/overprovisioning#arch-overview-load-balancing-overprovisioning-factor)), part of the ingress traffic for the service in that cluster will be prioritized to the service Pods in the disaster recovery region cluster.
+    
+    For example, after configuring a failover policy for cluster `c1` (disaster recovery region is the region of cluster `c2`), if the health ratio of productpage service Pods in the failure region cluster `c1` is 50%, then `50% * 1.4 = 70%` of the traffic for the service in cluster `c1` will be handled by the service Pods in the failure region cluster `c1`, and the remaining 30% of the traffic will be handled by the service Pods in the disaster recovery region cluster `c2`. <br />If failover is not set, traffic will be randomly forwarded among clusters in the mesh.
+    
+    For details on traffic load priority, refer to [Priority levels](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/priority).
+
+    :::
+
+6. Click **Create**.
+
+## Validation Method
+
+1. In the top navigation bar, click the product view switch to switch to **Container Platform** and enter the namespace `ns1` under cluster `c1`.
+
+2. In the left navigation bar, click **Compute Components** > **Deployments**.
+
+3. Click the ***Deployment name*** of the productpage.
+
+4. Click **Stop** in the upper right corner to stop all Pods of the productpage.
+
+5. Refer to the [Access Verification]() method of the productpage service to continuously access the productpage service based on the routing configuration (`External Access Address`) created by the gateway deployed in cluster `c1`.
+
+    **Note**: If the Bookinfo application can still be accessed normally, it indicates that cross-cluster failover has been achieved. Additionally, you can go to the Service Mesh platform to further verify traffic forwarding by viewing the service topology (cross-cluster) and call chains.
