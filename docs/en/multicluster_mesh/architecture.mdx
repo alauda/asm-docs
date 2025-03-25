@@ -2,24 +2,28 @@
 weight: 20
 ---
 
-:::tip
-撰写「功能架构」文档的目的是帮助用户理解功能的核心流程和概念。
+# Architecture
 
-在架构中引入的「概念」建议链接到下文「核心概念」对应的章节。如果引入的「概念」较为简单且无需单独文档介绍，则可在架构文档中进行简要说明。
+## Multiple Control Planes
 
-对于复杂的流程，建议在当前目录下单独撰写「深入理解 XXXX」文章，以便深入浅出地进行介绍。
+The platform deploys the Istio control plane for all clusters in the mesh by creating ServiceMesh resources in the clusters.
 
-可以访问[架构文档示例](https://product-doc-guide.alauda.cn/template/arch/module_arch_example.html)查看示例文档。
-:::
+Each control plane can independently manage services, gateways, and other resources (ServiceEntry, EnvoyFilter, WASM plugins) deployed in the cluster and can be upgraded separately.
 
-# 架构
+## Independent Fault Domains
 
-请增加一张或多张关于该功能的技术架构图，图中可以包含以下内容：
+Clusters within the mesh are entirely independent, allowing for cross-cloud and cross-region deployments. Each cluster is an independent fault domain.
 
-- 核心组件：例如 Operator、任务、中间件等，并在图中描绘出各个组件之间的联系及其作用。
-- 数据流程：例如引入的资源、资源之间的依赖关系，以及资源被消费的流程等。
-- 部署架构：例如多集群部署、高可用设计等。
+* A failure in any cluster within the mesh does not affect other clusters.
+* Services can be deployed in any cluster within the mesh.
+* Services can achieve cross-region disaster recovery and load balancing.
 
-在架构图下方增加对该图片的描述，说明图片的含义及其中各部分的作用。
+## Single Network / Multi-Network Mode
 
-对架构图中引入的概念进行简要介绍。如果某个概念需要更详细的说明，请链接到「核心概念」对应的章节。
+* **Single Network**: When multiple Kubernetes clusters within the mesh are interconnected and pods in different clusters can access each other via Pod IP, the mesh operates in a single network mode. In this mode, pods can communicate directly without Istio gateways or other components for forwarding.
+
+    <img src="./assets/sin_net_arch.svg" width="500" />
+
+* **Multi-Network**: When clusters within the mesh are not in the same network plane (VPC), pods in different clusters must use Istio gateways to communicate.
+
+    <img src="./assets/muti_net_arch.svg" width="500" />
