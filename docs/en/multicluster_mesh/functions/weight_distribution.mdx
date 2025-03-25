@@ -1,0 +1,33 @@
+---
+weight: 20
+---
+
+# Configure and Validate Cross-Region Cluster Weight Distribution
+
+This document explains how to achieve cross-cluster weight distribution for applications based on a multi-cluster service mesh using the Bookinfo application as an example.
+
+## Steps
+
+1. In the left navigation bar, click **Service Mesh** > **Mesh**.
+
+2. Click the ***name of the service mesh*** to be configured.
+
+3. On the **Mesh Policies** tab, click **Create Policy** > **Regional Load Balancing** on the right side of cluster `c1`.
+
+4. Select **Weight Distribution** as the **Policy Type** and configure the related parameters as described below.
+
+    | Parameter | Description |
+    | --------- | ----------- |
+    | **Region** | The region capable of providing cross-region load balancing under the current service mesh. **Current Region** is the region to which the current cluster belongs. |
+    | **Cluster** | The cluster within the region. When there are multiple clusters in the same region, traffic will be evenly distributed among the clusters in that region. |
+    | **Weight** | The percentage of load traffic. <br />**Note**: The total weight of all regions must equal 100. |
+
+    **Example**: Set the weight of the region where cluster `c1` is located to 80% and the weight of the region where cluster `c2` is located to 20%.
+
+5. Click **Create**.
+
+### Validation Method
+
+Refer to the [Access Verification](../how_to/deploy_bookinfo.mdx#access-verification) method for the productpage service to continuously access the productpage service based on the routing configuration (`External Access Address`) created by the gateway deployed in cluster `c1`.
+
+You can go to the **Monitoring** page of the Service Mesh platform and compare the monitoring data of the productpage service in each cluster on the **Cluster Traffic Comparison** panel. If the traffic monitoring data corresponds to the weight proportions, it indicates that cross-cluster weight distribution is effective.
