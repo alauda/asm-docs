@@ -5,37 +5,48 @@ i18n:
     en: Installation
 ---
 
-:::tip
+# Installation
 
-如果该模块需要单独进行部署，则需要提供部署文档，否则可以不提供。
+This article will use two AWS EKS (Amazon Elastic Kubernetes Service) clusters, c1 and c2, located in different VPCs (Virtual Private Clouds) as examples to illustrate how to build a multi-cluster, multi-network service mesh.
 
-部署文档应包含部署流程、部署配置、卸载流程等。若部署文档内容较多，可以将部署文档改成目录，并在目录中拆分为多篇文档进行介绍。
+:::note
 
-可以访问 [部署](https://product-doc-guide.alauda.cn/template/installation/example.html) 查看对应文档的示例。
+For demonstration purposes, this article only selects two clusters to build the mesh. In practice, you can add more clusters that meet the prerequisites to the service mesh according to your needs.
 
 :::
 
-# 部署
+## Prerequisites
 
-## 安装 XXX
+* For private clouds, ensure that Kubernetes LoadBalancer (e.g., MetaLB) is configured on all clusters to provide load balancing capabilities for Istio gateways deployed on the clusters.
+* All clusters have been connected to the platform.
+* Monitoring components have been deployed for all clusters through [Deploy monitoring component](@console-platform-docs/en/platform-usermanual/clusterall/1cluster/12plugins/5monitoring/), including **VictoriaMetrics**. <br />To ensure that monitoring data from multiple clusters can be aggregated, make sure that the monitoring data of multiple clusters to be added to the mesh can be collected to the same VictoriaMetrics Center with the same data query address.
+    **Note**: Tested, **VictoriaMetrics** supports the **multi-master architecture** service mesh well. For support with other monitoring solutions, please contact technical support.
+* All **control nodes** and **load balancing devices** (if any) in all clusters must have port `6443` for kube-apiserver open, and the `6443` port of the load balancing device must forward traffic to the `6443` port of the control node.
+* Ensure that the Kubernetes version of the clusters is compatible with the Istio version supported by the platform. For detailed information, see [Istio's Supported Kubernetes Versions](https://istio.io/latest/docs/releases/supported-releases/).
 
-介绍安装组件所需的前提条件。
+## Create a service mesh
 
-### 使用 Web 控制台安装 XXX
+Select one of the prepared clusters and create a service mesh.
 
-介绍使用 Web 控制台安装组件的流程。
+When creating the mesh, configure the corresponding parameters as follows, and configure other parameters as needed:
 
-### 使用 CLI 安装 XXX
+* Deploy Istio for the mesh.
+* Choose `Multi-cluster` for the **Mesh Architecture**.
+* Choose `Multi-network` for the **Network Type**.
+    **Note**: The platform will automatically deploy east-west traffic gateways for all clusters joining the mesh, connecting the networks between clusters.
+* Integrate with the monitoring components provided by `the platform` for the **Monitoring System**.
 
-介绍使用 CLI 安装组件的流程。
+## Add clusters
 
-
-## 卸载 XXX 
-
-介绍卸载组件的流程步骤。一般需要先删除组件的实例，然后删除组件的 Operator，最后删除组件的 CRD。
-
-
-## 自定义配置
-
-介绍组件安装过程中可以自定义的配置项。
-
+1. In the left navigation bar, click **Service Mesh** > **Mesh**.
+2. Click the ***Service Mesh Name*** of the cluster to be added.
+3. Under the **Mesh Details** tab, in the **Mesh Deployment** section, click **Add Cluster**.
+4. In the **Basic Information** section, select the cluster to join the service mesh.
+5. Configure the mesh configuration and components at the cluster level according to the actual deployment needs.
+6. Click **Add**.
+   
+    **Note**:
+    
+    * After successful addition, the system will deploy service mesh-related components on the cluster in sequence. Click <img src="./assets/show_status.png" style={{display: "inline", verticalAlign: "middle"}} /> in the **Mesh Deployment** section to view the deployment progress.
+    
+    * After adding a cluster, the global configuration of the mesh (monitoring system, Elasticsearch integration configuration) will automatically synchronize to the newly added cluster.
