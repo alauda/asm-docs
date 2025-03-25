@@ -1,0 +1,28 @@
+---
+weight: 20
+---
+
+# How to Set the Region for a Cluster
+
+:::tip
+Generally, public cloud clusters come with region attributes. This document explains how to set the region attribute for self-built clusters on the platform or private deployment clusters connected to the platform.
+:::
+
+* If you need to set the region for a **cluster to be added** to the mesh, refer to [Set Region for a Cluster](@console-platform-docs/zh/platform-usermanual/clusterall/1cluster/13clustermanagement/#region).
+
+* If you need to set the region for a **cluster already added** to the mesh, follow the steps below:
+
+    1. Perform the operation [Set Region for a Cluster](@console-platform-docs/zh/platform-usermanual/clusterall/1cluster/13clustermanagement/#region).
+    
+    2. Log in to any control node of the cluster and execute the following command to restart the Istiod component deployed in the cluster:
+    
+        ```sh
+        # If the version number of Istiod is 1.18, the default name of the Istiod Deployment is “istiod-1-18”; Istiod is deployed in the istio-system namespace by default.
+        kubectl rollout restart deployment <Istiod Deployment Name> --namespace=<Istiod Namespace>
+        ```
+    
+    3. Execute the following command to restart all services in the cluster that have Sidecar injected:
+    
+        ```sh
+        kubectl rollout restart deployment <Service Deployment Name> --namespace=<Service Namespace>
+        ```

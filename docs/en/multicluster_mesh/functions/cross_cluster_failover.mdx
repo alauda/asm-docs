@@ -53,6 +53,6 @@ This document explains how to achieve cross-cluster failover for applications ba
 
 4. Click **Stop** in the upper right corner to stop all Pods of the productpage.
 
-5. Refer to the [Access Verification]() method of the productpage service to continuously access the productpage service based on the routing configuration (`External Access Address`) created by the gateway deployed in cluster `c1`.
+5. Refer to the [Access Verification](../how_to/deploy_bookinfo.mdx#access-verification) method of the productpage service to continuously access the productpage service based on the routing configuration (`External Access Address`) created by the gateway deployed in cluster `c1`.
 
     **Note**: If the Bookinfo application can still be accessed normally, it indicates that cross-cluster failover has been achieved. Additionally, you can go to the Service Mesh platform to further verify traffic forwarding by viewing the service topology (cross-cluster) and call chains.

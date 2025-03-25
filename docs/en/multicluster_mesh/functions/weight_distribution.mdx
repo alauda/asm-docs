@@ -28,6 +28,6 @@ This document explains how to achieve cross-cluster weight distribution for appl
 
 ### Validation Method
 
-Refer to the [Access Verification]() method for the productpage service to continuously access the productpage service based on the routing configuration (`External Access Address`) created by the gateway deployed in cluster `c1`.
+Refer to the [Access Verification](../how_to/deploy_bookinfo.mdx#access-verification) method for the productpage service to continuously access the productpage service based on the routing configuration (`External Access Address`) created by the gateway deployed in cluster `c1`.
 
 You can go to the **Monitoring** page of the Service Mesh platform and compare the monitoring data of the productpage service in each cluster on the **Cluster Traffic Comparison** panel. If the traffic monitoring data corresponds to the weight proportions, it indicates that cross-cluster weight distribution is effective.
