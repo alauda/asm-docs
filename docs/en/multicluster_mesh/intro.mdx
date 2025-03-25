@@ -2,94 +2,44 @@
 weight: 10
 ---
 
-:::tip
+# Introduction
 
-1 、什么是介绍
+## Deployment Model
 
-「介绍」章节是产品文档或者功能模块的开篇，提供对产品或功能的总体描述。它涵盖了核心概念、主要功能、目标用户和预期用途，为读者提供清晰的初步了解。
+Due to considerations of service performance, stability, security isolation, latency, location, and cluster scalability, enterprises typically deploy services across multiple clusters in different data centers (across regions and clouds).
 
-我们一般会将介绍、优势、功能总览这三篇根据文章的整体篇幅长短决定是否存在在一篇文档中。对于复杂产品（如包含多个核心模块的平台类产品），建议将这些内容拆分为独立文档；对于单一功能模块，可以合并在同一篇文档中。
+The platform's multi-cluster service mesh is implemented based on Istio's [multiple control planes](https://istio.io/latest/docs/ops/deployment/deployment-models/#endpoint-discovery-with-multiple-control-planes) deployment model. In this model, the service mesh can manage multiple primary clusters, each with its own Istio control plane. Services deployed in various clusters under the mesh can discover each other and share the load.
 
-2 、介绍的重要性
+## Features
 
-产品或者功能模块涉及的点可能会很多，在开篇添加一个介绍可以：
+### Integrated with Istio's Native Capabilities
 
-- 统一理解：可以作为开篇提供一个一致的认知，减少沟通误差。
-- 引导阅读：为读者提供清晰的产品背景，方便深入了解后续详细内容。
-- 提升效率：减少重复解释对于产品基础认知的时间
+* **Failover**: If a service in one cluster fails and triggers a circuit breaker, part of the traffic intended for that service is redirected to healthy pods in clusters in the disaster recovery region to ensure overall service load performance stability.
+* **Weighted Distribution**: Traffic is routed to clusters in multiple regions based on configured weights, achieving multi-region load balancing.
 
-3 、如何去构思介绍这个章节
+### Unified UI for Easy Configuration and Management
 
-- 简洁明了：用简洁的语言概括产品的核心要点，避免冗长。
-- 突出关键点：强调产品的独特卖点和主要功能。
-- 面向读者：考虑目标读者的背景，提供他们关心的信息。
+* You can create a service mesh or manage clusters by configuring simple parameters via the UI.
+* The platform provides a unified operation and configuration management interface for the multi-cluster service mesh. You can view and manage the configurations and monitoring data of different clusters within the mesh on a single page.
+* The platform automatically deploys Istio east-west traffic gateways for all clusters in a multi-network mode service mesh. You only need to add the cluster to the mesh.
 
-4、介绍的特殊之处
+### Cross-Cluster Visualization
 
-本模板为文档提供标准化的功能模块描述框架。通过结构化的内容组织和清晰的表达方式，帮助团队更好地传达产品功能价值，使用户快速理解和使用产品功能。
+* Compare traffic monitoring data of services in different clusters within the mesh.
+* View cross-cluster service topology.
+* View cross-cluster call chains.
 
-产品级别的介绍和模块级别的介绍我们会发现存在一些差异：
+## Application Scenarios
 
-产品级别介绍的特点
+### Cross-Cluster Failover
 
-- **产品定位**：明确说明产品在行业中的位置和竞争优势
-- **完整生态**：描述产品包含的所有核心模块和功能体系
-- **适用场景**：产品的适用场景会更全面，需要根据不同模块的特性联合说明
+Deploy services in clusters located in different regions within the mesh. If services in a cluster in one region fail to handle traffic, the platform can smoothly shift the traffic to clusters in disaster recovery regions according to the pre-configured failover strategy, ensuring normal business operations.
 
-模块级别介绍的特点
+### Cross-Cluster Weighted Distribution
 
-- **模块定位**：说明该模块在产品中的角色和职责
-- **模块特性**：侧重描述单一模块的特性以及优势
-- **适用场景**：重点说明单一模块的支持的适用场景
+* Scenario 1: Load traffic proportionally to multiple clusters
+    * When services have specific regional requirements and can only meet availability, latency, and other needs by being deployed in specific regions, you can adjust the cluster's traffic distribution weight to route a designated proportion of traffic to the clusters in those regions.
+    * When service operation demands high performance from the hosting cluster, you can adjust the cluster's traffic distribution weight to route more traffic to clusters with better performance.
 
----
-
-可以访问[介绍文档示例](https://product-doc-guide.alauda.cn/template/intro/example.html)查看对应文档的示例。
-
-:::
-
-# 介绍
-
-## \<产品/模块\> 介绍
-
-> 介绍中的除了介绍这一篇幅，如果其他章节过长或者相对复杂，都可以独立开
-
-此处为短描述。具体介绍 \<产品/模块名称\> 预期用途是什么。比如：
-
-\<容器管理\> 是基于 Kubernetes 构建的面向云原生应用的容器化管理模块。它是 ACP 的核心， 基于原生多集群架构，解耦底层基础设施，实现多云与多集群统一化管理，大幅简化企业的应用上云流程， 有效降低运维管理和人力成本。通过容器管理，您可以便捷创建 Kubernetes 集群，快速搭建企业级的容器云管理平台。
-
-## \<产品/模块> 优势
-
-> 罗列该产品/模块的 性能、可视化、安全等领域的优势，推荐使用无序列表格式。
-
-\<产品/模块名称\> 的核心优势如下：
-
-- 优势 1
-
-  （提供具体的说明，比如在性能、可视化、安全等方面的优势）
-
-- 优势 2
-
-  （具体说明）
-
-- ......
-
-## \<产品/模块\> 应用场景
-
-> 罗列该 \<产品/模块\> 的主要应用场景并提供必要说明，推荐使用无序列表格式。
-
-\<产品/模块\> 的主要应用场景如下：
-
-- 场景 1
-
-  （具体说明）
-
-- 场景 2
-
-  （具体说明）
-
-- ......
-
-## \<产品/模块\> 使用限制
-
-> 若 \<产品/模块\> 有使用限制，可在此处说明。
+* Scenario 2: Cross-cluster service migration
+    When enterprises need to migrate services across clusters (across clouds or regions), they can add the target cluster to the mesh and deploy the services in that cluster. Then, by configuring traffic distribution weights for the source and target clusters through the platform, services can be smoothly migrated to the target cluster without interrupting business operations. During this process, you can monitor the service performance in the target cluster and adjust weights in real-time.
