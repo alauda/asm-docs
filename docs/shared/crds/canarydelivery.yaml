@@ -1,0 +1,421 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: canarydeliveries.asm.alauda.io
+spec:
+  group: asm.alauda.io
+  names:
+    kind: CanaryDelivery
+    listKind: CanaryDeliveryList
+    plural: canarydeliveries
+    singular: canarydelivery
+  preserveUnknownFields: false
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.isavaliable
+      name: IsAvaliable
+      type: boolean
+    - jsonPath: .status.phase
+      name: Status
+      type: string
+    - jsonPath: .status.canaryWeight
+      name: Weight
+      type: string
+    - jsonPath: .status.failedChecks
+      name: FailedChecks
+      priority: 1
+      type: string
+    - jsonPath: .spec.analysis.interval
+      name: Interval
+      priority: 1
+      type: string
+    - jsonPath: .spec.analysis.mirror
+      name: Mirror
+      priority: 1
+      type: boolean
+    - jsonPath: .spec.analysis.stepWeight
+      name: StepWeight
+      priority: 1
+      type: string
+    - jsonPath: .spec.analysis.maxWeight
+      name: MaxWeight
+      priority: 1
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: CanaryDelivery is the Schema for the Canarydeliveries API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CanaryDeliverySpec defines the desired state of CanaryDelivery
+            properties:
+              analysis:
+                description: Analysis defines the validation process of a release
+                properties:
+                  interval:
+                    description: Schedule interval for this canary analysis
+                    type: string
+                  iterations:
+                    description: Number of checks to run for A/B Testing and Blue/Green
+                    type: integer
+                  match:
+                    description: A/B testing HTTP header match conditions
+                    items:
+                      description: "HttpMatchRequest specifies a set of criterion
+                        to be met in order for the rule to be applied to the HTTP
+                        request. For example, the following restricts the rule to
+                        match only requests where the URL path starts with /ratings/v2/
+                        and the request contains a \"cookie\" with value \"user=jason\".
+                        \n apiVersion: networking.istio.io/v1alpha3 kind: VirtualService
+                        metadata: name: ratings-route spec: hosts: - ratings http:
+                        - match: - headers: cookie: regex: \"^(.*?;)?(user=jason)(;.*)?\"
+                        uri: prefix: \"/ratings/v2/\" route: - destination: host:
+                        ratings \n HTTPMatchRequest CANNOT be empty."
+                      properties:
+                        authority:
+                          description: "HTTP Authority values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        gateways:
+                          description: Names of gateways where the rule should be
+                            applied to. Gateway names at the top of the VirtualService
+                            (if any) are overridden. The gateway match is independent
+                            of sourceLabels.
+                          items:
+                            type: string
+                          type: array
+                        headers:
+                          additionalProperties:
+                            description: Describes how to match a given string in
+                              HTTP headers. Match is case-sensitive.
+                            properties:
+                              exact:
+                                description: exact string match
+                                type: string
+                              prefix:
+                                description: prefix-based match
+                                type: string
+                              regex:
+                                description: ECMAscript style regex-based match
+                                type: string
+                              suffix:
+                                description: suffix-based match.
+                                type: string
+                            type: object
+                          description: "The header keys must be lowercase and use
+                            hyphen as the separator, e.g. _x-request-id_. \n Header
+                            values are case-sensitive and formatted as follows: \n
+                            - `exact: \"value\"` for exact string match \n - `prefix:
+                            \"value\"` for prefix-based match \n - `regex: \"value\"`
+                            for ECMAscript style regex-based match \n **Note:** The
+                            keys `uri`, `scheme`, `method`, and `authority` will be
+                            ignored."
+                          type: object
+                        method:
+                          description: "HTTP Method values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        port:
+                          description: Specifies the ports on the host that is being
+                            addressed. Many services only expose a single port or
+                            label ports with the protocols they support, in these
+                            cases it is not required to explicitly select the port.
+                          format: int32
+                          type: integer
+                        scheme:
+                          description: "URI Scheme values are case-sensitive and formatted
+                            as follows: \n - `exact: \"value\"` for exact string match
+                            \n - `prefix: \"value\"` for prefix-based match \n - `regex:
+                            \"value\"` for ECMAscript style regex-based match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        sourceLabels:
+                          additionalProperties:
+                            type: string
+                          description: One or more labels that constrain the applicability
+                            of a rule to workloads with the given labels. If the VirtualService
+                            has a list of gateways specified at the top, it should
+                            include the reserved gateway `mesh` in order for this
+                            field to be applicable.
+                          type: object
+                        uri:
+                          description: "URI to match values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                      type: object
+                    type: array
+                  maxWeight:
+                    description: Max traffic percentage routed to canary
+                    type: integer
+                  mirror:
+                    description: Enable traffic mirroring for Blue/Green
+                    type: boolean
+                  stepWeight:
+                    description: Incremental traffic percentage step
+                    type: integer
+                  stepWeightPromotion:
+                    description: Incremental traffic percentage step for promotion
+                      phase
+                    type: integer
+                  threshold:
+                    description: Max number of failed checks before the canary is
+                      terminated
+                    type: integer
+                type: object
+              approvegate:
+                type: boolean
+              autopromote:
+                type: boolean
+              autoscalerRef:
+                description: AutoscalerRef references an autoscaling resource
+                properties:
+                  apiVersion:
+                    description: API version of the referent
+                    type: string
+                  kind:
+                    description: Kind of the referent
+                    type: string
+                  name:
+                    description: Name of the referent
+                    type: string
+                  namespace:
+                    description: Namespace of the referent
+                    type: string
+                required:
+                - name
+                type: object
+              delivertype:
+                type: string
+              failFallBack:
+                description: if set true,we will rollback canary workload modify
+                type: boolean
+              isavaliable:
+                type: boolean
+              maxResponseTime:
+                description: the max response time,if larger than will failed,default
+                  is 500ms
+                type: number
+              metrics:
+                description: Metric check list for this canary analysis
+                items:
+                  description: CanaryMetric holds the reference to metrics used for
+                    canary analysis
+                  properties:
+                    interval:
+                      description: Interval represents the windows size
+                      type: string
+                    name:
+                      description: Name of the metric
+                      type: string
+                    query:
+                      description: Prometheus query for this metric (deprecated in
+                        favor of TemplateRef)
+                      type: string
+                    templateRef:
+                      description: TemplateRef references a metric template object
+                      properties:
+                        apiVersion:
+                          description: API version of the referent
+                          type: string
+                        kind:
+                          description: Kind of the referent
+                          type: string
+                        name:
+                          description: Name of the referent
+                          type: string
+                        namespace:
+                          description: Namespace of the referent
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    threshold:
+                      description: Max value accepted for this metric
+                      type: number
+                    thresholdRange:
+                      description: Range value accepted for this metric
+                      properties:
+                        max:
+                          description: Maximum value
+                          type: number
+                        min:
+                          description: Minimum value
+                          type: number
+                      type: object
+                  required:
+                  - name
+                  type: object
+                type: array
+              minSuccessRate:
+                description: the min request succress rate,if below,canary will failed,default
+                  is 95 percent
+                type: number
+              promote:
+                type: boolean
+              rollback:
+                type: boolean
+              targetRef:
+                description: TargetRef references a target resource
+                properties:
+                  apiVersion:
+                    description: API version of the referent
+                    type: string
+                  kind:
+                    description: Kind of the referent
+                    type: string
+                  name:
+                    description: Name of the referent
+                    type: string
+                  namespace:
+                    description: Namespace of the referent
+                    type: string
+                required:
+                - name
+                type: object
+            required:
+            - targetRef
+            type: object
+          status:
+            description: CanaryDeliveryStatus defines the observed state of CanaryDelivery
+            properties:
+              canaryWeight:
+                type: integer
+              canaryready:
+                type: boolean
+              conditions:
+                items:
+                  description: CanaryCondition is a status condition for a Canary
+                  properties:
+                    lastTransitionTime:
+                      description: LastTransitionTime of this condition
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: LastUpdateTime of this condition
+                      format: date-time
+                      type: string
+                    message:
+                      description: Message associated with this condition
+                      type: string
+                    reason:
+                      description: Reason for the current status of this condition
+                      type: string
+                    status:
+                      description: Status of this condition
+                      type: string
+                    type:
+                      description: Type of this condition
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              failedChecks:
+                type: integer
+              iterations:
+                type: integer
+              lastAppliedSpec:
+                type: string
+              lastInitErrorCount:
+                type: integer
+              lastInitErrorDesc:
+                type: string
+              lastPromotedSpec:
+                type: string
+              phase:
+                description: CanaryPhase is a label for the condition of a canary
+                  at the current time
+                type: string
+              trackedConfigs:
+                additionalProperties:
+                  type: string
+                type: object
+            required:
+            - canaryWeight
+            - failedChecks
+            - iterations
+            - lastInitErrorCount
+            - phase
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

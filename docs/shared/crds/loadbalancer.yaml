@@ -1,0 +1,250 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: loadbalancers.asm.alauda.io
+spec:
+  group: asm.alauda.io
+  names:
+    kind: LoadBalancer
+    listKind: LoadBalancerList
+    plural: loadbalancers
+    shortNames:
+    - lb
+    singular: loadbalancer
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    served: true
+    storage: false
+    schema:
+      openAPIV3Schema:
+        description: LoadBalancer is the Schema for the loadbalancers API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LoadBalancerSpec defines the desired state of LoadBalancer
+            properties:
+              consistentHash:
+                description: Consistent Hash-based load balancing can be used to provide
+                  soft session affinity based on HTTP headers, cookies or other properties.
+                  This load balancing policy is applicable only for HTTP connections.
+                  The affinity to a particular destination host will be lost when one
+                  or more hosts are added/removed from the destination service.
+                properties:
+                  httpCookie:
+                    description: Hash based on HTTP cookie.
+                    properties:
+                      name:
+                        description: Name of the cookie.
+                        type: string
+                      path:
+                        description: Path to set for the cookie.
+                        type: string
+                      ttl:
+                        description: Lifetime of the cookie.
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                        type: string
+                    type: object
+                  httpHeaderName:
+                    description: Hash based on a specific HTTP header.
+                    type: string
+                  minimumRingSize:
+                    description: The minimum number of virtual nodes to use for the
+                      hash ring. Defaults to 1024. Larger ring sizes result in more
+                      granular load distributions. If the number of hosts in the load
+                      balancing pool is larger than the ring size, each host will be
+                      assigned a single virtual node.
+                    format: int64
+                    type: integer
+                  useSourceIp:
+                    description: Hash based on the source IP address.
+                    type: boolean
+                type: object
+              host:
+                type: string
+              localityLbSetting:
+                description: 'Optional: only one of distribute or failover can be set.
+                  Explicitly specify loadbalancing weight across different zones and
+                  geographical locations. Refer to [Locality weighted load balancing](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/locality_weight)
+                  If empty, the locality weight is set according to the endpoints number
+                  within it.'
+                properties:
+                  distribute:
+                    items:
+                      properties:
+                        from:
+                          description: Originating locality, '/' separated, e.g. 'region/zone/sub_zone'.
+                          type: string
+                        to:
+                          additionalProperties:
+                            format: int32
+                            type: integer
+                          description: Map of upstream localities to traffic distribution
+                            weights. The sum of all weights should be 100. Any locality
+                            not present will receive no traffic.
+                          type: object
+                      type: object
+                    type: array
+                  enabled:
+                    type: boolean
+                  failover:
+                    items:
+                      properties:
+                        from:
+                          description: Originating region.
+                          type: string
+                        to:
+                          description: Destination region the traffic will fail over
+                            to when endpoints in the 'from' region becomes unhealthy.
+                          type: string
+                      type: object
+                    type: array
+                required:
+                - enabled
+                type: object
+              simple:
+                description: Standard load balancing algorithms that require no tuning.
+                enum:
+                - ROUND_ROBIN
+                - LEAST_CONN
+                - RANDOM
+                type: string
+            type: object
+          status:
+            description: LoadBalancerStatus defines the observed state of LoadBalancer
+            type: object
+        type: object
+  - name: v1beta2
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: LoadBalancer is the Schema for the loadbalancers API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LoadBalancerSpec defines the desired state of LoadBalancer
+            properties:
+              consistentHash:
+                description: Consistent Hash-based load balancing can be used to provide
+                  soft session affinity based on HTTP headers, cookies or other properties.
+                  This load balancing policy is applicable only for HTTP connections.
+                  The affinity to a particular destination host will be lost when one
+                  or more hosts are added/removed from the destination service.
+                properties:
+                  httpCookie:
+                    description: Hash based on HTTP cookie.
+                    properties:
+                      name:
+                        description: Name of the cookie.
+                        type: string
+                      path:
+                        description: Path to set for the cookie.
+                        type: string
+                      ttl:
+                        description: Lifetime of the cookie.
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                        type: string
+                    type: object
+                  httpHeaderName:
+                    description: Hash based on a specific HTTP header.
+                    type: string
+                  minimumRingSize:
+                    description: The minimum number of virtual nodes to use for the
+                      hash ring. Defaults to 1024. Larger ring sizes result in more
+                      granular load distributions. If the number of hosts in the load
+                      balancing pool is larger than the ring size, each host will be
+                      assigned a single virtual node.
+                    format: int64
+                    type: integer
+                  useSourceIp:
+                    description: Hash based on the source IP address.
+                    type: boolean
+                type: object
+              host:
+                type: string
+              localityLbSetting:
+                description: 'Optional: only one of distribute or failover can be set.
+                  Explicitly specify loadbalancing weight across different zones and
+                  geographical locations. Refer to [Locality weighted load balancing](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/locality_weight)
+                  If empty, the locality weight is set according to the endpoints number
+                  within it.'
+                properties:
+                  distribute:
+                    items:
+                      properties:
+                        from:
+                          description: Originating locality, '/' separated, e.g. 'region/zone/sub_zone'.
+                          type: string
+                        to:
+                          additionalProperties:
+                            format: int32
+                            type: integer
+                          description: Map of upstream localities to traffic distribution
+                            weights. The sum of all weights should be 100. Any locality
+                            not present will receive no traffic.
+                          type: object
+                      type: object
+                    type: array
+                  enabled:
+                    type: boolean
+                  failover:
+                    items:
+                      properties:
+                        from:
+                          description: Originating region.
+                          type: string
+                        to:
+                          description: Destination region the traffic will fail over
+                            to when endpoints in the 'from' region becomes unhealthy.
+                          type: string
+                      type: object
+                    type: array
+                required:
+                - enabled
+                type: object
+              simple:
+                description: Standard load balancing algorithms that require no tuning.
+                enum:
+                - ROUND_ROBIN
+                - LEAST_CONN
+                - RANDOM
+                type: string
+            type: object
+          status:
+            description: LoadBalancerStatus defines the observed state of LoadBalancer
+            type: object
+        type: object
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

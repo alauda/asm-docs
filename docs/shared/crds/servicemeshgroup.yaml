@@ -1,0 +1,407 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: servicemeshgroups.asm.alauda.io
+spec:
+  group: asm.alauda.io
+  names:
+    kind: ServiceMeshGroup
+    listKind: ServiceMeshGroupList
+    plural: servicemeshgroups
+    shortNames:
+    - smg
+    singular: servicemeshgroup
+  preserveUnknownFields: false
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ServiceMeshGroup is the Schema for the servicemeshgroups API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ServiceMeshGroupSpec defines the desired state of ServiceMeshGroup
+            properties:
+              caConfig:
+                properties:
+                  certmanager:
+                    description: Certmanager is generated CA for Istio
+                    type: object
+                  insecure:
+                    description: 'Deprecated: Insecure, use Certmanager instead For
+                      compatibility reasons, insecure CA is used by default'
+                    type: object
+                type: object
+              clusters:
+                items:
+                  type: string
+                type: array
+              groupID:
+                type: string
+              istioConfig:
+                properties:
+                  localityLbSetting:
+                    description: "Locality-weighted load balancing allows administrators
+                      to control the distribution of traffic to endpoints based on
+                      the localities of where the traffic originates and where it
+                      will terminate. These localities are specified using arbitrary
+                      labels that designate a hierarchy of localities in {region}/{zone}/{sub-zone}
+                      form. For additional detail refer to [Locality Weight](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/locality_weight)
+                      The following example shows how to setup locality weights mesh-wide.
+                      \n Given a mesh with workloads and their service deployed to
+                      \"us-west/zone1/*\" and \"us-west/zone2/*\". This example specifies
+                      that when traffic accessing a service originates from workloads
+                      in \"us-west/zone1/*\", 80% of the traffic will be sent to endpoints
+                      in \"us-west/zone1/*\", i.e the same zone, and the remaining
+                      20% will go to endpoints in \"us-west/zone2/*\". This setup
+                      is intended to favor routing traffic to endpoints in the same
+                      locality. A similar setting is specified for traffic originating
+                      in \"us-west/zone2/*\". \n ```yaml \n distribute: - from: us-west/zone1/*
+                      to: \"us-west/zone1/*\": 80 \"us-west/zone2/*\": 20 - from:
+                      us-west/zone2/* to: \"us-west/zone1/*\": 20 \"us-west/zone2/*\":
+                      80 \n ``` \n If the goal of the operator is not to distribute
+                      load across zones and regions but rather to restrict the regionality
+                      of failover to meet other operational requirements an operator
+                      can set a 'failover' policy instead of a 'distribute' policy.
+                      \n The following example sets up a locality failover policy
+                      for regions. Assume a service resides in zones within us-east,
+                      us-west & eu-west this example specifies that when endpoints
+                      within us-east become unhealthy traffic should failover to endpoints
+                      in any zone or sub-zone within eu-west and similarly us-west
+                      should failover to us-east. \n ```yaml \n failover: - from:
+                      us-east to: eu-west - from: us-west to: us-east \n ```"
+                    properties:
+                      distribute:
+                        description: Explicitly specify loadbalancing weight across
+                          different zones and geographical locations. Refer to [Locality
+                          weighted load balancing](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/locality_weight)
+                          If empty, the locality weight is set according to the endpoints
+                          number within it.
+                        items:
+                          description: "Describes how traffic originating in the 'from'
+                            zone or sub-zone is distributed over a set of 'to' zones.
+                            Syntax for specifying a zone is {region}/{zone}/{sub-zone}
+                            and terminal wildcards are allowed on any segment of the
+                            specification. Examples: \n `*` - matches all localities
+                            \n `us-west/*` - all zones and sub-zones within the us-west
+                            region \n `us-west/zone-1/*` - all sub-zones within us-west/zone-1"
+                          properties:
+                            from:
+                              description: Originating locality, '/' separated, e.g.
+                                'region/zone/sub_zone'.
+                              type: string
+                            to:
+                              additionalProperties:
+                                format: int32
+                                type: integer
+                              description: Map of upstream localities to traffic distribution
+                                weights. The sum of all weights should be 100. Any
+                                locality not present will receive no traffic.
+                              type: object
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        description: e.g. true means that turn on locality load balancing
+                          for this DestinationRule no matter what mesh wide settings
+                          is.
+                        type: boolean
+                      failover:
+                        description: 'Optional: only one of distribute, failover or
+                          failoverPriority can be set. Explicitly specify the region
+                          traffic will land on when endpoints in local region becomes
+                          unhealthy. Should be used together with OutlierDetection
+                          to detect unhealthy endpoints. Note: if no OutlierDetection
+                          specified, this will not take effect.'
+                        items:
+                          description: Specify the traffic failover policy across
+                            regions. Since zone and sub-zone failover is supported
+                            by default this only needs to be specified for regions
+                            when the operator needs to constrain traffic failover
+                            so that the default behavior of failing over to any endpoint
+                            globally does not apply. This is useful when failing over
+                            traffic across regions would not improve service health
+                            or may need to be restricted for other reasons like regulatory
+                            controls.
+                          properties:
+                            from:
+                              description: Originating region.
+                              type: string
+                            to:
+                              description: Destination region the traffic will fail
+                                over to when endpoints in the 'from' region becomes
+                                unhealthy.
+                              type: string
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      failoverPriority:
+                        description: "failoverPriority is an ordered list of labels
+                          used to sort endpoints to do priority based load balancing.
+                          This is to support traffic failover across different groups
+                          of endpoints. Suppose there are total N labels specified:
+                          \n 1. Endpoints matching all N labels with the client proxy
+                          have priority P(0) i.e. the highest priority. 2. Endpoints
+                          matching the first N-1 labels with the client proxy have
+                          priority P(1) i.e. second highest priority. 3. By extension
+                          of this logic, endpoints matching only the first label with
+                          the client proxy has priority P(N-1) i.e. second lowest
+                          priority. 4. All the other endpoints have priority P(N)
+                          i.e. lowest priority. \n Note: For a label to be considered
+                          for match, the previous labels must match, i.e. nth label
+                          would be considered matched only if first n-1 labels match.
+                          \n It can be any label specified on both client and server
+                          workloads. The following labels which have special semantic
+                          meaning are also supported: \n - `topology.istio.io/network`
+                          is used to match the network metadata of an endpoint, which
+                          can be specified by pod/namespace label `topology.istio.io/network`,
+                          sidecar env `ISTIO_META_NETWORK` or MeshNetworks. - `topology.istio.io/cluster`
+                          is used to match the clusterID of an endpoint, which can
+                          be specified by pod label `topology.istio.io/cluster` or
+                          pod env `ISTIO_META_CLUSTER_ID`. - `topology.kubernetes.io/region`
+                          is used to match the region metadata of an endpoint, which
+                          maps to Kubernetes node label `topology.kubernetes.io/region`
+                          or the deprecated label `failure-domain.beta.kubernetes.io/region`.
+                          - `topology.kubernetes.io/zone` is used to match the zone
+                          metadata of an endpoint, which maps to Kubernetes node label
+                          `topology.kubernetes.io/zone` or the deprecated label `failure-domain.beta.kubernetes.io/zone`.
+                          - `topology.istio.io/subzone` is used to match the subzone
+                          metadata of an endpoint, which maps to Istio node label
+                          `topology.istio.io/subzone`. \n The below topology config
+                          indicates the following priority levels: \n ```yaml failoverPriority:
+                          - \"topology.istio.io/network\" - \"topology.kubernetes.io/region\"
+                          - \"topology.kubernetes.io/zone\" - \"topology.istio.io/subzone\"
+                          ``` \n 1. endpoints match same [network, region, zone, subzone]
+                          label with the client proxy have the highest priority. 2.
+                          endpoints have same [network, region, zone] label but different
+                          [subzone] label with the client proxy have the second highest
+                          priority. 3. endpoints have same [network, region] label
+                          but different [zone] label with the client proxy have the
+                          third highest priority. 4. endpoints have same [network]
+                          but different [region] labels with the client proxy have
+                          the fourth highest priority. 5. all the other endpoints
+                          have the same lowest priority. \n Optional: only one of
+                          distribute, failover or failoverPriority can be set. And
+                          it should be used together with `OutlierDetection` to detect
+                          unhealthy endpoints, otherwise has no effect."
+                        items:
+                          type: string
+                        type: array
+                        x-kubernetes-list-type: atomic
+                    type: object
+                type: object
+              istioVersion:
+                type: string
+              k8sVersion:
+                type: string
+              meshCommonConfig:
+                properties:
+                  elasticsearch:
+                    properties:
+                      enabled:
+                        type: boolean
+                      isDefault:
+                        type: boolean
+                      password:
+                        type: string
+                      secretName:
+                        type: string
+                      secretNamespace:
+                        type: string
+                      url:
+                        type: string
+                      username:
+                        type: string
+                    type: object
+                  isDefaultMonitor:
+                    type: boolean
+                  istioSidecar:
+                    description: 'Deprecated: IstioSidecar'
+                    properties:
+                      cpuValue:
+                        type: string
+                      memoryValue:
+                        type: string
+                    type: object
+                  jaeger:
+                    properties:
+                      indexPrefix:
+                        type: string
+                      strategy:
+                        type: string
+                    type: object
+                  kafka:
+                    properties:
+                      authentication:
+                        type: string
+                      enabled:
+                        type: boolean
+                      password:
+                        type: string
+                      secretName:
+                        type: string
+                      secretNamespace:
+                        type: string
+                      tls:
+                        properties:
+                          enabled:
+                            type: boolean
+                          secretName:
+                            type: string
+                          secretNamespace:
+                            type: string
+                        type: object
+                      url:
+                        type: string
+                      username:
+                        type: string
+                    type: object
+                  monitorType:
+                    type: string
+                  prometheusBasicAuth:
+                    properties:
+                      enabled:
+                        type: boolean
+                      password:
+                        type: string
+                      secretName:
+                        type: string
+                      secretNamespace:
+                        type: string
+                      username:
+                        type: string
+                    type: object
+                  prometheusURL:
+                    type: string
+                  traceSampling:
+                    description: 'Deprecated: TraceSampling'
+                    type: number
+                type: object
+              meshConfig:
+                additionalProperties:
+                  type: object
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              multiCluster:
+                properties:
+                  enabled:
+                    description: Indicates that whether the multi-cluster feature
+                      is enabled.
+                    type: boolean
+                  isMultiNetwork:
+                    description: Indicates whether the servicemeshgroup is targeting
+                      a multi-network environment.
+                    type: boolean
+                type: object
+              network:
+                type: string
+              primary:
+                description: 'Deprecated: PrimaryCluster 仅做为主从结构的兼容性保留，不再使用'
+                type: string
+              selector:
+                description: A label selector is a label query over a set of resources.
+                  The result of matchLabels and matchExpressions are ANDed. An empty
+                  label selector matches all objects. A null label selector matches
+                  no objects.
+                properties:
+                  matchExpressions:
+                    description: matchExpressions is a list of label selector requirements.
+                      The requirements are ANDed.
+                    items:
+                      description: A label selector requirement is a selector that
+                        contains values, a key, and an operator that relates the key
+                        and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: operator represents a key's relationship to
+                            a set of values. Valid operators are In, NotIn, Exists
+                            and DoesNotExist.
+                          type: string
+                        values:
+                          description: values is an array of string values. If the
+                            operator is In or NotIn, the values array must be non-empty.
+                            If the operator is Exists or DoesNotExist, the values
+                            array must be empty. This array is replaced during a strategic
+                            merge patch.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                  matchLabels:
+                    additionalProperties:
+                      type: string
+                    description: matchLabels is a map of {key,value} pairs. A single
+                      {key,value} in the matchLabels map is equivalent to an element
+                      of matchExpressions, whose key field is "key", the operator
+                      is "In", and the values array contains only "value". The requirements
+                      are ANDed.
+                    type: object
+                type: object
+                x-kubernetes-map-type: atomic
+            required:
+            - primary
+            type: object
+          status:
+            description: ServiceMeshGroupStatus defines the observed state of ServiceMeshGroup
+            properties:
+              clusterCount:
+                type: integer
+              latestUpdateTime:
+                type: string
+              meshStatus:
+                additionalProperties:
+                  type: string
+                description: Individual status of each component controlled by the
+                  operator. The map key is the name of the component.
+                type: object
+              message:
+                description: Optional message providing additional information about
+                  the existing overall status.
+                type: string
+              nonReadyClusterCount:
+                type: integer
+              nonReadyClusters:
+                items:
+                  type: string
+                type: array
+              status:
+                description: "Overall status of all clusters controlled by the operator.
+                  \n * If all clusters have status `NONE`, overall status is `NONE`.
+                  * If all clusters are `HEALTHY`, overall status is `HEALTHY`. *
+                  If one or more clusters are `RECONCILING` and others are `HEALTHY`,
+                  overall status is `RECONCILING`. * If one or more clusters are `UPDATING`
+                  and others are `HEALTHY`, overall status is `UPDATING`. * If clusters
+                  are a mix of `RECONCILING`, `UPDATING` and `HEALTHY`, overall status
+                  is `UPDATING`. * If any component is in `ERROR` state, overall status
+                  is `ERROR`. * If further action is needed for reconciliation to
+                  proceed, overall status is `ACTION_REQUIRED`."
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

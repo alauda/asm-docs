@@ -1,0 +1,98 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: manualgrayevents.asm.alauda.io
+spec:
+  group: asm.alauda.io
+  names:
+    kind: ManualGrayEvent
+    listKind: ManualGrayEventList
+    plural: manualgrayevents
+    singular: manualgrayevent
+  preserveUnknownFields: false
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.phase
+      name: Status
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ManualGrayEvent is the Schema for the ManualGrayEvent API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ManualGrayEventSpec defines the desired state of ManualGrayEvent
+            properties:
+              deliverType:
+                description: deliver type, canary or ab or others
+                type: string
+              events:
+                items:
+                  description: GrayEvent is a status condition for a event
+                  properties:
+                    err:
+                      description: err if the target not valid
+                      type: string
+                    lastTransitionTime:
+                      description: LastTransitionTime of this condition
+                      format: date-time
+                      type: string
+                    message:
+                      description: Message associated with this condition
+                      type: string
+                    phase:
+                      description: phase of this condition
+                      type: string
+                    startTime:
+                      description: StartTime of this condition
+                      format: date-time
+                      type: string
+                    step:
+                      description: Type of this condition
+                      type: string
+                  required:
+                  - step
+                  type: object
+                type: array
+                x-kubernetes-list-type: atomic
+              finishTime:
+                description: GrayWorkloadDeployTime of this condition
+                format: date-time
+                type: string
+              phase:
+                type: string
+            required:
+            - deliverType
+            - phase
+            type: object
+          status:
+            description: ManualGrayEventStatus defines the observed state of ManualGrayRelease
+            properties:
+              finishTime:
+                description: GrayWorkloadDeployTime of this condition
+                format: date-time
+                type: string
+              phase:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

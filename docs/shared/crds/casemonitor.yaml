@@ -1,0 +1,426 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: casemonitors.asm.alauda.io
+spec:
+  group: asm.alauda.io
+  names:
+    kind: CaseMonitor
+    plural: casemonitors
+  scope: Namespaced
+  versions:
+  - name: v1beta2
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              interval:
+                type: string
+              jobLabel:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              monitorResults:
+                description: SampleLimit defines per-scrape limit on number of scraped
+                  samples that will be accepted.
+                properties:
+                  latestUpdated:
+                    format: date-time
+                    type: string
+                  targets:
+                    items:
+                      properties:
+                        lastErrors:
+                          items:
+                            type: string
+                          type: array
+                        name:
+                          type: string
+                        running:
+                          type: string
+                        targetType:
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              namespaceSelector:
+                description: NamespaceSelector to select which namespaces the Endpoints
+                  objects are discovered from.
+                properties:
+                  matchNames:
+                    description: List of namespace names.
+                    items:
+                      type: string
+                    type: array
+                type: object
+              pingurls:
+                description: A list of urls allowed as part of this ServiceMonitor.
+                items:
+                  properties:
+                    host:
+                      description: HTTP path to scrape for metrics.
+                      type: string
+                    interval:
+                      description: Interval at which metrics should be scraped
+                      type: string
+                    name:
+                      description: HTTP path to scrape for metrics.
+                      type: string
+                    params:
+                      description: Optional HTTP URL parameters
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    path:
+                      description: HTTP path to scrape for metrics.
+                      type: string
+                    port:
+                      description: Name of the service port this url refers to. Mutually
+                        exclusive with targetPort.
+                      type: string
+                    scheme:
+                      description: HTTP scheme to use for scraping.
+                      type: string
+                    scrapeTimeout:
+                      description: Timeout after which the scrape is ended
+                      type: string
+                    tlsConfig:
+                      description: TLS configuration to use when scraping the url
+                      properties:
+                        insecureSkipVerify:
+                          description: Disable target certificate validation.
+                          type: boolean
+                      type: object
+                    url:
+                      description: url for whole url
+                      type: string
+                    customErrors:
+                      description: List of custom errors.
+                      items:
+                        type: string
+                      type: array
+                  type: object
+                type: array
+              selector:
+                description: Selector transfers labels on the Kubernetes Pod onto the
+                  target.
+                properties:
+                  matchExpressions:
+                    description: matchExpressions is a list of label selector requirements.
+                      The requirements are ANDed.
+                    items:
+                      description: A label selector requirement is a selector that contains
+                        values, a key, and an operator that relates the key and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: operator represents a key's relationship to a
+                            set of values. Valid operators are In, NotIn, Exists and
+                            DoesNotExist.
+                          type: string
+                        values:
+                          description: values is an array of string values. If the operator
+                            is In or NotIn, the values array must be non-empty. If the
+                            operator is Exists or DoesNotExist, the values array must
+                            be empty. This array is replaced during a strategic merge
+                            patch.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                        - key
+                        - operator
+                      type: object
+                    type: array
+                  matchLabels:
+                    description: matchLabels is a map of {key,value} pairs. A single
+                      {key,value} in the matchLabels map is equivalent to an element
+                      of matchExpressions, whose key field is "key", the operator is
+                      "In", and the values array contains only "value". The requirements
+                      are ANDed.
+                    type: object
+                type: object
+              crds:
+                description: A list of crds allowed as part of this CaseMonitor.
+                items:
+                  properties:
+                    name:
+                      description: name of job.
+                      type: string
+                    group:
+                      description: group for apigroups GroupVersionKind.
+                      type: string
+                    kind:
+                      description: kind for GroupVersionKind.
+                      type: string
+                    version:
+                      description: version for GroupVersionKind.
+                      type: string
+                    crdname:
+                      description: name of crd.
+                      type: string
+                    namespace:
+                      description: namespace of crd.
+                      type: string
+                    operator:
+                      description: operator of the crd, like Exists, HttpPing.
+                      type: string
+                    basicAuth:
+                      description: 'BasicAuth allow an http to authenticate over basic authentication'
+                      properties:
+                        password:
+                          description: property name of password.
+                          type: string
+                        username:
+                          description: property name of username.
+                          type: string
+                      type: object
+                    url:
+                      description: property name of url
+                      type: string
+                    customErrors:
+                      description: List of custom errors.
+                      items:
+                        type: string
+                      type: array
+                  required:
+                    - name
+                    - group
+                    - kind
+                    - version
+                    - operator
+                  type: object
+                type: array
+            type: object
+          status:
+            type: object
+  - name: v1beta1
+    served: true
+    storage: false
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              interval:
+                type: string
+              jobLabel:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              monitorResults:
+                description: SampleLimit defines per-scrape limit on number of scraped
+                  samples that will be accepted.
+                properties:
+                  latestUpdated:
+                    format: date-time
+                    type: string
+                  targets:
+                    items:
+                      properties:
+                        lastErrors:
+                          items:
+                            type: string
+                          type: array
+                        name:
+                          type: string
+                        running:
+                          type: string
+                        targetType:
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              namespaceSelector:
+                description: NamespaceSelector to select which namespaces the Endpoints
+                  objects are discovered from.
+                properties:
+                  matchNames:
+                    description: List of namespace names.
+                    items:
+                      type: string
+                    type: array
+                type: object
+              pingurls:
+                description: A list of urls allowed as part of this ServiceMonitor.
+                items:
+                  properties:
+                    host:
+                      description: HTTP path to scrape for metrics.
+                      type: string
+                    interval:
+                      description: Interval at which metrics should be scraped
+                      type: string
+                    name:
+                      description: HTTP path to scrape for metrics.
+                      type: string
+                    params:
+                      description: Optional HTTP URL parameters
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    path:
+                      description: HTTP path to scrape for metrics.
+                      type: string
+                    port:
+                      description: Name of the service port this url refers to. Mutually
+                        exclusive with targetPort.
+                      type: string
+                    scheme:
+                      description: HTTP scheme to use for scraping.
+                      type: string
+                    scrapeTimeout:
+                      description: Timeout after which the scrape is ended
+                      type: string
+                    tlsConfig:
+                      description: TLS configuration to use when scraping the url
+                      properties:
+                        insecureSkipVerify:
+                          description: Disable target certificate validation.
+                          type: boolean
+                      type: object
+                    url:
+                      description: url for whole url
+                      type: string
+                    customErrors:
+                      description: List of custom errors.
+                      items:
+                        type: string
+                      type: array
+                  type: object
+                type: array
+              selector:
+                description: Selector transfers labels on the Kubernetes Pod onto the
+                  target.
+                properties:
+                  matchExpressions:
+                    description: matchExpressions is a list of label selector requirements.
+                      The requirements are ANDed.
+                    items:
+                      description: A label selector requirement is a selector that contains
+                        values, a key, and an operator that relates the key and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: operator represents a key's relationship to a
+                            set of values. Valid operators are In, NotIn, Exists and
+                            DoesNotExist.
+                          type: string
+                        values:
+                          description: values is an array of string values. If the operator
+                            is In or NotIn, the values array must be non-empty. If the
+                            operator is Exists or DoesNotExist, the values array must
+                            be empty. This array is replaced during a strategic merge
+                            patch.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                        - key
+                        - operator
+                      type: object
+                    type: array
+                  matchLabels:
+                    description: matchLabels is a map of {key,value} pairs. A single
+                      {key,value} in the matchLabels map is equivalent to an element
+                      of matchExpressions, whose key field is "key", the operator is
+                      "In", and the values array contains only "value". The requirements
+                      are ANDed.
+                    type: object
+                type: object
+              crds:
+                description: A list of crds allowed as part of this CaseMonitor.
+                items:
+                  properties:
+                    name:
+                      description: name of job.
+                      type: string
+                    group:
+                      description: group for apigroups GroupVersionKind.
+                      type: string
+                    kind:
+                      description: kind for GroupVersionKind.
+                      type: string
+                    version:
+                      description: version for GroupVersionKind.
+                      type: string
+                    crdname:
+                      description: name of crd.
+                      type: string
+                    namespace:
+                      description: namespace of crd.
+                      type: string
+                    operator:
+                      description: operator of the crd, like Exists, HttpPing.
+                      type: string
+                    basicAuth:
+                      description: 'BasicAuth allow an http to authenticate over basic authentication'
+                      properties:
+                        password:
+                          description: property name of password.
+                          type: string
+                        username:
+                          description: property name of username.
+                          type: string
+                      type: object
+                    url:
+                      description: property name of url
+                      type: string
+                    customErrors:
+                      description: List of custom errors.
+                      items:
+                        type: string
+                      type: array
+                  required:
+                    - name
+                    - group
+                    - kind
+                    - version
+                    - operator
+                  type: object
+                type: array
+            type: object
+          status:
+            type: object
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
