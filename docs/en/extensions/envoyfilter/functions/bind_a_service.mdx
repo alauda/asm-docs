@@ -1,0 +1,33 @@
+---
+weight: 20
+---
+
+# Bind a service
+
+By binding the created EnvoyFilter to services, the capabilities of this EnvoyFilter can be distributed to the services in the cluster where the EnvoyFilter is located.
+
+## Prerequisites
+
+The **Istio-compatible version** of EnvoyFilter includes the Istio version of the service mesh.
+
+## Procedure
+
+1. In the left navigation bar, click **Service Mesh** > **EnvoyFilter**.
+
+2. (Optional) In the top navigation bar, click to switch to **Service Mesh**.
+
+3. Click on the name of the ***EnvoyFilter*** to be bound to the service.
+
+4. On the **Bind Service** tab, click **Bind Service**.
+
+4. Refer to the following instructions to configure the relevant parameters.
+
+    * **Namespaces**: The namespace in which the EnvoyFilter resides in the cluster.
+
+        **Tip**: During the configuration process, you can switch namespaces and configure them separately. Switching namespaces does not affect the configured data. For example, in namespace `ns 1`, if you select 3 services, and then switch to namespace `ns 2` and select 4 services, when you perform the binding operation, all 7 selected services will be bound.
+
+    * **Clear Selection**: Clear the services in the **Selected** service list. After clearing, all services in the **Select Service** list will be displayed as unselected.
+
+    * **Delete selected services**: Services that have been deleted from the "Selected" services list will be displayed as unselected in the "Select services" list.
+
+5. After confirming that the information is correct, click **Bind**.
