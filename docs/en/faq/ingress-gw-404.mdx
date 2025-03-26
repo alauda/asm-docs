@@ -1,0 +1,352 @@
+---
+title: 404 errors occur when multiple gateways configured with same TLS certificate
+description: This document addresses the 404 error that occurs when multiple gateways are configured with the same TLS certificate, detailing the phenomenon's causes, troubleshooting methods, and solutions. It presents two approaches to resolve the issue, including merging Gateway resources and returning a 421 response code, assisting users in effectively addressing errors caused by HTTP/2 connection reuse.
+weight: 200
+---
+
+## Issue Description
+
+**Symptom**
+
+When accessing via the Istio Ingress Gateway using the HTTP/2 protocol, a 404 error occurs.
+
+This issue is a known problem in the Istio community. For more details, please refer to [404 errors occur when multiple gateways configured with same TLS certificate](https://istio.io/latest/docs/ops/common-problems/network-issues/#404-errors-occur-when-multiple-gateways-configured-with-same-tls-certificate).
+
+**Analysis**
+
+Configuring more than one gateway using the same TLS certificate will cause browsers that leverage HTTP/2 connection reuse (i.e., most browsers) to produce 404 errors when accessing a second host after a connection to another host has already been established.
+
+**Example:** If the domains `a.example.com` and `b.example.com` use the same TLS certificate and are accessed through the same Istio Ingress Gateway but are configured in two different Gateway resources, an HTTP/2 browser client will encounter a 404 error when accessing `b.example.com` after having accessed `a.example.com`. This is due to the browser's HTTP/2 connection reuse.
+
+## Troubleshooting Method
+
+You can use the following script to quickly check if your environment has Gateway configurations matching the problem description. The script needs to be executed on the master node of the business cluster where the Istio Ingress Gateway is located.
+
+**Note:**
+
+- The script depends on the `jq` tool. If your cluster node does not have the `jq` tool, please install `jq` in the cluster before executing the script. Download link for the tool: [jq download](https://jqlang.github.io/jq/download/).
+- The `jq` tool version must be 1.7 or higher.
+
+```bash
+#!/bin/bash
+
+nslist=$(kubectl get ns  -o jsonpath='{.items[*].metadata.name}')
+declare -A cred_map
+
+echo "begin to check gw"
+for ns in $nslist; do
+  # Get gw resources
+  #echo "begin to list gw in $ns"
+  gateways=$(kubectl get gw -n $ns -o jsonpath='{.items[*].metadata.name}')
+  # Get the YAML file of the Gateway resource
+  for gateway in $gateways; do
+    gateway_yaml=$(kubectl get gw -n $ns $gateway  -o yaml)
+    gateway_json=$(kubectl get gw -n $ns $gateway  -o json)
+
+    tls_lines=$(echo "$gateway_yaml" | grep  'credentialName:')
+    secname=$(echo "$gateway_yaml" | grep  'credentialName:'|awk '{print $2}')
+
+    if [[ -n "$tls_lines" ]]; then
+      found=false
+      for key in "${!cred_map[@]}"; do
+        if [[ "$key" == "$secname" ]]; then
+          found=true
+          break
+        fi
+      done
+
+      if [[ $found == true ]]; then
+        echo -e "\033[31m cred already exist in other gw resource ,please must merge hosts in the  gw resource  ${cred_map[$secname]} ,and delete this gw!  \033[0m"
+        hosts=$(echo "$gateway_json" | jq -r '.spec.servers[] | .hosts[]')
+        # Output Gateway name and hosts information
+        echo -e  "\033[31m invalid gw name namespace: $gateway ,  $ns \033[0m"
+        echo "Hosts: $hosts"
+      else
+        echo "first get secret name $secname the gw is $gateway $ns"
+        cred_map["$secname"]="$gateway~$ns"
+      fi
+
+
+      #for key in "${!cred_map[@]}"; do
+        #echo "Key: $key, Value: ${cred_map[$key]}"
+      #done
+
+      echo ""
+    fi
+  done
+done
+```
+
+**Example of Script Execution Output:**
+
+```plaintext
+[root@idp-lihuang-w9x9w-9n9jv-cluster0-dt2n4 gwtls]# sh check.sh
+begin to check gw
+first get secret name jiaxiurc-com the gw is drawdb-gateway drawdb
+first get secret name gyssg-com the gw is ec jxb-ec
+first get secret name nexus the gw is nexus-gateway nexus
+ cred already exist in other gw resource, please must merge hosts in the gw resource drawdb-gateway~drawdb, and delete this gw!
+ invalid gw name namespace: authory-gateway, nm-edu-authory
+Hosts: rzzx-test.jiaxiurc.com
+rzzx-test.jiaxiurc.com
+```
+
+If you see a similar message in the output: “cred already exist in other gw resource, please must merge hosts in the gw resource drawdb-gateway~drawdb, and delete this gw!” it indicates that you are facing the issue described in this document.
+
+## Overview of Solutions
+
+To address this issue, we offer two solutions. You can refer to the comparison below and choose either solution to implement in your environment.
+
+**Solution Comparison**
+
+| Solution                                                            | Advantages                                                                                                            | Disadvantages                                                                                                                                                                                                                                                                                            |
+|---------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [(Recommended) Solution 1: Merge Gateway Resources](#merge_gateway) | - Community-recommended fix, with backward compatibility.<br/>- Maintains HTTP/2 performance for the client.          | - If there are a large number of related Gateway resources in the cluster, the merge operation may be cumbersome.                                                                                                                                                                                        |
+| [Solution 2: Response Code 421](#res_401)                           | - No need to modify existing Gateway and VirtualService resources.<br/>- Maintains HTTP/2 performance for the client. | - Strongly dependent on the client supporting the 421 response code. Most mainstream browsers support the 421 response code, such as Chrome, Firefox, and Safari (Safari version must be 15.1 or higher, i.e., macOS Monterey).<br/>- Before upgrading Istio, EnvoyFilter compatibility must be checked. |
+
+### <span id="merge_gateway">Solution 1: Merge Gateway Resources</span>
+
+**Solution Description**
+
+Merge multiple Gateway resources that use the same TLS certificate into one.
+
+**Steps to Implement**
+
+1. Merge multiple Gateway resources into one Gateway configuration, using the same `spec.servers.hosts` list or a wildcard domain configuration.
+2. Modify the related VirtualService resources to ensure they point to the merged Gateway.
+
+For example, in the original configuration, two Gateways use the same TLS certificate `testhl`:
+```yaml
+# Gateway Error Example 1: Two Gateways use the same TLS certificate
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm2.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm1.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+# Gateway Error Example 2: The same Gateway uses the same TLS certificate in different Hosts sections
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: error-3
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm1.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https-2
+      number: 443
+      protocol: HTTPS
+  - hosts:
+    - "asm2.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+# VirtualService Example
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default2
+  namespace: bus-system
+spec:
+  gateways:
+  - istio-system/default2
+  hosts:
+  - asm2.test.com
+  http:
+  - route:
+    - destination:
+        host: asm-0.testhl.svc.cluster.local
+        port:
+          number: 80
+  ...
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default
+  namespace: bus-system
+spec:
+  gateways:
+  - istio-system/default
+  hosts:
+  - asm1.test.com
+  ...
+```
+
+Correct configuration after merging:
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm2.test.com"
+    - "asm1.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default1
+  namespace: istio-system
+spec:
+  gateways:
+  - istio-system/default2
+  hosts:
+  - asm2.test.com
+  ...
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  gateways:
+  - istio-system/default2
+  hosts:
+  - asm1.test.com
+  ...
+```
+
+You can also write it in a wildcard format:
+
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "*.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+```
+
+**Summary of Steps**
+
+- Merge the `spec.servers.hosts` of the Gateway resources, combining all Gateway resources that use the same certificate into a single `server` configuration.
+- Modify the VirtualService resources to point to the merged Gateway.
+- Ensure that the `destination` in the VirtualService uses the Kubernetes FQDN format.
+
+**Important Note:** After performing the above steps, please rerun the check script to confirm that the issue has been resolved.
+
+### <span id="res_401">Solution 2: Response Code 421</span>
+
+**Solution Description**
+
+Response 421 status code in case of a problem allows the client to re-establish the connection, which will route to the correct target Host.
+
+**Steps to Implement**
+
+Apply the following EnvoyFilter configuration:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: misdirected-request
+  namespace: istio-system
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.router
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.lua
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+            inlineCode: |
+              local function get_host_from_authority(authority)
+                local colon_pos = authority:find(":", 1, true)
+                return colon_pos and authority:sub(1, colon_pos - 1) or authority
+              end
+
+              function envoy_on_request(request_handle)
+                local streamInfo = request_handle:streamInfo()
+                local requestedServerName = streamInfo:requestedServerName()
+
+                if requestedServerName ~= "" then
+                  local host = get_host_from_authority(request_handle:headers():get(":authority"))
+                  local isWildcard = string.sub(requestedServerName, 1, 2) == "*."
+
+                  if isWildcard and not string.find(host, string.sub(requestedServerName, 3)) then
+                    request_handle:respond({[":status"] = "421"}, "Misdirected Request")
+                  elseif not isWildcard and requestedServerName ~= host then
+                    request_handle:respond({[":status"] = "421"}, "Misdirected Request")
+                  end
+                end
+              end
+```

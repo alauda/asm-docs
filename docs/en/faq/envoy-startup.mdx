@@ -1,0 +1,54 @@
+---
+title: Envoy Proxy Startup Troubleshooting
+description: When the pod fails to start or the traffic does not function as intended, use the following tools and techniques to troubleshoot.
+weight: 100
+---
+
+The Envoy proxy, also known as `istio-proxy` when used as a sidecar in your workload pod, intercepts all inbound and outbound traffic in your pod within the service mesh.
+
+When the pod fails to start or the traffic does not function as intended, use the following tools and techniques to troubleshoot:
+
+## PostStarHookError
+
+If you encounter a `PostStarHookError` error and the error message for the pod indicates something like:
+
+```
+Error: timeout waiting for Envoy proxy to become ready.
+```
+
+It means that the proxy cannot become ready within a specified time period (`30s`). Here are common causes of this error:
+
+___Insufficient CPU or Memory Limits for Sidecar___
+
+When:
+- The host machine experiences high load
+- CPU frequency is inadequate
+- There are too many services across the service mesh
+- etc
+
+Then the sidecar cannot process xDS configuration from `istiod` within a reasonable time (30s).
+
+**Action:** Increase the CPU and memory limits of the sidecar.
+
+___Firewall___
+
+The service mesh requires sidecar traffic to access services in the `istio-system` namespace.
+
+If you find messages in `istio-proxy` logs indicating "cannot connect to istiod", check the firewall configuration on your platform and contact your platform administrator to allow workload traffic to the `istio-system` namespace:
+
+The specific configuration depends on the CNI used on your platform:
+
+- (Generic) `NetworkPolicy`
+- (Calico) `NetworkPolicy`, `GlobalNetworkPolicy` in `projectcalico.org/v3`
+- (Cilium/KubeOVN) `CiliumNetworkPolicy`
+
+However, in rare cases (e.g., HuaweiCloud CCE & Ubuntu 22.04) due to a bug caused by CCE VPC CNI, you cannot use the `istio-init` initContainer to intercept network traffic. In this scenario, use the Istio CNI to configure the interception.
+
+## Problematic WASM / EnvoyFilter Plugins
+
+WASM and EnvoyFilters are powerful but potentially disruptive features in Istio.
+
+Incorrectly configured WASM or EnvoyFilter plugins can cause unpredictable behavior in the service mesh.
+Therefore, when the Istio sidecar appears to be stalled during startup, check for suspicious EnvoyFilters first.
+
+Alternatively, if a WASM plugin is installed for the workload-specific or globally, uninstall it to verify if the Istio proxy functions as intended afterward.

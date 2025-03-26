@@ -1,0 +1,59 @@
+---
+title: Common Issues in Trace Querying
+description: This article addresses common issues you may encounter when querying trace data.
+weight: 300
+---
+
+## Why Can't I Find the Trace Data I Need?
+
+### 1. Trace Sampling Rate Is Too Low
+
+If the trace sampling rate in your Service Mesh is set too low, you might only see trace data when there is a sufficient volume of requests.
+
+You can increase the sampling rate based on your needs.
+
+### 2. Querying Very Recent Trace Data
+
+When querying trace data from recent time frames (e.g., the last 30 minutes), if the trace results do not include data from the last 10 seconds, this is normal. You can wait a moment and refresh the page to try again.
+
+This is because trace data is stored in Elasticsearch, which provides near real-time search capabilities.
+
+Additionally, ASM configures the trace index in Elasticsearch with a default setting of `"refresh_interval": "10s"`, meaning Elasticsearch refreshes the data from memory to disk every 10 seconds, after which it becomes searchable.
+
+This index configuration effectively reduces Elasticsearch's data merge pressure, improving indexing speed and initial query performance, but it slightly decreases the real-time nature of the data.
+
+You can adjust this configuration using the `--es.asm.index-refresh-interval` startup parameter for `jaeger-collector`. The default value is `10s`.
+
+If this parameter is set to `"null"`, the `refresh_interval` of the index will not be configured.
+
+### 3. Improper Query Condition Settings
+
+When performing trace queries, if the technical principles behind the `Span kind` parameter are not well understood, it may result in no data being returned. Therefore, it's not recommended to use this parameter arbitrarily. Especially when both `Client` and `Server` are specified, it can lead to empty query results.
+
+#### Example 1: `Span kind` set to `Root Span` with both `Client` and `Server` specified
+In this case, the query will return **no data**. The reason is that when both the client and server are governed by OTel Agent, the root span of the trace is typically on the client side, and server data will not be retrieved. To resolve this, remove the `Server` condition or avoid selecting `Root Span`.
+
+#### Example 2: `Span kind` set to `Service Entry Span` with both `Client` and `Server` specified
+Similarly, this query will also return **no data**. The reason is that when both the client and server have a Sidecar injected, the `Service Entry Span` refers to the first request received by the server, but the trace data is stored on the client side. To resolve this, remove the `Client` condition or avoid selecting `Service Entry Span`.
+
+## Why Are the Queried Traces Incomplete?
+
+### 1. Trace Data for the Current Time Period is Incomplete
+
+When querying trace data from recent time frames (e.g., the last 30 minutes), if spans within the traces are incomplete, this is normal. You can wait a moment and refresh the page to try again.
+
+This happens because while Elasticsearch is refreshing the latest spans to disk, some spans may not yet be generated or written to disk, leading to incomplete trace results.
+
+### 2. Incomplete Traces for Long-Duration Spans
+
+If the queried traces have long durations (e.g., spanning more than an hour), incomplete data may be returned, which is normal.
+
+By default, when ASM queries traces for a span, the time range extends one hour before and after the span's start and end times.
+
+For example, if a span starts at 08:12:30 and ends at 08:12:32, the query time range for that trace will be from 07:12:30 to 09:12:32.
+
+Thus, if a trace spans more than an hour, querying via this span may not retrieve the complete trace.
+
+If the traces in your environment typically have longer durations, you can adjust the query time range for individual traces using the `--es.asm.span-trace-query-time-adjustment-hours` startup parameter for `jaeger-query`.
+
+The default value for this parameter is one hour, but you can increase it as needed.
