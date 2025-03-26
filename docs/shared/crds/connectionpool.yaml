@@ -1,0 +1,122 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: connectionpools.asm.alauda.io
+spec:
+  group: asm.alauda.io
+  names:
+    kind: ConnectionPool
+    listKind: ConnectionPoolList
+    plural: connectionpools
+    shortNames:
+    - cp
+    singular: connectionpool
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: ConnectionPool is the Schema for the connectionpools API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ConnectionPoolSpec defines the desired state of ConnectionPool
+            properties:
+              host:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              http:
+                description: Settings applicable to HTTP1.1/HTTP2/GRPC connections.
+                properties:
+                  httpMaxPendingRequests:
+                    description: Maximum number of pending HTTP1 requests to a destination.
+                      Default 1024.
+                    format: int32
+                    type: integer
+                  httpMaxRequests:
+                    description: Maximum number of HTTP2 requests to a backend. Default
+                      1024.
+                    format: int32
+                    type: integer
+                  maxConnections:
+                    description: Maximum number of HTTP1 /TCP connections to a destination
+                      host. Default 2^32-1.
+                    format: int32
+                    type: integer
+                  maxRequestsPerConnection:
+                    description: parameter 1 disables keep alive. Default 0, meaning
+                      "unlimited",
+                    format: int32
+                    type: integer
+                  maxRetries:
+                    description: cluster at a given time. Defaults to 3.
+                    format: int32
+                    type: integer
+                type: object
+              tcp:
+                description: Settings for common to both HTTP and TCP upstream connections.
+                properties:
+                  connectTimeout:
+                    description: 'TCP connection timeout. format: 1h/1m/1s/1ms. MUST
+                      BE >=1ms. Default is 10s.'
+                    pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                    type: string
+                  maxConnections:
+                    description: Maximum number of HTTP1 /TCP connections to a destination
+                      host. Default 2^32-1.
+                    format: int32
+                    type: integer
+                  tcpKeepalive:
+                    description: If set then set SO_KEEPALIVE on the socket to enable
+                      TCP Keepalives.
+                    properties:
+                      interval:
+                        description: The time duration between keep-alive probes. Default
+                          is to use the OS level configuration (unless overridden, Linux
+                          defaults to 75s.)
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                        type: string
+                      probes:
+                        description: Maximum number of keepalive probes to send without
+                          response before deciding the connection is dead. Default is
+                          to use the OS level configuration (unless overridden, Linux
+                          defaults to 9.)
+                        format: int32
+                        type: integer
+                      time:
+                        description: The time duration a connection needs to be idle
+                          before keep-alive probes start being sent. Default is to use
+                          the OS level configuration (unless overridden, Linux defaults
+                          to 7200s (ie 2 hours.)
+                        pattern: ([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?([0-9]+us)?([0-9]+µs)?([0-9]+ns)?
+                        type: string
+                    type: object
+                type: object
+            type: object
+          status:
+            description: ConnectionPoolStatus defines the observed state of ConnectionPool
+            type: object
+        type: object
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

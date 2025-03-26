@@ -1,0 +1,1463 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: canarytemplates.asm.alauda.io
+spec:
+  group: asm.alauda.io
+  names:
+    kind: CanaryTemplate
+    listKind: CanaryTemplateList
+    plural: canarytemplates
+    singular: canarytemplate
+  preserveUnknownFields: false
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: CanaryTemplate is the Schema for the Canarytemplates API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CanaryTemplateSpec defines the desired state of CanaryTemplate
+            properties:
+              analysis:
+                description: Analysis defines the validation process of a release
+                properties:
+                  interval:
+                    description: Schedule interval for this canary analysis
+                    type: string
+                  iterations:
+                    description: Number of checks to run for A/B Testing and Blue/Green
+                    type: integer
+                  match:
+                    description: A/B testing HTTP header match conditions
+                    items:
+                      description: "HttpMatchRequest specifies a set of criterion
+                        to be met in order for the rule to be applied to the HTTP
+                        request. For example, the following restricts the rule to
+                        match only requests where the URL path starts with /ratings/v2/
+                        and the request contains a \"cookie\" with value \"user=jason\".
+                        \n apiVersion: networking.istio.io/v1alpha3 kind: VirtualService
+                        metadata: name: ratings-route spec: hosts: - ratings http:
+                        - match: - headers: cookie: regex: \"^(.*?;)?(user=jason)(;.*)?\"
+                        uri: prefix: \"/ratings/v2/\" route: - destination: host:
+                        ratings \n HTTPMatchRequest CANNOT be empty."
+                      properties:
+                        authority:
+                          description: "HTTP Authority values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        gateways:
+                          description: Names of gateways where the rule should be
+                            applied to. Gateway names at the top of the VirtualService
+                            (if any) are overridden. The gateway match is independent
+                            of sourceLabels.
+                          items:
+                            type: string
+                          type: array
+                        headers:
+                          additionalProperties:
+                            description: Describes how to match a given string in
+                              HTTP headers. Match is case-sensitive.
+                            properties:
+                              exact:
+                                description: exact string match
+                                type: string
+                              prefix:
+                                description: prefix-based match
+                                type: string
+                              regex:
+                                description: ECMAscript style regex-based match
+                                type: string
+                              suffix:
+                                description: suffix-based match.
+                                type: string
+                            type: object
+                          description: "The header keys must be lowercase and use
+                            hyphen as the separator, e.g. _x-request-id_. \n Header
+                            values are case-sensitive and formatted as follows: \n
+                            - `exact: \"value\"` for exact string match \n - `prefix:
+                            \"value\"` for prefix-based match \n - `regex: \"value\"`
+                            for ECMAscript style regex-based match \n **Note:** The
+                            keys `uri`, `scheme`, `method`, and `authority` will be
+                            ignored."
+                          type: object
+                        method:
+                          description: "HTTP Method values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        port:
+                          description: Specifies the ports on the host that is being
+                            addressed. Many services only expose a single port or
+                            label ports with the protocols they support, in these
+                            cases it is not required to explicitly select the port.
+                          format: int32
+                          type: integer
+                        scheme:
+                          description: "URI Scheme values are case-sensitive and formatted
+                            as follows: \n - `exact: \"value\"` for exact string match
+                            \n - `prefix: \"value\"` for prefix-based match \n - `regex:
+                            \"value\"` for ECMAscript style regex-based match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        sourceLabels:
+                          additionalProperties:
+                            type: string
+                          description: One or more labels that constrain the applicability
+                            of a rule to workloads with the given labels. If the VirtualService
+                            has a list of gateways specified at the top, it should
+                            include the reserved gateway `mesh` in order for this
+                            field to be applicable.
+                          type: object
+                        uri:
+                          description: "URI to match values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                      type: object
+                    type: array
+                  maxWeight:
+                    description: Max traffic percentage routed to canary
+                    type: integer
+                  metrics:
+                    description: Metric check list for this canary analysis
+                    items:
+                      description: CanaryMetric holds the reference to metrics used
+                        for canary analysis
+                      properties:
+                        interval:
+                          description: Interval represents the windows size
+                          type: string
+                        name:
+                          description: Name of the metric
+                          type: string
+                        query:
+                          description: Prometheus query for this metric (deprecated
+                            in favor of TemplateRef)
+                          type: string
+                        templateRef:
+                          description: TemplateRef references a metric template object
+                          properties:
+                            apiVersion:
+                              description: API version of the referent
+                              type: string
+                            kind:
+                              description: Kind of the referent
+                              type: string
+                            name:
+                              description: Name of the referent
+                              type: string
+                            namespace:
+                              description: Namespace of the referent
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        threshold:
+                          description: Max value accepted for this metric
+                          type: number
+                        thresholdRange:
+                          description: Range value accepted for this metric
+                          properties:
+                            max:
+                              description: Maximum value
+                              type: number
+                            min:
+                              description: Minimum value
+                              type: number
+                          type: object
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  mirror:
+                    description: Enable traffic mirroring for Blue/Green
+                    type: boolean
+                  stepWeight:
+                    description: Incremental traffic percentage step
+                    type: integer
+                  stepWeightPromotion:
+                    description: Incremental traffic percentage step for promotion
+                      phase
+                    type: integer
+                  threshold:
+                    description: Max number of failed checks before the canary is
+                      terminated
+                    type: integer
+                  webhooks:
+                    description: Webhook list for this canary  analysis
+                    items:
+                      description: CanaryWebhook holds the reference to external checks
+                        used for canary analysis
+                      properties:
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          description: Metadata (key-value pairs) for this webhook
+                          type: object
+                        name:
+                          description: Name of this webhook
+                          type: string
+                        timeout:
+                          description: Request timeout for this webhook
+                          type: string
+                        type:
+                          description: Type of this webhook
+                          type: string
+                        url:
+                          description: URL address of this webhook
+                          type: string
+                      required:
+                      - name
+                      - type
+                      - url
+                      type: object
+                    type: array
+                required:
+                - interval
+                type: object
+              autoscalerRef:
+                description: AutoscalerRef references an autoscaling resource
+                properties:
+                  apiVersion:
+                    description: API version of the referent
+                    type: string
+                  kind:
+                    description: Kind of the referent
+                    type: string
+                  name:
+                    description: Name of the referent
+                    type: string
+                  namespace:
+                    description: Namespace of the referent
+                    type: string
+                required:
+                - name
+                type: object
+              canaryAnalysis:
+                description: 'Deprecated: replaced by Analysis'
+                properties:
+                  interval:
+                    description: Schedule interval for this canary analysis
+                    type: string
+                  iterations:
+                    description: Number of checks to run for A/B Testing and Blue/Green
+                    type: integer
+                  match:
+                    description: A/B testing HTTP header match conditions
+                    items:
+                      description: "HttpMatchRequest specifies a set of criterion
+                        to be met in order for the rule to be applied to the HTTP
+                        request. For example, the following restricts the rule to
+                        match only requests where the URL path starts with /ratings/v2/
+                        and the request contains a \"cookie\" with value \"user=jason\".
+                        \n apiVersion: networking.istio.io/v1alpha3 kind: VirtualService
+                        metadata: name: ratings-route spec: hosts: - ratings http:
+                        - match: - headers: cookie: regex: \"^(.*?;)?(user=jason)(;.*)?\"
+                        uri: prefix: \"/ratings/v2/\" route: - destination: host:
+                        ratings \n HTTPMatchRequest CANNOT be empty."
+                      properties:
+                        authority:
+                          description: "HTTP Authority values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        gateways:
+                          description: Names of gateways where the rule should be
+                            applied to. Gateway names at the top of the VirtualService
+                            (if any) are overridden. The gateway match is independent
+                            of sourceLabels.
+                          items:
+                            type: string
+                          type: array
+                        headers:
+                          additionalProperties:
+                            description: Describes how to match a given string in
+                              HTTP headers. Match is case-sensitive.
+                            properties:
+                              exact:
+                                description: exact string match
+                                type: string
+                              prefix:
+                                description: prefix-based match
+                                type: string
+                              regex:
+                                description: ECMAscript style regex-based match
+                                type: string
+                              suffix:
+                                description: suffix-based match.
+                                type: string
+                            type: object
+                          description: "The header keys must be lowercase and use
+                            hyphen as the separator, e.g. _x-request-id_. \n Header
+                            values are case-sensitive and formatted as follows: \n
+                            - `exact: \"value\"` for exact string match \n - `prefix:
+                            \"value\"` for prefix-based match \n - `regex: \"value\"`
+                            for ECMAscript style regex-based match \n **Note:** The
+                            keys `uri`, `scheme`, `method`, and `authority` will be
+                            ignored."
+                          type: object
+                        method:
+                          description: "HTTP Method values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        port:
+                          description: Specifies the ports on the host that is being
+                            addressed. Many services only expose a single port or
+                            label ports with the protocols they support, in these
+                            cases it is not required to explicitly select the port.
+                          format: int32
+                          type: integer
+                        scheme:
+                          description: "URI Scheme values are case-sensitive and formatted
+                            as follows: \n - `exact: \"value\"` for exact string match
+                            \n - `prefix: \"value\"` for prefix-based match \n - `regex:
+                            \"value\"` for ECMAscript style regex-based match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        sourceLabels:
+                          additionalProperties:
+                            type: string
+                          description: One or more labels that constrain the applicability
+                            of a rule to workloads with the given labels. If the VirtualService
+                            has a list of gateways specified at the top, it should
+                            include the reserved gateway `mesh` in order for this
+                            field to be applicable.
+                          type: object
+                        uri:
+                          description: "URI to match values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                      type: object
+                    type: array
+                  maxWeight:
+                    description: Max traffic percentage routed to canary
+                    type: integer
+                  metrics:
+                    description: Metric check list for this canary analysis
+                    items:
+                      description: CanaryMetric holds the reference to metrics used
+                        for canary analysis
+                      properties:
+                        interval:
+                          description: Interval represents the windows size
+                          type: string
+                        name:
+                          description: Name of the metric
+                          type: string
+                        query:
+                          description: Prometheus query for this metric (deprecated
+                            in favor of TemplateRef)
+                          type: string
+                        templateRef:
+                          description: TemplateRef references a metric template object
+                          properties:
+                            apiVersion:
+                              description: API version of the referent
+                              type: string
+                            kind:
+                              description: Kind of the referent
+                              type: string
+                            name:
+                              description: Name of the referent
+                              type: string
+                            namespace:
+                              description: Namespace of the referent
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        threshold:
+                          description: Max value accepted for this metric
+                          type: number
+                        thresholdRange:
+                          description: Range value accepted for this metric
+                          properties:
+                            max:
+                              description: Maximum value
+                              type: number
+                            min:
+                              description: Minimum value
+                              type: number
+                          type: object
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  mirror:
+                    description: Enable traffic mirroring for Blue/Green
+                    type: boolean
+                  stepWeight:
+                    description: Incremental traffic percentage step
+                    type: integer
+                  stepWeightPromotion:
+                    description: Incremental traffic percentage step for promotion
+                      phase
+                    type: integer
+                  threshold:
+                    description: Max number of failed checks before the canary is
+                      terminated
+                    type: integer
+                  webhooks:
+                    description: Webhook list for this canary  analysis
+                    items:
+                      description: CanaryWebhook holds the reference to external checks
+                        used for canary analysis
+                      properties:
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          description: Metadata (key-value pairs) for this webhook
+                          type: object
+                        name:
+                          description: Name of this webhook
+                          type: string
+                        timeout:
+                          description: Request timeout for this webhook
+                          type: string
+                        type:
+                          description: Type of this webhook
+                          type: string
+                        url:
+                          description: URL address of this webhook
+                          type: string
+                      required:
+                      - name
+                      - type
+                      - url
+                      type: object
+                    type: array
+                required:
+                - interval
+                type: object
+              failFallBack:
+                description: if set true,we will rollback canary workload modify
+                type: boolean
+              ingressRef:
+                description: Reference to NGINX ingress resource
+                properties:
+                  apiVersion:
+                    description: API version of the referent
+                    type: string
+                  kind:
+                    description: Kind of the referent
+                    type: string
+                  name:
+                    description: Name of the referent
+                    type: string
+                  namespace:
+                    description: Namespace of the referent
+                    type: string
+                required:
+                - name
+                type: object
+              maxResponseTime:
+                type: number
+              metricsServer:
+                description: MetricsServer overwrites the -metrics-server flag for
+                  this particular canary
+                type: string
+              minSuccessRate:
+                type: number
+              progressDeadlineSeconds:
+                description: ProgressDeadlineSeconds represents the maximum time in
+                  seconds for a canary deployment to make progress before it is considered
+                  to be failed
+                format: int32
+                type: integer
+              service:
+                description: Service defines how ClusterIP services, service mesh
+                  or ingress routing objects are generated
+                properties:
+                  backends:
+                    description: Backends of the generated App Mesh virtual nodes
+                    items:
+                      type: string
+                    type: array
+                  corsPolicy:
+                    description: Cross-Origin Resource Sharing policy for the generated
+                      Istio virtual service
+                    properties:
+                      allowCredentials:
+                        description: Indicates whether the caller is allowed to send
+                          the actual request (not the preflight) using credentials.
+                          Translates to Access-Control-Allow-Credentials header.
+                        type: boolean
+                      allowHeaders:
+                        description: List of HTTP headers that can be used when requesting
+                          the resource. Serialized to Access-Control-Allow-Methods
+                          header.
+                        items:
+                          type: string
+                        type: array
+                      allowMethods:
+                        description: List of HTTP methods allowed to access the resource.
+                          The content will be serialized into the Access-Control-Allow-Methods
+                          header.
+                        items:
+                          type: string
+                        type: array
+                      allowOrigin:
+                        description: The list of origins that are allowed to perform
+                          CORS requests. The content will be serialized into the Access-Control-Allow-Origin
+                          header. Wildcard * will allow all origins.
+                        items:
+                          type: string
+                        type: array
+                      exposeHeaders:
+                        description: A white list of HTTP headers that the browsers
+                          are allowed to access. Serialized into Access-Control-Expose-Headers
+                          header.
+                        items:
+                          type: string
+                        type: array
+                      maxAge:
+                        description: Specifies how long the the results of a preflight
+                          request can be cached. Translates to the Access-Control-Max-Age
+                          header.
+                        type: string
+                    type: object
+                  gateways:
+                    description: Gateways attached to the generated Istio virtual
+                      service Defaults to the internal mesh gateway
+                    items:
+                      type: string
+                    type: array
+                  headers:
+                    description: Headers operations for the generated Istio virtual
+                      service
+                    properties:
+                      request:
+                        description: Header manipulation rules to apply before forwarding
+                          a request to the destination service
+                        properties:
+                          add:
+                            additionalProperties:
+                              type: string
+                            description: Append the given values to the headers specified
+                              by keys (will create a comma-separated list of values)
+                            type: object
+                          remove:
+                            description: Remove the specified headers
+                            items:
+                              type: string
+                            type: array
+                          set:
+                            additionalProperties:
+                              type: string
+                            description: Overwrite the headers specified by key with
+                              the given values
+                            type: object
+                        type: object
+                      response:
+                        description: Header manipulation rules to apply before returning
+                          a response to the caller
+                        properties:
+                          add:
+                            additionalProperties:
+                              type: string
+                            description: Append the given values to the headers specified
+                              by keys (will create a comma-separated list of values)
+                            type: object
+                          remove:
+                            description: Remove the specified headers
+                            items:
+                              type: string
+                            type: array
+                          set:
+                            additionalProperties:
+                              type: string
+                            description: Overwrite the headers specified by key with
+                              the given values
+                            type: object
+                        type: object
+                    type: object
+                  hosts:
+                    description: Hosts attached to the generated Istio virtual service
+                      Defaults to the service name
+                    items:
+                      type: string
+                    type: array
+                  match:
+                    description: URI match conditions for the generated service
+                    items:
+                      description: "HttpMatchRequest specifies a set of criterion
+                        to be met in order for the rule to be applied to the HTTP
+                        request. For example, the following restricts the rule to
+                        match only requests where the URL path starts with /ratings/v2/
+                        and the request contains a \"cookie\" with value \"user=jason\".
+                        \n apiVersion: networking.istio.io/v1alpha3 kind: VirtualService
+                        metadata: name: ratings-route spec: hosts: - ratings http:
+                        - match: - headers: cookie: regex: \"^(.*?;)?(user=jason)(;.*)?\"
+                        uri: prefix: \"/ratings/v2/\" route: - destination: host:
+                        ratings \n HTTPMatchRequest CANNOT be empty."
+                      properties:
+                        authority:
+                          description: "HTTP Authority values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        gateways:
+                          description: Names of gateways where the rule should be
+                            applied to. Gateway names at the top of the VirtualService
+                            (if any) are overridden. The gateway match is independent
+                            of sourceLabels.
+                          items:
+                            type: string
+                          type: array
+                        headers:
+                          additionalProperties:
+                            description: Describes how to match a given string in
+                              HTTP headers. Match is case-sensitive.
+                            properties:
+                              exact:
+                                description: exact string match
+                                type: string
+                              prefix:
+                                description: prefix-based match
+                                type: string
+                              regex:
+                                description: ECMAscript style regex-based match
+                                type: string
+                              suffix:
+                                description: suffix-based match.
+                                type: string
+                            type: object
+                          description: "The header keys must be lowercase and use
+                            hyphen as the separator, e.g. _x-request-id_. \n Header
+                            values are case-sensitive and formatted as follows: \n
+                            - `exact: \"value\"` for exact string match \n - `prefix:
+                            \"value\"` for prefix-based match \n - `regex: \"value\"`
+                            for ECMAscript style regex-based match \n **Note:** The
+                            keys `uri`, `scheme`, `method`, and `authority` will be
+                            ignored."
+                          type: object
+                        method:
+                          description: "HTTP Method values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        port:
+                          description: Specifies the ports on the host that is being
+                            addressed. Many services only expose a single port or
+                            label ports with the protocols they support, in these
+                            cases it is not required to explicitly select the port.
+                          format: int32
+                          type: integer
+                        scheme:
+                          description: "URI Scheme values are case-sensitive and formatted
+                            as follows: \n - `exact: \"value\"` for exact string match
+                            \n - `prefix: \"value\"` for prefix-based match \n - `regex:
+                            \"value\"` for ECMAscript style regex-based match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                        sourceLabels:
+                          additionalProperties:
+                            type: string
+                          description: One or more labels that constrain the applicability
+                            of a rule to workloads with the given labels. If the VirtualService
+                            has a list of gateways specified at the top, it should
+                            include the reserved gateway `mesh` in order for this
+                            field to be applicable.
+                          type: object
+                        uri:
+                          description: "URI to match values are case-sensitive and
+                            formatted as follows: \n - `exact: \"value\"` for exact
+                            string match \n - `prefix: \"value\"` for prefix-based
+                            match \n - `regex: \"value\"` for ECMAscript style regex-based
+                            match"
+                          properties:
+                            exact:
+                              description: exact string match
+                              type: string
+                            prefix:
+                              description: prefix-based match
+                              type: string
+                            regex:
+                              description: ECMAscript style regex-based match
+                              type: string
+                            suffix:
+                              description: suffix-based match.
+                              type: string
+                          type: object
+                      type: object
+                    type: array
+                  meshName:
+                    description: Mesh name of the generated App Mesh virtual nodes
+                      and virtual service
+                    type: string
+                  name:
+                    description: Name of the Kubernetes service generated by Flagger
+                      Defaults to CanarySpec.TargetRef.Name
+                    type: string
+                  port:
+                    description: Port of the generated Kubernetes service
+                    format: int32
+                    type: integer
+                  portDiscovery:
+                    description: PortDiscovery adds all container ports to the generated
+                      Kubernetes service
+                    type: boolean
+                  portName:
+                    description: Port name of the generated Kubernetes service Defaults
+                      to http
+                    type: string
+                  retries:
+                    description: Retries policy for the generated virtual service
+                    properties:
+                      attempts:
+                        description: REQUIRED. Number of retries for a given request.
+                          The interval between retries will be determined automatically
+                          (25ms+). Actual number of retries attempted depends on the
+                          httpReqTimeout.
+                        type: integer
+                      perTryTimeout:
+                        description: 'Timeout per retry attempt for a given request.
+                          format: 1h/1m/1s/1ms. MUST BE >=1ms.'
+                        type: string
+                      retryOn:
+                        description: Specifies the conditions under which retry takes
+                          place. One or more policies can be specified using a ‘,’
+                          delimited list. The supported policies can be found in <https://www.envoyproxy.io/docs/envoy/latest/configuration/http_filters/router_filter#x-envoy-retry-on>
+                          and <https://www.envoyproxy.io/docs/envoy/latest/configuration/http_filters/router_filter#x-envoy-retry-grpc-on>
+                        type: string
+                    type: object
+                  rewrite:
+                    description: Rewrite HTTP URIs for the generated service
+                    properties:
+                      authority:
+                        description: rewrite the Authority/Host header with this value.
+                        type: string
+                      uri:
+                        description: rewrite the path (or the prefix) portion of the
+                          URI with this value. If the original URI was matched based
+                          on prefix, the value provided in this field will replace
+                          the corresponding matched prefix.
+                        type: string
+                    type: object
+                  targetPort:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: Target port number or name of the generated Kubernetes
+                      service Defaults to CanaryService.Port
+                    x-kubernetes-int-or-string: true
+                  timeout:
+                    description: Timeout of the HTTP or gRPC request
+                    type: string
+                  trafficPolicy:
+                    description: TrafficPolicy attached to the generated Istio destination
+                      rules
+                    properties:
+                      connectionPool:
+                        description: Settings controlling the volume of connections
+                          to an upstream service
+                        properties:
+                          http:
+                            description: HTTP connection pool settings.
+                            properties:
+                              h2UpgradePolicy:
+                                description: Specify if http1.1 connection should
+                                  be upgraded to http2 for the associated destination.
+                                  DEFAULT - Use the global default. DO_NOT_UPGRADE
+                                  - Do not upgrade the connection to http2. UPGRADE
+                                  - Upgrade the connection to http2.
+                                type: string
+                              http1MaxPendingRequests:
+                                description: Maximum number of pending HTTP requests
+                                  to a destination. Default 2^32-1.
+                                format: int32
+                                type: integer
+                              http2MaxRequests:
+                                description: Maximum number of requests to a backend.
+                                  Default 2^32-1.
+                                format: int32
+                                type: integer
+                              idleTimeout:
+                                description: The idle timeout for upstream connection
+                                  pool connections. The idle timeout is defined as
+                                  the period in which there are no active requests.
+                                  If not set, the default is 1 hour. When the idle
+                                  timeout is reached the connection will be closed.
+                                  Note that request based timeouts mean that HTTP/2
+                                  PINGs will not keep the connection alive. Applies
+                                  to both HTTP1.1 and HTTP2 connections.
+                                type: string
+                              maxRequestsPerConnection:
+                                description: Maximum number of requests per connection
+                                  to a backend. Setting this parameter to 1 disables
+                                  keep alive. Default 0, meaning "unlimited", up to
+                                  2^29.
+                                format: int32
+                                type: integer
+                              maxRetries:
+                                description: Maximum number of retries that can be
+                                  outstanding to all hosts in a cluster at a given
+                                  time. Defaults to 2^32-1.
+                                format: int32
+                                type: integer
+                            type: object
+                          tcp:
+                            description: Settings common to both HTTP and TCP upstream
+                              connections.
+                            properties:
+                              connectTimeout:
+                                description: TCP connection timeout.
+                                type: string
+                              maxConnections:
+                                description: Maximum number of HTTP1 /TCP connections
+                                  to a destination host.
+                                format: int32
+                                type: integer
+                            type: object
+                        type: object
+                      loadBalancer:
+                        description: Settings controlling the load balancer algorithms.
+                        properties:
+                          consistentHash:
+                            description: Consistent Hash-based load balancing can
+                              be used to provide soft session affinity based on HTTP
+                              headers, cookies or other properties. This load balancing
+                              policy is applicable only for HTTP connections. The
+                              affinity to a particular destination host will be lost
+                              when one or more hosts are added/removed from the destination
+                              service.
+                            properties:
+                              httpCookie:
+                                description: Hash based on HTTP cookie.
+                                properties:
+                                  name:
+                                    description: REQUIRED. Name of the cookie.
+                                    type: string
+                                  path:
+                                    description: Path to set for the cookie.
+                                    type: string
+                                  ttl:
+                                    description: REQUIRED. Lifetime of the cookie.
+                                    type: string
+                                required:
+                                - name
+                                - ttl
+                                type: object
+                              httpHeaderName:
+                                description: 'It is required to specify exactly one
+                                  of the fields as hash key: HTTPHeaderName, HTTPCookie,
+                                  or UseSourceIP. Hash based on a specific HTTP header.'
+                                type: string
+                              minimumRingSize:
+                                description: The minimum number of virtual nodes to
+                                  use for the hash ring. Defaults to 1024. Larger
+                                  ring sizes result in more granular load distributions.
+                                  If the number of hosts in the load balancing pool
+                                  is larger than the ring size, each host will be
+                                  assigned a single virtual node.
+                                format: int64
+                                type: integer
+                              useSourceIp:
+                                description: Hash based on the source IP address.
+                                type: boolean
+                            type: object
+                          simple:
+                            description: 'It is required to specify exactly one of
+                              the fields: Simple or ConsistentHash'
+                            type: string
+                        type: object
+                      outlierDetection:
+                        description: Settings controlling eviction of unhealthy hosts
+                          from the load balancing pool
+                        properties:
+                          baseEjectionTime:
+                            description: 'Minimum ejection duration. A host will remain
+                              ejected for a period equal to the product of minimum
+                              ejection duration and the number of times the host has
+                              been ejected. This technique allows the system to automatically
+                              increase the ejection period for unhealthy upstream
+                              servers. format: 1h/1m/1s/1ms. MUST BE >=1ms. Default
+                              is 30s.'
+                            type: string
+                          consecutive5xxErrors:
+                            description: "Number of 5xx errors before a host is ejected
+                              from the connection pool. When the upstream host is
+                              accessed over an opaque TCP connection, connect timeouts,
+                              connection error/failure and request failure events
+                              qualify as a 5xx error. This feature defaults to 5 but
+                              can be disabled by setting the value to 0. \n Note that
+                              consecutive_gateway_errors and consecutive_5xx_errors
+                              can be used separately or together. Because the errors
+                              counted by consecutive_gateway_errors are also included
+                              in consecutive_5xx_errors, if the value of consecutive_gateway_errors
+                              is greater than or equal to the value of consecutive_5xx_errors,
+                              consecutive_gateway_errors will have no effect."
+                            format: int32
+                            type: integer
+                          consecutiveErrors:
+                            description: Number of errors before a host is ejected
+                              from the connection pool. Defaults to 5. When the upstream
+                              host is accessed over HTTP, a 5xx return code qualifies
+                              as an error. When the upstream host is accessed over
+                              an opaque TCP connection, connect timeouts and connection
+                              error/failure events qualify as an error.
+                            format: int32
+                            type: integer
+                          consecutiveGatewayErrors:
+                            description: "Number of gateway errors before a host is
+                              ejected from the connection pool. When the upstream
+                              host is accessed over HTTP, a 502, 503, or 504 return
+                              code qualifies as a gateway error. When the upstream
+                              host is accessed over an opaque TCP connection, connect
+                              timeouts and connection error/failure events qualify
+                              as a gateway error. This feature is disabled by default
+                              or when set to the value 0. \n Note that consecutive_gateway_errors
+                              and consecutive_5xx_errors can be used separately or
+                              together. Because the errors counted by consecutive_gateway_errors
+                              are also included in consecutive_5xx_errors, if the
+                              value of consecutive_gateway_errors is greater than
+                              or equal to the value of consecutive_5xx_errors, consecutive_gateway_errors
+                              will have no effect."
+                            format: int32
+                            type: integer
+                          interval:
+                            description: 'Time interval between ejection sweep analysis.
+                              format: 1h/1m/1s/1ms. MUST BE >=1ms. Default is 10s.'
+                            type: string
+                          maxEjectionPercent:
+                            description: Maximum % of hosts in the load balancing
+                              pool for the upstream service that can be ejected. Defaults
+                              to 10%.
+                            format: int32
+                            type: integer
+                          minHealthPercent:
+                            description: Outlier detection will be enabled as long
+                              as the associated load balancing pool has at least min_health_percent
+                              hosts in healthy mode. When the percentage of healthy
+                              hosts in the load balancing pool drops below this threshold,
+                              outlier detection will be disabled and the proxy will
+                              load balance across all hosts in the pool (healthy and
+                              unhealthy). The threshold can be disabled by setting
+                              it to 0%. The default is 0% as it's not typically applicable
+                              in k8s environments with few pods per service.
+                            format: int32
+                            type: integer
+                        type: object
+                      portLevelSettings:
+                        description: Traffic policies specific to individual ports.
+                          Note that port level settings will override the destination-level
+                          settings. Traffic settings specified at the destination-level
+                          will not be inherited when overridden by port-level settings,
+                          i.e. default values will be applied to fields omitted in
+                          port-level traffic policies.
+                        items:
+                          description: Traffic policies that apply to specific ports
+                            of the service
+                          properties:
+                            connectionPool:
+                              description: Settings controlling the volume of connections
+                                to an upstream service
+                              properties:
+                                http:
+                                  description: HTTP connection pool settings.
+                                  properties:
+                                    h2UpgradePolicy:
+                                      description: Specify if http1.1 connection should
+                                        be upgraded to http2 for the associated destination.
+                                        DEFAULT - Use the global default. DO_NOT_UPGRADE
+                                        - Do not upgrade the connection to http2.
+                                        UPGRADE - Upgrade the connection to http2.
+                                      type: string
+                                    http1MaxPendingRequests:
+                                      description: Maximum number of pending HTTP
+                                        requests to a destination. Default 2^32-1.
+                                      format: int32
+                                      type: integer
+                                    http2MaxRequests:
+                                      description: Maximum number of requests to a
+                                        backend. Default 2^32-1.
+                                      format: int32
+                                      type: integer
+                                    idleTimeout:
+                                      description: The idle timeout for upstream connection
+                                        pool connections. The idle timeout is defined
+                                        as the period in which there are no active
+                                        requests. If not set, the default is 1 hour.
+                                        When the idle timeout is reached the connection
+                                        will be closed. Note that request based timeouts
+                                        mean that HTTP/2 PINGs will not keep the connection
+                                        alive. Applies to both HTTP1.1 and HTTP2 connections.
+                                      type: string
+                                    maxRequestsPerConnection:
+                                      description: Maximum number of requests per
+                                        connection to a backend. Setting this parameter
+                                        to 1 disables keep alive. Default 0, meaning
+                                        "unlimited", up to 2^29.
+                                      format: int32
+                                      type: integer
+                                    maxRetries:
+                                      description: Maximum number of retries that
+                                        can be outstanding to all hosts in a cluster
+                                        at a given time. Defaults to 2^32-1.
+                                      format: int32
+                                      type: integer
+                                  type: object
+                                tcp:
+                                  description: Settings common to both HTTP and TCP
+                                    upstream connections.
+                                  properties:
+                                    connectTimeout:
+                                      description: TCP connection timeout.
+                                      type: string
+                                    maxConnections:
+                                      description: Maximum number of HTTP1 /TCP connections
+                                        to a destination host.
+                                      format: int32
+                                      type: integer
+                                  type: object
+                              type: object
+                            loadBalancer:
+                              description: Settings controlling the load balancer
+                                algorithms.
+                              properties:
+                                consistentHash:
+                                  description: Consistent Hash-based load balancing
+                                    can be used to provide soft session affinity based
+                                    on HTTP headers, cookies or other properties.
+                                    This load balancing policy is applicable only
+                                    for HTTP connections. The affinity to a particular
+                                    destination host will be lost when one or more
+                                    hosts are added/removed from the destination service.
+                                  properties:
+                                    httpCookie:
+                                      description: Hash based on HTTP cookie.
+                                      properties:
+                                        name:
+                                          description: REQUIRED. Name of the cookie.
+                                          type: string
+                                        path:
+                                          description: Path to set for the cookie.
+                                          type: string
+                                        ttl:
+                                          description: REQUIRED. Lifetime of the cookie.
+                                          type: string
+                                      required:
+                                      - name
+                                      - ttl
+                                      type: object
+                                    httpHeaderName:
+                                      description: 'It is required to specify exactly
+                                        one of the fields as hash key: HTTPHeaderName,
+                                        HTTPCookie, or UseSourceIP. Hash based on
+                                        a specific HTTP header.'
+                                      type: string
+                                    minimumRingSize:
+                                      description: The minimum number of virtual nodes
+                                        to use for the hash ring. Defaults to 1024.
+                                        Larger ring sizes result in more granular
+                                        load distributions. If the number of hosts
+                                        in the load balancing pool is larger than
+                                        the ring size, each host will be assigned
+                                        a single virtual node.
+                                      format: int64
+                                      type: integer
+                                    useSourceIp:
+                                      description: Hash based on the source IP address.
+                                      type: boolean
+                                  type: object
+                                simple:
+                                  description: 'It is required to specify exactly
+                                    one of the fields: Simple or ConsistentHash'
+                                  type: string
+                              type: object
+                            outlierDetection:
+                              description: Settings controlling eviction of unhealthy
+                                hosts from the load balancing pool
+                              properties:
+                                baseEjectionTime:
+                                  description: 'Minimum ejection duration. A host
+                                    will remain ejected for a period equal to the
+                                    product of minimum ejection duration and the number
+                                    of times the host has been ejected. This technique
+                                    allows the system to automatically increase the
+                                    ejection period for unhealthy upstream servers.
+                                    format: 1h/1m/1s/1ms. MUST BE >=1ms. Default is
+                                    30s.'
+                                  type: string
+                                consecutive5xxErrors:
+                                  description: "Number of 5xx errors before a host
+                                    is ejected from the connection pool. When the
+                                    upstream host is accessed over an opaque TCP connection,
+                                    connect timeouts, connection error/failure and
+                                    request failure events qualify as a 5xx error.
+                                    This feature defaults to 5 but can be disabled
+                                    by setting the value to 0. \n Note that consecutive_gateway_errors
+                                    and consecutive_5xx_errors can be used separately
+                                    or together. Because the errors counted by consecutive_gateway_errors
+                                    are also included in consecutive_5xx_errors, if
+                                    the value of consecutive_gateway_errors is greater
+                                    than or equal to the value of consecutive_5xx_errors,
+                                    consecutive_gateway_errors will have no effect."
+                                  format: int32
+                                  type: integer
+                                consecutiveErrors:
+                                  description: Number of errors before a host is ejected
+                                    from the connection pool. Defaults to 5. When
+                                    the upstream host is accessed over HTTP, a 5xx
+                                    return code qualifies as an error. When the upstream
+                                    host is accessed over an opaque TCP connection,
+                                    connect timeouts and connection error/failure
+                                    events qualify as an error.
+                                  format: int32
+                                  type: integer
+                                consecutiveGatewayErrors:
+                                  description: "Number of gateway errors before a
+                                    host is ejected from the connection pool. When
+                                    the upstream host is accessed over HTTP, a 502,
+                                    503, or 504 return code qualifies as a gateway
+                                    error. When the upstream host is accessed over
+                                    an opaque TCP connection, connect timeouts and
+                                    connection error/failure events qualify as a gateway
+                                    error. This feature is disabled by default or
+                                    when set to the value 0. \n Note that consecutive_gateway_errors
+                                    and consecutive_5xx_errors can be used separately
+                                    or together. Because the errors counted by consecutive_gateway_errors
+                                    are also included in consecutive_5xx_errors, if
+                                    the value of consecutive_gateway_errors is greater
+                                    than or equal to the value of consecutive_5xx_errors,
+                                    consecutive_gateway_errors will have no effect."
+                                  format: int32
+                                  type: integer
+                                interval:
+                                  description: 'Time interval between ejection sweep
+                                    analysis. format: 1h/1m/1s/1ms. MUST BE >=1ms.
+                                    Default is 10s.'
+                                  type: string
+                                maxEjectionPercent:
+                                  description: Maximum % of hosts in the load balancing
+                                    pool for the upstream service that can be ejected.
+                                    Defaults to 10%.
+                                  format: int32
+                                  type: integer
+                                minHealthPercent:
+                                  description: Outlier detection will be enabled as
+                                    long as the associated load balancing pool has
+                                    at least min_health_percent hosts in healthy mode.
+                                    When the percentage of healthy hosts in the load
+                                    balancing pool drops below this threshold, outlier
+                                    detection will be disabled and the proxy will
+                                    load balance across all hosts in the pool (healthy
+                                    and unhealthy). The threshold can be disabled
+                                    by setting it to 0%. The default is 0% as it's
+                                    not typically applicable in k8s environments with
+                                    few pods per service.
+                                  format: int32
+                                  type: integer
+                              type: object
+                            port:
+                              description: "Specifies the port name or number of a
+                                port on the destination service on which this policy
+                                is being applied. \n Names must comply with DNS label
+                                syntax (rfc1035) and therefore cannot collide with
+                                numbers. If there are multiple ports on a service
+                                with the same protocol the names should be of the
+                                form <protocol-name>-<DNS label>."
+                              properties:
+                                name:
+                                  description: Valid port name
+                                  type: string
+                                number:
+                                  description: Valid port number
+                                  format: int32
+                                  type: integer
+                              type: object
+                            tls:
+                              description: TLS related settings for connections to
+                                the upstream service.
+                              properties:
+                                caCertificates:
+                                  description: 'OPTIONAL: The path to the file containing
+                                    certificate authority certificates to use in verifying
+                                    a presented server certificate. If omitted, the
+                                    proxy will not verify the server''s certificate.
+                                    Should be empty if mode is `ISTIO_MUTUAL`.'
+                                  type: string
+                                clientCertificate:
+                                  description: REQUIRED if mode is `MUTUAL`. The path
+                                    to the file holding the client-side TLS certificate
+                                    to use. Should be empty if mode is `ISTIO_MUTUAL`.
+                                  type: string
+                                mode:
+                                  description: 'REQUIRED: Indicates whether connections
+                                    to this port should be secured using TLS. The
+                                    value of this field determines how TLS is enforced.'
+                                  type: string
+                                privateKey:
+                                  description: REQUIRED if mode is `MUTUAL`. The path
+                                    to the file holding the client's private key.
+                                    Should be empty if mode is `ISTIO_MUTUAL`.
+                                  type: string
+                                sni:
+                                  description: SNI string to present to the server
+                                    during TLS handshake. Should be empty if mode
+                                    is `ISTIO_MUTUAL`.
+                                  type: string
+                                subjectAltNames:
+                                  description: A list of alternate names to verify
+                                    the subject identity in the certificate. If specified,
+                                    the proxy will verify that the server certificate's
+                                    subject alt name matches one of the specified
+                                    values. Should be empty if mode is `ISTIO_MUTUAL`.
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                              - mode
+                              type: object
+                          required:
+                          - port
+                          type: object
+                        type: array
+                      tls:
+                        description: TLS related settings for connections to the upstream
+                          service.
+                        properties:
+                          caCertificates:
+                            description: 'OPTIONAL: The path to the file containing
+                              certificate authority certificates to use in verifying
+                              a presented server certificate. If omitted, the proxy
+                              will not verify the server''s certificate. Should be
+                              empty if mode is `ISTIO_MUTUAL`.'
+                            type: string
+                          clientCertificate:
+                            description: REQUIRED if mode is `MUTUAL`. The path to
+                              the file holding the client-side TLS certificate to
+                              use. Should be empty if mode is `ISTIO_MUTUAL`.
+                            type: string
+                          mode:
+                            description: 'REQUIRED: Indicates whether connections
+                              to this port should be secured using TLS. The value
+                              of this field determines how TLS is enforced.'
+                            type: string
+                          privateKey:
+                            description: REQUIRED if mode is `MUTUAL`. The path to
+                              the file holding the client's private key. Should be
+                              empty if mode is `ISTIO_MUTUAL`.
+                            type: string
+                          sni:
+                            description: SNI string to present to the server during
+                              TLS handshake. Should be empty if mode is `ISTIO_MUTUAL`.
+                            type: string
+                          subjectAltNames:
+                            description: A list of alternate names to verify the subject
+                              identity in the certificate. If specified, the proxy
+                              will verify that the server certificate's subject alt
+                              name matches one of the specified values. Should be
+                              empty if mode is `ISTIO_MUTUAL`.
+                            items:
+                              type: string
+                            type: array
+                        required:
+                        - mode
+                        type: object
+                    type: object
+                required:
+                - port
+                - portDiscovery
+                type: object
+              skipAnalysis:
+                description: SkipAnalysis promotes the canary without analysing it
+                type: boolean
+              targetRef:
+                description: TargetRef references a target resource
+                properties:
+                  apiVersion:
+                    description: API version of the referent
+                    type: string
+                  kind:
+                    description: Kind of the referent
+                    type: string
+                  name:
+                    description: Name of the referent
+                    type: string
+                  namespace:
+                    description: Namespace of the referent
+                    type: string
+                required:
+                - name
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true

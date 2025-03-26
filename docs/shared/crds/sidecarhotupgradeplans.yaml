@@ -1,0 +1,108 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: sidecarhotupgradeplans.asm.alauda.io
+spec:
+  group: asm.alauda.io
+  names:
+    kind: SidecarHotUpgradePlan
+    listKind: SidecarHotUpgradePlanList
+    plural: sidecarhotupgradeplans
+    shortNames:
+    - scup
+    singular: sidecarhotupgradeplan
+  preserveUnknownFields: false
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: SidecarHotUpgradePlan is the Schema for the sidecarhotupgradeplans
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              gracePeriod:
+                description: Tolerance time. Default 60s.
+                type: string
+              targetSidecarVersion:
+                description: The target version of the hot update.
+                type: string
+            required:
+            - targetSidecarVersion
+            type: object
+          status:
+            description: SidecarHotUpgradePlanStatus
+            properties:
+              observedRef:
+                properties:
+                  generation:
+                    format: int64
+                    type: integer
+                  uid:
+                    description: UID is a type that holds unique ID values, including
+                      UUIDs.  Because we don't ONLY use UUIDs, this is an alias to
+                      string.  Being a type captures intent and helps make sure that
+                      UIDs and names do not get conflated.
+                    type: string
+                type: object
+              progress:
+                description: HotUpgradeProgress
+                properties:
+                  failed:
+                    type: integer
+                  pods:
+                    items:
+                      properties:
+                        message:
+                          type: string
+                        name:
+                          type: string
+                        planUID:
+                          description: UID is a type that holds unique ID values,
+                            including UUIDs.  Because we don't ONLY use UUIDs, this
+                            is an alias to string.  Being a type captures intent and
+                            helps make sure that UIDs and names do not get conflated.
+                          type: string
+                        state:
+                          type: string
+                        target:
+                          type: string
+                      required:
+                      - name
+                      - target
+                      type: object
+                    type: array
+                    x-kubernetes-list-map-keys:
+                    - name
+                    x-kubernetes-list-type: map
+                  success:
+                    type: integer
+                  total:
+                    type: integer
+                type: object
+              reason:
+                type: string
+              state:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
