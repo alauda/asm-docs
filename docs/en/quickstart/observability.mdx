@@ -7,9 +7,9 @@ This article will guide you through how to use Istio to inject Sidecars into the
 
 **Before you begin, make sure:**  
 
-- The [Bookinfo sample application has been deployed].  
-- A [service mesh has been created].  
-- You have [accessed Bookinfo].  
+- The [Bookinfo sample application has been deployed](quickstart/deploy-bookinfo.html).
+- A [service mesh has been created](create_service_mesh/index.html).
+- You have [accessed Bookinfo](quickstart/access-bookinfo.html).
 
 ## Step 1: Manage the Namespace  
 
@@ -24,7 +24,6 @@ Go to **Platform Management**, navigate to **Service Mesh** > **Service Meshes**
    Paste the following script into the terminal and execute it:
    ```bash
    #!/bin/bash
-   cat <<EOF > sidecar.yaml
    apiVersion: asm.alauda.io/v1beta3
    kind: MicroService
    metadata:
@@ -124,7 +123,7 @@ Go to **Platform Management**, navigate to **Service Mesh** > **Service Meshes**
 
 1. **Generate traffic**  
    To explore the observability features, the Bookinfo application needs traffic so that Istio can collect metrics and traces from the services. Use the following script to generate traffic.  
-   **Note: ** Replace `GATEWAY_IP_PORT` with the actual IP of your ingress gateway. We have previously obtained the `GATEWAY_IP_PORT` in the [Accessing Bookinfo]({{< relref "mesh-gettingstart/access-bookinfo.md" >}}) section.
+   **Note: ** Replace `GATEWAY_IP_PORT` with the actual IP of your ingress gateway. We have previously obtained the `GATEWAY_IP_PORT` in the [Accessing Bookinfo] section.
 
    Save the following script as `send-requests.sh`
    ```bash
