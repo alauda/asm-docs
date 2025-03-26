@@ -36,9 +36,11 @@ The table below shows the supported Istio upgrade paths for the current platform
 
 **Note**:
 
+{/* TODO: [Upgrade Components](@console-platform-docs/zh/platform-usermanual/clusterall/1cluster/11upgrade/) */}
+
 - The table only describes the major versions of Istio and Kubernetes; minor versions do not affect compatibility.
 - You can check the current running versions of Istio and Kubernetes in the cluster by going to the **Components** list.
-- If the current Kubernetes version of the cluster is lower than the required version for the Istio upgrade, you need to upgrade Kubernetes to a compatible version through [Upgrade Components](@console-platform-docs/zh/platform-usermanual/clusterall/1cluster/11upgrade/).
+- If the current Kubernetes version of the cluster is lower than the required version for the Istio upgrade, you need to upgrade Kubernetes to a compatible version through [Upgrade Components]().
 - For more information, please refer to the [Community's Supported Kubernetes Versions for Istio](https://istio.io/latest/docs/releases/supported-releases/).
 
 ## Upgrade Process
@@ -55,10 +57,12 @@ The complete service mesh upgrade process includes the following steps:
 
 ### <span id="component">Upgrade the Non-Istio Components of the Service Mesh in the Cluster</span>
 
+{/* TODO: [Upgrade Components](@console-platform-docs/zh/platform-usermanual/clusterall/1cluster/11upgrade/) */}
+
 1. In the **Platform Management** left navigation, click **Service Mesh** > **Meshes**.
 2. Click the `Service Mesh Name` that needs to be upgraded to enter the mesh details.
 3. In the **Mesh Deployment** area of the mesh details, there is a list of clusters where the service mesh has been deployed. Click the `Cluster Name` to open the cluster details page in a new tab.
-4. Switch to **Components** in the cluster details page, and click upgrade to upgrade the non-Istio components of the service mesh in the cluster to the latest version. For detailed documentation on upgrading components, see [Upgrade Components](@console-platform-docs/zh/platform-usermanual/clusterall/1cluster/11upgrade/).
+4. Switch to **Components** in the cluster details page, and click upgrade to upgrade the non-Istio components of the service mesh in the cluster to the latest version. For detailed documentation on upgrading components, see [Upgrade Components]().
 
 **Note**: The non-Istio components of the service mesh include asm, Flagger Operator, Asm Operator, Jaeger Operator.
 
