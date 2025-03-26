@@ -1,0 +1,121 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: (devel)
+  creationTimestamp: null
+  name: canaryevents.asm.alauda.io
+spec:
+  group: asm.alauda.io
+  names:
+    kind: CanaryEvent
+    listKind: CanaryEventList
+    plural: canaryevents
+    singular: canaryevent
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    additionalPrinterColumns:
+    - name: Status
+      type: string
+      jsonPath: .spec.records.status
+    schema:
+      openAPIV3Schema:
+        description: CanaryEvent is the Schema for the CanaryEvent API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CanaryDeliverySpec defines the desired state of CanaryDelivery
+            properties:
+              currentRecordId:
+                description: current max record id
+                type: integer
+              records:
+                description: CanaryRecord list for canary
+                properties:
+                  currentWeight:
+                    type: integer
+                  endTime:
+                    type: string
+                  canarydeploy:
+                    type: string
+                  configtracks:
+                    items:
+                      properties:
+                        canaryyaml:
+                          type: string
+                        configtype:
+                          description: config type configmap  or secret
+                          type: string
+                        name:
+                          description: ConfigTracks
+                          type: string
+                        primaryyaml:
+                          type: string
+                      required:
+                      - configtype
+                      - name
+                      type: object
+                    type: array
+                  primarydeploy:
+                    type: string
+                  events:
+                    items:
+                      description: CanaryEvent is used for events of canary
+                      properties:
+                        eventName:
+                          description: name for the event
+                          type: string
+                        eventType:
+                          description: event type like canary ab bluegreen
+                          type: string
+                        message:
+                          description: the message flagger report
+                          type: string
+                        phase:
+                          description: Phase
+                          type: string
+                        timestamp:
+                          description: the event generate time
+                          type: string
+                        weight:
+                          description: current weight
+                          type: integer
+                      type: object
+                    type: array
+                  id:
+                    description: Id for this record
+                    type: integer
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                  startTime:
+                    type: string
+                  status:
+                    type: string
+                required:
+                - namespace
+                - startTime
+                type: object
+            type: object
+        type: object
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

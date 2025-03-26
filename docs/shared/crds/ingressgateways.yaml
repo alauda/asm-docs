@@ -1,0 +1,574 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.12.1
+  name: ingressgateways.asm.alauda.io
+spec:
+  group: asm.alauda.io
+  names:
+    kind: IngressGateway
+    listKind: IngressGatewayList
+    plural: ingressgateways
+    shortNames:
+    - ig
+    singular: ingressgateway
+  preserveUnknownFields: false
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.gateway.namespace
+      name: GDNAMESPACE
+      type: string
+    - jsonPath: .spec.gateway.name
+      name: GDNAME
+      type: string
+    - jsonPath: .spec.host
+      name: DOMAIN
+      type: string
+    - jsonPath: .spec.port.name
+      name: PORT
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: IngressGateway is the Schema for the ingressgateways API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: IngressGatewaySpec defines the desired state of IngressGateway
+            properties:
+              corsPolicy:
+                description: CORS configuration.
+                properties:
+                  allowCredentials:
+                    description: Whether to allow the browser to read the contents
+                      of the response.
+                    type: boolean
+                  allowHeaders:
+                    description: The list of request headers that the server allows
+                      for cross-origin requests.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  allowMethods:
+                    description: The list of cross-origin request methods allowed
+                      by the server.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  allowOrigins:
+                    description: The server allows cross-origin requests for the list
+                      of domains.
+                    items:
+                      properties:
+                        type:
+                          description: Match method.
+                          enum:
+                          - exact
+                          - prefix
+                          - regex
+                          type: string
+                        value:
+                          description: Value.
+                          type: string
+                      type: object
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  configType:
+                    description: CORS type. The value range is simple or advance,
+                      which means "basic configuration" and "advanced configuration"
+                      respectively.
+                    enum:
+                    - simple
+                    - advance
+                    type: string
+                  enabled:
+                    description: Whether to enable CORS.
+                    type: boolean
+                  exposeHeaders:
+                    description: A list of headers that the server allows browsers
+                      with cross-origin requests to access.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  maxAge:
+                    description: Cross-origin preflight request cache time.
+                    type: string
+                required:
+                - configType
+                - enabled
+                type: object
+              gateway:
+                description: GatewayDeploy
+                properties:
+                  name:
+                    description: The name of gateway.
+                    type: string
+                  namespace:
+                    description: The namespace of gateway.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              gatewayGroupsRef:
+                description: The associated API group.
+                items:
+                  properties:
+                    apiPrefixPath:
+                      description: Access path.
+                      type: string
+                    apiPrefixRule:
+                      description: Access rule.
+                      type: string
+                    corsPolicy:
+                      description: CORS configuration.
+                      properties:
+                        allowCredentials:
+                          description: Whether to allow the browser to read the contents
+                            of the response.
+                          type: boolean
+                        allowHeaders:
+                          description: The list of request headers that the server
+                            allows for cross-origin requests.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        allowMethods:
+                          description: The list of cross-origin request methods allowed
+                            by the server.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        allowOrigins:
+                          description: The server allows cross-origin requests for
+                            the list of domains.
+                          items:
+                            properties:
+                              type:
+                                description: Match method.
+                                enum:
+                                - exact
+                                - prefix
+                                - regex
+                                type: string
+                              value:
+                                description: Value.
+                                type: string
+                            type: object
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        configType:
+                          description: CORS type. The value range is simple or advance,
+                            which means "basic configuration" and "advanced configuration"
+                            respectively.
+                          enum:
+                          - simple
+                          - advance
+                          type: string
+                        enabled:
+                          description: Whether to enable CORS.
+                          type: boolean
+                        exposeHeaders:
+                          description: A list of headers that the server allows browsers
+                            with cross-origin requests to access.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        maxAge:
+                          description: Cross-origin preflight request cache time.
+                          type: string
+                      required:
+                      - configType
+                      - enabled
+                      type: object
+                    name:
+                      description: Group name.
+                      type: string
+                  required:
+                  - apiPrefixPath
+                  - apiPrefixRule
+                  - name
+                  type: object
+                type: array
+                x-kubernetes-list-type: atomic
+              host:
+                description: Access mode.
+                type: string
+              httpRoute:
+                description: HTTP route config.
+                properties:
+                  corsPolicy:
+                    description: CORS configuration.
+                    properties:
+                      allowCredentials:
+                        description: Whether to allow the browser to read the contents
+                          of the response.
+                        type: boolean
+                      allowHeaders:
+                        description: The list of request headers that the server allows
+                          for cross-origin requests.
+                        items:
+                          type: string
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      allowMethods:
+                        description: The list of cross-origin request methods allowed
+                          by the server.
+                        items:
+                          type: string
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      allowOrigins:
+                        description: The server allows cross-origin requests for the
+                          list of domains.
+                        items:
+                          properties:
+                            type:
+                              description: Match method.
+                              enum:
+                              - exact
+                              - prefix
+                              - regex
+                              type: string
+                            value:
+                              description: Value.
+                              type: string
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      configType:
+                        description: CORS type. The value range is simple or advance,
+                          which means "basic configuration" and "advanced configuration"
+                          respectively.
+                        enum:
+                        - simple
+                        - advance
+                        type: string
+                      enabled:
+                        description: Whether to enable CORS.
+                        type: boolean
+                      exposeHeaders:
+                        description: A list of headers that the server allows browsers
+                          with cross-origin requests to access.
+                        items:
+                          type: string
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      maxAge:
+                        description: Cross-origin preflight request cache time.
+                        type: string
+                    required:
+                    - configType
+                    - enabled
+                    type: object
+                  headers:
+                    description: Match headers.
+                    items:
+                      properties:
+                        key:
+                          description: Key.
+                          type: string
+                        type:
+                          description: Match method.
+                          type: string
+                        value:
+                          description: Value.
+                          type: string
+                      type: object
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  matchType:
+                    description: Match method.
+                    type: string
+                  name:
+                    description: Service name.
+                    type: string
+                  namespace:
+                    description: Service namespace.
+                    type: string
+                  port:
+                    description: Service port.
+                    type: integer
+                  redirect:
+                    description: Redirect configuration, new attribute in release3.14.
+                    properties:
+                      httpsRedirect:
+                        type: boolean
+                      location:
+                        type: string
+                      redirectCode:
+                        format: int32
+                        type: integer
+                    type: object
+                  rewrite:
+                    description: Request rewrite.
+                    type: string
+                  uri:
+                    description: Request path.
+                    type: string
+                required:
+                - matchType
+                - uri
+                type: object
+              patches:
+                description: List of patches to apply to root virtualservice.
+                items:
+                  properties:
+                    path:
+                      description: Path of the form a.[key1:value1].b.[:value2] Where
+                        [key1:value1] is a selector for a key-value pair to identify
+                        a list element and [:value] is a value selector to identify
+                        a list element in a leaf list. All path intermediate nodes
+                        must exist.
+                      type: string
+                    value:
+                      description: Value to add, delete or replace. For add, the path
+                        should be a new leaf. For delete, value should be unset. For
+                        replace, path should reference an existing node. All values
+                        are strings but are converted into appropriate type based
+                        on schema.
+                      x-kubernetes-preserve-unknown-fields: true
+                  type: object
+                type: array
+                x-kubernetes-list-type: atomic
+              port:
+                description: Port info.
+                properties:
+                  name:
+                    description: Port name, in the formatted of "protocol-port".
+                    type: string
+                required:
+                - name
+                type: object
+              ports:
+                description: Port details.
+                properties:
+                  detail:
+                    description: Port details.
+                    items:
+                      properties:
+                        nodePort:
+                          description: Node port.
+                          type: integer
+                        port:
+                          description: Service port.
+                          type: integer
+                        protocol:
+                          description: Protocal type.
+                          type: string
+                        targetPort:
+                          description: Container port.
+                          type: integer
+                      required:
+                      - port
+                      - protocol
+                      - targetPort
+                      type: object
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  group:
+                    description: Group name.
+                    type: string
+                required:
+                - group
+                type: object
+              serviceRoutes:
+                description: The associated service route.
+                items:
+                  properties:
+                    corsPolicy:
+                      description: CORS configuration.
+                      properties:
+                        allowCredentials:
+                          description: Whether to allow the browser to read the contents
+                            of the response.
+                          type: boolean
+                        allowHeaders:
+                          description: The list of request headers that the server
+                            allows for cross-origin requests.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        allowMethods:
+                          description: The list of cross-origin request methods allowed
+                            by the server.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        allowOrigins:
+                          description: The server allows cross-origin requests for
+                            the list of domains.
+                          items:
+                            properties:
+                              type:
+                                description: Match method.
+                                enum:
+                                - exact
+                                - prefix
+                                - regex
+                                type: string
+                              value:
+                                description: Value.
+                                type: string
+                            type: object
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        configType:
+                          description: CORS type. The value range is simple or advance,
+                            which means "basic configuration" and "advanced configuration"
+                            respectively.
+                          enum:
+                          - simple
+                          - advance
+                          type: string
+                        enabled:
+                          description: Whether to enable CORS.
+                          type: boolean
+                        exposeHeaders:
+                          description: A list of headers that the server allows browsers
+                            with cross-origin requests to access.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        maxAge:
+                          description: Cross-origin preflight request cache time.
+                          type: string
+                      required:
+                      - configType
+                      - enabled
+                      type: object
+                    headers:
+                      description: Header.
+                      items:
+                        properties:
+                          key:
+                            description: Key.
+                            type: string
+                          type:
+                            description: Match method.
+                            type: string
+                          value:
+                            description: Value.
+                            type: string
+                        type: object
+                      type: array
+                      x-kubernetes-list-type: atomic
+                    matchType:
+                      description: Match method.
+                      type: string
+                    msName:
+                      description: Service name.
+                      type: string
+                    msNamespace:
+                      description: Namespace where the service is located.
+                      type: string
+                    msPort:
+                      description: Service port.
+                      type: integer
+                    publish:
+                      description: Whether to publish.
+                      type: boolean
+                    rewrite:
+                      description: Request rewrite.
+                      type: string
+                    uri:
+                      description: Request path.
+                      type: string
+                  required:
+                  - matchType
+                  - msName
+                  - msNamespace
+                  - msPort
+                  - publish
+                  - uri
+                  type: object
+                type: array
+                x-kubernetes-list-type: atomic
+              tcpRoute:
+                description: TCP route config
+                properties:
+                  name:
+                    description: Service name.
+                    type: string
+                  namespace:
+                    description: Namespace where the service is located.
+                    type: string
+                  port:
+                    description: Service port.
+                    type: integer
+                required:
+                - name
+                - namespace
+                - port
+                type: object
+              tcpRoutes:
+                description: The associated TCP service route.
+                items:
+                  properties:
+                    gwPort:
+                      description: Gateway port.
+                      type: integer
+                    msName:
+                      description: Service name.
+                      type: string
+                    msNamespace:
+                      description: Namespace where the service is located.
+                      type: string
+                    msPort:
+                      description: Service port.
+                      type: integer
+                  required:
+                  - gwPort
+                  - msName
+                  - msNamespace
+                  - msPort
+                  type: object
+                type: array
+                x-kubernetes-list-type: atomic
+              tlsDomain:
+                description: TLSDomain which come out of TLS secret
+                type: string
+            required:
+            - port
+            type: object
+          status:
+            description: IngressGatewayStatus defines the observed state of IngressGateway
+            properties:
+              upgrade:
+                description: The status of upgration
+                properties:
+                  failReason:
+                    description: The reasone of failed upgration
+                    type: string
+                  phase:
+                    description: Phase of upgration
+                    type: string
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
