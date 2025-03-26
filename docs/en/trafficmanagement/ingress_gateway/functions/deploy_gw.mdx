@@ -1,0 +1,93 @@
+---
+weight: 10
+---
+
+# Deploying Ingress Gateway
+
+## Introduction  
+The Ingress Gateway deployment enables secure external access to service mesh resources by:
+
+- Providing dedicated entry points for north-south traffic  
+- Supporting flexible exposure methods (LoadBalancer/NodePort)  
+- Enabling protocol-specific listener configurations  
+- Isolating gateway components from control plane  
+
+Core value: Safe and scalable ingress traffic management  
+
+## Features  
+- Multi-protocol listener support (HTTP/HTTPS/TCP)  
+- Shared/Dedicated gateway deployment modes  
+- Cloud provider LB integration (AWS ELB, MetalLB, etc.)  
+- NodePort fallback for bare-metal environments  
+
+## Advantages  
+- **Security Isolation**: Deploys in non-control plane namespaces  
+- **Multi-Cloud Ready**: Supports major cloud LB solutions  
+- **Port Flexibility**: Customizable service/node ports  
+- **Access Control**: Namespace-level visibility management  
+
+## Gateway Deployment via LoadBalancer
+
+### Step 1: Initiate Deployment  
+1. Navigate: **Service Mesh** > **Gateway**  
+2. Select target cluster  
+3. Click **Deploy Gateway**  
+
+| Parameter | Requirement | Description |  
+|-----------|-------------|-------------|  
+| Gateway Name | Required | DNS-1123 compliant |  
+| Namespace | Required | Non-control plane namespace |  
+| Service Type | Auto-set | LoadBalancer |  
+
+### Step 2: Protocol Configuration  
+```yaml
+ports:
+• protocol: HTTPS 
+  port: 443
+• protocol: TCP
+  port: 3306
+```
+
+| Parameter | Constraints |  
+|-----------|--------------|  
+| Protocol | HTTP/HTTPS/TCP |  
+| Port Range | 1-65535 |  
+
+### Step 3: Cloud Integration  
+For Huawei Cloud ELB:  
+- Provide ELB ID and type  
+For MetalLB:  
+- Verify available IPs in **Network Management** > **External Address Pool**  
+
+## Gateway Deployment via NodePort
+
+### Step 1: Configure NodePort  
+1. Set **Service Type** to NodePort  
+2. Define node ports:  
+
+| Protocol | NodePort | Constraint |  
+|----------|----------|------------|  
+| HTTP | 30080 | Cluster-wide unique |  
+| HTTPS | 30443 | Non-conflicting |  
+
+### Step 2: External Proxy Setup  
+Recommended Architecture:  
+```
+Client → F5/HAProxy → NodeIP:NodePort → Ingress Gateway
+```
+
+## Verification  
+1. Access gateway details page  
+2. Confirm status: **Running**  
+3. Validate endpoint connectivity:  
+```bash
+curl -I http://<EXTERNAL-IP>:<PORT>/healthz
+```
+
+## Operational Notes  
+- Shared gateways are visible to all cluster projects  
+- Dedicated gateways require project isolation  
+- TLS termination requires separate certificate configuration  
+- Avoid port conflicts with existing services  
+```
+

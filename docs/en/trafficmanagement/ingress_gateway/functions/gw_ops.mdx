@@ -1,0 +1,88 @@
+---
+weight: 40
+---
+
+# Gateway Operations
+
+## Introduction  
+Gateway Operations provides comprehensive monitoring and logging capabilities to ensure stable ingress gateway performance. It addresses:
+
+- Real-time health visibility challenges  
+- Alert fatigue through smart thresholds  
+- Post-mortem analysis needs  
+- Compliance auditing requirements  
+
+Core value: Proactive maintenance and rapid troubleshooting  
+
+## Features  
+- Auto-refreshing metrics dashboard  
+- Built-in alert policies (CPU/Memory)  
+- Multi-level log verbosity control  
+- Access log pattern analysis  
+- Historical event tracking  
+
+## Advantages  
+**Automation**: Pre-configured monitoring policies  
+**Granularity**: 7-tier log level control  
+**Integration**: Unified operations center linkage  
+**Compliance**: Audit-ready access logs  
+
+## Gateway Monitoring
+
+### Real-Time Metrics Access  
+1. Navigate: **Service Mesh** > **Gateway** > **Monitoring**  
+2. Use controls:  
+   - Manual refresh: Click ![](/en/img/00metricrefresh.png)  
+   - Auto-refresh: Set interval via ![](/en/img/00metricautorefresh.png)  
+3. View details:  
+   - Toggle chart lines via ![](/en/img/00legend.png)  
+   - Adjust thresholds with ![](/en/img/asm/33metricsetting.png)  
+
+### Key Monitoring Metrics  
+| Metric | Alert Threshold | Description |  
+|--------|-----------------|-------------|  
+| CPU Usage | 80% (default) | Pod CPU limit utilization |  
+| Memory Usage | 90% (default) | Pod memory limit utilization |  
+| QPS | N/A | HTTP requests per second |  
+| Connections | N/A | Active TCP/HTTP sessions |  
+
+## Log Management
+
+### Configuration Steps  
+1. Access gateway details page  
+2. Update parameters:  
+
+| Parameter | Options | Impact |  
+|-----------|---------|--------|  
+| Access Log | On/Off | Enables request tracing |  
+| Log Level | trace-debug-info-warning-error-critical-off | Verbosity control |  
+
+### Access Log Analysis  
+Sample Entry:  
+```
+2022-10-14 [2022-10-14T09:20:59.000Z] "GET /notfound HTTP/1.1" 404 - via_upstream - "-" 0 10 14 13 "-" "curl/7.29.0" "2f76bda0-f06b-91b0-a96f-5aead910e5d3" "10.11.172.161" "10.10.0.204:80" inbound|80|| 127.0.0.6:41864 10.10.0.204:80 10.44.1.23:37652
+```
+
+Critical Fields:  
+| Field | Example | Purpose |  
+|-------|---------|---------|  
+| %RESPONSE_CODE% | 404 | HTTP status |  
+| %DURATION% | 14ms | Processing time |  
+| %UPSTREAM_HOST% | 10.10.0.204:80 | Backend target |  
+| %DOWNSTREAM_REMOTE_ADDRESS% | 10.44.1.23:37652 | Client origin |  
+
+## Alert Management  
+1. Preconfigured Policies:  
+   - Pod health status  
+   - Resource overutilization  
+2. Notification Setup:  
+   - Navigate: **Operations Center** > **Alert Policies**  
+   - Configure receivers/webhooks  
+
+## Retention & Compliance  
+- Log retention: Set via **Operations Center** > **Log Strategy**  
+- Audit trail: 6 months default retention  
+- Encryption: TLS 1.2+ for log transmission  
+
+```
+

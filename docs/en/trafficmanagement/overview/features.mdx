@@ -3,32 +3,27 @@ weight: 20
 sourceSHA: 2ffcc54470ceb1699921d7a92b18563f60ee056e8ea380196d48400e5d732f6b
 ---
 
-:::tip
-
-List all functional modules under the parent module and provide a brief introduction to each, allowing users to quickly understand all functionalities under this module.
-
-You can visit the [Feature Overview Example](https://product-doc-guide.alauda.cn/template/features_overview/example.html) to see the corresponding document example.
-
-:::
-
 # Feature Overview
 
-## Feature Category 1
+## Traffic Control
 
-- Feature 1
+- **Dynamic Routing**  
+  Supports weight-based and header-based traffic routing for A/B testing and canary deployments.
 
-  A brief introduction to Feature 1.
+- **Traffic Mirroring**  
+  Replicates production traffic to staging environments for safe testing without impacting live users.
 
-- Feature 2
+- **Request Retries**  
+  Configures automatic retries for failed requests with customizable retry conditions and backoff policies.
 
-  A brief introduction to Feature 2.
+## Resilience & Fault Handling
 
-## Feature Category 2
+- **Circuit Breaking**  
+  Automatically blocks requests to overloaded services based on error thresholds and latency metrics.
 
-- Feature 1
+- **Fault Injection**  
+  Simulates service failures (HTTP errors, delays) to validate system fault tolerance and recovery workflows.
 
-  A brief introduction to Feature 1.
-
-- Feature 2
-
-  A brief introduction to Feature 2.
+- **Timeout Control**  
+  Sets service-level timeout thresholds to prevent cascading failures and improve system responsiveness.
+ 

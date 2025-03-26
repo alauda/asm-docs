@@ -1,0 +1,125 @@
+---
+weight: 30
+---
+
+# Routing Configuration
+
+## Introduction
+Routing Configuration defines ingress traffic routing rules and processing strategies to:
+
+- Control request flow to backend services
+- Enable path-based traffic manipulation
+- Implement cross-origin resource sharing (CORS)
+- Manage HTTP redirects and rewrites
+
+Core value: Granular traffic control for ingress gateway operations
+
+## Features
+- Path prefix matching
+- Request rewriting capabilities
+- CORS policy configuration
+- HTTP redirect management
+- Multi-rule prioritization
+
+## Advantages
+**Security**: Strict origin validation for CORS
+**Flexibility**: Parallel rewrite/redirect strategies
+**Compliance**: Adheres to HTTP standards
+**Scalability**: Unlimited rule sequencing
+
+## Creating Routing Configuration
+
+### Step 1: Access Routing Interface
+1. Navigate: **Service Mesh** > **Gateways**
+2. Select target ingress gateway
+3. Open **Gateway Route** tab
+4. Click **Create Routing Configuration**
+
+### Step 2: Basic Parameters
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: product-route
+spec:
+  hosts:
+  • "www.example.com"
+  gateways:
+  • main-gateway
+```
+
+| Parameter | Required | Constraints |
+|-----------|----------|-------------|
+| Namespace | Yes | Service deployment scope |
+| Hosts | Yes | Must match gateway config |
+| Match | Yes | URI prefix pattern |
+
+### Step 3: Strategy Selection
+**Request Rewrite Example**:
+```yaml
+http:
+• match:
+  • uri:
+      prefix: /app/product
+  rewrite:
+    uri: /foo
+```
+
+**Redirect Configuration**:
+```yaml
+redirect:
+  uri: /new-location
+  authority: new.example.com
+  redirectCode: 301
+```
+
+**Mutual Exclusivity**:
+- Request rewrite and redirect cannot coexist
+- Last-matched rule takes priority
+
+## Cross-Origin Resource Sharing (CORS)
+
+### Policy Configuration
+```yaml
+corsPolicy:
+  allowOrigins:
+  • exact: https://origin-site.com
+  allowMethods:
+  • GET
+  • POST
+  allowHeaders: X-Custom-Header
+  maxAge: "86400"
+```
+
+### CORS Parameters
+| Parameter | HTTP Header Equivalent | Value Example |
+|-----------|------------------------|---------------|
+| Origins | Access-Control-Allow-Origin | `https://trusted.com` |
+| Methods | Access-Control-Allow-Methods | GET,POST |
+| Headers | Access-Control-Allow-Headers | X-API-Key |
+| Max-Age | Access-Control-Max-Age | 86400 (24h) |
+
+## Configuration Constraints
+
+### Host Limitations
+- Wildcard (`*`) hosts support single route only
+- Domain-specific hosts allow multiple routes
+
+### Rule Precedence
+1. Rules evaluated top-to-bottom
+2. First match executes strategy
+3. Drag-and-drop ordering available
+
+## Access Verification
+1. Use **External Access Address** from route details
+2. Validate using curl:
+```bash
+curl -v -H "Origin: https://client.com" https://gateway-domain.com/app/product
+```
+
+## Management Notes
+- Project admins can view/modify configurations
+- Route testing recommended before production deployment
+- Monitor 4xx/5xx errors for misconfigurations
+```
+
