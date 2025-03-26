@@ -1,0 +1,352 @@
+---
+title: 配置相同 TLS 证书的多个网关时出现 404 错误
+description: >-
+  本文档解决了在配置多个使用相同 TLS 证书的网关时出现的 404 错误，详细阐述了该现象的原因、故障排除方法和解决方案。提供了包括合并网关资源和返回
+  421 响应代码的两种解决方案，帮助用户有效应对因 HTTP/2 连接重用导致的错误。
+weight: 200
+sourceSHA: 7452de08bf6b3e4dcc7c159d092bc9780dc3323e518695f9d84bc9b137500dda
+---
+
+## 问题描述
+
+**症状**
+
+通过 Istio Ingress Gateway 使用 HTTP/2 协议访问时，出现 404 错误。
+
+这个问题是 Istio 社区的一个已知问题。有关详细信息，请参阅 [配置相同 TLS 证书的多个网关时出现 404 错误](https://istio.io/latest/docs/ops/common-problems/network-issues/#404-errors-occur-when-multiple-gateways-configured-with-same-tls-certificate)。
+
+**分析**
+
+使用相同 TLS 证书配置多个网关将导致利用 HTTP/2 连接重用的浏览器（即大多数浏览器）在已与另一个主机建立连接后访问第二个主机时产生 404 错误。
+
+**示例：** 如果域 `a.example.com` 和 `b.example.com` 使用相同的 TLS 证书，并且通过同一 Istio Ingress Gateway 访问但在两个不同的网关资源中配置，则 HTTP/2 浏览器客户端在访问过 `a.example.com` 后访问 `b.example.com` 时将遇到 404 错误。这是因为浏览器的 HTTP/2 连接重用所致。
+
+## 故障排除方法
+
+您可以使用以下脚本快速检查您的环境中是否存在符合问题描述的网关配置。该脚本需要在 Istio Ingress Gateway 所在业务集群的主节点上执行。
+
+**注意：**
+
+- 该脚本依赖于 `jq` 工具。如果您的集群节点没有 `jq` 工具，请在执行脚本之前先在集群中安装 `jq`。工具下载链接：[jq download](https://jqlang.github.io/jq/download/)。
+- `jq` 工具的版本必须为 1.7 或更高。
+
+```bash
+#!/bin/bash
+
+nslist=$(kubectl get ns  -o jsonpath='{.items[*].metadata.name}')
+declare -A cred_map
+
+echo "开始检查网关"
+for ns in $nslist; do
+  # 获取网关资源
+  #echo "开始列出 $ns 的网关"
+  gateways=$(kubectl get gw -n $ns -o jsonpath='{.items[*].metadata.name}')
+  # 获取网关资源的 YAML 文件
+  for gateway in $gateways; do
+    gateway_yaml=$(kubectl get gw -n $ns $gateway  -o yaml)
+    gateway_json=$(kubectl get gw -n $ns $gateway  -o json)
+
+    tls_lines=$(echo "$gateway_yaml" | grep  'credentialName:')
+    secname=$(echo "$gateway_yaml" | grep  'credentialName:'|awk '{print $2}')
+
+    if [[ -n "$tls_lines" ]]; then
+      found=false
+      for key in "${!cred_map[@]}"; do
+        if [[ "$key" == "$secname" ]]; then
+          found=true
+          break
+        fi
+      done
+
+      if [[ $found == true ]]; then
+        echo -e "\033[31m 凭据已存在于其他网关资源中，请合并网关资源 ${cred_map[$secname]} 中的主机，然后删除此网关！ \033[0m"
+        hosts=$(echo "$gateway_json" | jq -r '.spec.servers[] | .hosts[]')
+        # 输出网关名称和主机信息
+        echo -e  "\033[31m 无效的网关名称空间: $gateway ,  $ns \033[0m"
+        echo "主机: $hosts"
+      else
+        echo "首次获取凭据名称 $secname 的网关是 $gateway $ns"
+        cred_map["$secname"]="$gateway~$ns"
+      fi
+
+      echo ""
+    fi
+  done
+done
+```
+
+**脚本执行输出示例：**
+
+```plaintext
+[root@idp-lihuang-w9x9w-9n9jv-cluster0-dt2n4 gwtls]# sh check.sh
+开始检查网关
+首次获取凭据名称 jiaxiurc-com 的网关是 drawdb-gateway drawdb
+首次获取凭据名称 gyssg-com 的网关是 ec jxb-ec
+首次获取凭据名称 nexus 的网关是 nexus-gateway nexus
+ 凭据已存在于其他网关资源中，请合并网关资源 drawdb-gateway~drawdb 中的主机，然后删除此网关！
+ 无效的网关名称空间: authory-gateway, nm-edu-authory
+主机: rzzx-test.jiaxiurc.com
+rzzx-test.jiaxiurc.com
+```
+
+如果您在输出中看到类似的信息：“凭据已存在于其他网关资源中，请合并网关资源 drawdb-gateway\~drawdb 中的主机，然后删除此网关！”，这表明您遇到了本文档描述的问题。
+
+## 解决方案概述
+
+为了解决此问题，我们提供了两种解决方案。您可以参考下面的比较，选择任一种解决方案在您的环境中实施。
+
+**解决方案比较**
+
+| 解决方案                                                            | 优点                                                                                                               | 缺点                                                                                                                                                                                                                                                                                               |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [(推荐) 解决方案 1：合并网关资源](#merge_gateway) | - 社区推荐的修复方案，具有向后兼容性。<br />- 保持 HTTP/2 对客户端的性能。            | - 如果集群中相关的网关资源数量较多，合并操作可能会比较繁琐。                                                                                                                                                                                                                                          |
+| [解决方案 2：响应代码 421](#res_401)                           | - 无需修改现有的网关和虚拟服务资源。<br />- 保持 HTTP/2 对客户端的性能。          | - 强烈依赖客户端支持 421 响应代码。大多数主流浏览器支持 421 响应代码，如 Chrome、Firefox 和 Safari（必须是 Safari 15.1 或更高版本，即 macOS Monterey）。<br />- 在升级 Istio 之前，必须检查 EnvoyFilter 的兼容性。 |
+
+### <span id="merge_gateway">解决方案 1：合并网关资源</span>
+
+**解决方案描述**
+
+将多个使用相同 TLS 证书的网关资源合并为一个。
+
+**实施步骤**
+
+1. 将多个网关资源合并为一个网关配置，使用相同的 `spec.servers.hosts` 列表或通配符域名配置。
+2. 修改相关的虚拟服务资源，确保它们指向合并后的网关。
+
+例如，在原始配置中，两个网关使用相同的 TLS 证书 `testhl`：
+
+```yaml
+# 网关错误示例 1：两个网关使用相同的 TLS 证书
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm2.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm1.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+# 网关错误示例 2：同一网关在不同主机部分使用相同的 TLS 证书
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: error-3
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm1.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https-2
+      number: 443
+      protocol: HTTPS
+  - hosts:
+    - "asm2.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+# 虚拟服务示例
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default2
+  namespace: bus-system
+spec:
+  gateways:
+  - istio-system/default2
+  hosts:
+  - asm2.test.com
+  http:
+  - route:
+    - destination:
+        host: asm-0.testhl.svc.cluster.local
+        port:
+          number: 80
+  ...
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default
+  namespace: bus-system
+spec:
+  gateways:
+  - istio-system/default
+  hosts:
+  - asm1.test.com
+  ...
+```
+
+合并后的正确配置：
+
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm2.test.com"
+    - "asm1.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default1
+  namespace: istio-system
+spec:
+  gateways:
+  - istio-system/default2
+  hosts:
+  - asm2.test.com
+  ...
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  gateways:
+  - istio-system/default2
+  hosts:
+  - asm1.test.com
+  ...
+```
+
+您还可以以通配符格式编写：
+
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "*.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+```
+
+**步骤摘要**
+
+- 合并网关资源的 `spec.servers.hosts`，将所有使用相同证书的网关资源合并为一个 `server` 配置。
+- 修改虚拟服务资源以指向合并后的网关。
+- 确保虚拟服务中的 `destination` 使用 Kubernetes FQDN 格式。
+
+**重要提示：** 执行上述步骤后，请重新运行检查脚本以确认问题已解决。
+
+### <span id="res_401">解决方案 2：响应代码 421</span>
+
+**解决方案描述**
+
+在出现问题时返回 421 状态码，允许客户端重新建立连接，路由到正确的目标主机。
+
+**实施步骤**
+
+应用以下 EnvoyFilter 配置：
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: misdirected-request
+  namespace: istio-system
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.router
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.lua
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+            inlineCode: |
+              local function get_host_from_authority(authority)
+                local colon_pos = authority:find(":", 1, true)
+                return colon_pos and authority:sub(1, colon_pos - 1) or authority
+              end
+
+              function envoy_on_request(request_handle)
+                local streamInfo = request_handle:streamInfo()
+                local requestedServerName = streamInfo:requestedServerName()
+
+                if requestedServerName ~= "" then
+                  local host = get_host_from_authority(request_handle:headers():get(":authority"))
+                  local isWildcard = string.sub(requestedServerName, 1, 2) == "*."
+
+                  if isWildcard and not string.find(host, string.sub(requestedServerName, 3)) then
+                    request_handle:respond({[":status"] = "421"}, "Misdirected Request")
+                  elseif not isWildcard and requestedServerName ~= host then
+                    request_handle:respond({[":status"] = "421"}, "Misdirected Request")
+                  end
+                end
+              end
+```

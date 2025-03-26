@@ -4,7 +4,7 @@ title: 将 OpenTelemetry 可观察数据集成到平台
 description: >-
   本文档解释了如何将 OpenTelemetry 可观察数据集成到平台，包括配置 OTel Collector 接收器和集成支持 OpenTelemetry
   的用户开发服务或外部软件，从而启用平台的数据可视化功能。
-sourceSHA: a39b516f2f1bad5aa7d7c8ea2fa8897171639fccf903322c001a59cd74c62977
+sourceSHA: b81a4da44ba61539100d33cf3b4e3b451d612447ac759bcc185286a77b612101
 ---
 
 ## 概述
@@ -73,7 +73,7 @@ OpenTelemetry 社区为不同语言提供了 SDK 使用示例；请参阅官方�
 
 1. 如果软件部署在与服务网格相同的集群中：
    - 确保平台上已启用所需接收器。
-   - 有关支持的接收器的完整列表，请参阅 \[平台支持的接收器列表]。
+   - 有关支持的接收器的完整列表，请参阅 [平台支持的接收器列表](distributed_tracing/how_to/otel_collector_config.html#receivers)。
 
 2. 如果软件无法直接使用集群地址访问 OTel Collector，则可能需要设置负载均衡器以允许外部服务访问。请联系您的管理员以获取进一步配置帮助。
 
