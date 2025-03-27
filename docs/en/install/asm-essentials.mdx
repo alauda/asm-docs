@@ -1,0 +1,79 @@
+---
+weight: 20
+---
+
+# Alauda Service Mesh Essentials Cluster Plugin
+
+Alauda Service Mesh Essentials cluster plugin provides UI , advance API server and global asm controller.
+
+## Downloading
+
+:::info
+Alauda Service Mesh Essentials cluster plugin can be retrieved from Alauda Cloud.
+
+Please contact Consumer Support for more information.
+:::
+
+## Uploading
+
+We need to upload the Alauda Service Mesh Essentials cluster plugin to ACP **global** cluster.
+
+### Procedure
+
+<Steps>
+
+### Downloading the violet tool
+
+First, we need to download the `violet` tool if not present on the machine.
+
+In **Platform Management** of ACP console:
+
+1. Click **Marketplace / Upload Packages**.
+2. Click **Download Packaging and Listing Tool**.
+3. Locate the right OS / CPU architecture under **Execution Environment**.
+4. Click **Download** to download the `violet` tool.
+5. Run `chmod +x ${PATH_TO_THE_VIOLET_TOOL}` to make the tool executable.
+
+### Uploading package
+
+Then, run the following command to upload the **Alauda Service Mesh Essentials** cluster plugin to ACP global cluster:
+
+```bash
+# [!code callout:5]
+violet push \
+    ${PKG_NAME} \
+    --platform-address=${PLATFORM_ADDRESS} \
+    --platform-username=${PLATFORM_ADMIN_USER} \
+    --platform-password=${PLATFORM_ADMIN_PASSWORD} \
+    --clusters=global
+```
+
+<Callouts>
+
+1. Execute `violet push` to upload cluster plugin.
+2. `${PKG_NAME}` is the name of the **Alauda Service Mesh Essentials** cluster plugin tarball.
+3. `${PLATFORM_ADDRESS}` is your ACP platform address.
+4. `${PLATFORM_ADMIN_USER}` is the username of the ACP platform admin.
+5. `${PLATFORM_ADMIN_PASSWORD}` is the password of the ACP platform admin.
+
+</Callouts>
+
+</Steps>
+
+## Installing
+
+### Procedure
+
+In **Platform Management** of ACP console:
+
+1. Select **global** cluster from the **Cluster** dropdown list at the top of the console.
+2. Click **Marketplace / Cluster Plugin**.
+3. Locate **Alauda Service Mesh Essentials**.
+4. Click **Install**.
+
+### Verification
+
+Confirm that the **Alauda Service Mesh Essentials** tile shows one of the following states:
+
+- `Installing`: installation is in progress; wService Mesht for this to change to `Installed`.
+- `Installed`: installation is complete.

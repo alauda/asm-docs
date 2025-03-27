@@ -19,6 +19,9 @@ For instructions on creating a multi-cluster service mesh, please refer to the [
 - When the cluster is an IPv4/IPv6 dual-stack network, a service mesh cannot be deployed.
 
 ## Prerequisites
+Download the Alauda Service Mesh Operator installation package corresponding to your platform architecture.
+
+Upload the Alauda Service Mesh Operator installation package using the Upload Packages mechanism.
 
 Ensure that the cluster has deployed the Prometheus plugin or VictoriaMetrics plugin.
 
