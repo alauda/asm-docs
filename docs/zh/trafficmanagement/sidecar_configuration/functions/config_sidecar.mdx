@@ -1,0 +1,138 @@
+---
+weight: 10
+sourceSHA: 89d91ec1f84f334b52cbe61bad836256c98a8c086dcefa616d0d401c78c92cda
+---
+
+# Sidecar 配置管理
+
+## 介绍
+
+Sidecar 配置使您能够精确控制在 Istio 服务网格中 Envoy 代理的行为。此功能：
+
+- 定义流量策略执行范围
+- 优化代理资源利用
+- 实现命名空间级别的访问控制
+- 支持分层配置策略
+
+核心价值：通过细粒度的流量管理平衡服务网格的性能和安全性
+
+## 功能
+
+- 默认的集群范围配置
+- 命名空间特定的自定义规则
+- 通配符模式匹配
+- 优先级覆盖机制
+
+## 优势
+
+**性能优化**：减少代理处理开销  
+**安全控制**：限制服务暴露范围  
+**灵活性**：多种命名空间匹配模式  
+**兼容性**：完全支持 Istio API  
+
+## 默认配置管理
+
+### 配置参数
+
+| 参数            | 格式               | 示例                |
+| --------------- | ------------------ | ------------------- |
+| 外部主机        | namespace/dnsName  | `istio-system/*`    |
+
+### 更新过程
+
+1. 导航到：**服务网格** > **网格**
+2. 选择目标网格 > **Sidecar 配置**选项卡
+3. 查找集群 > 点击编辑图标 ![](/zh/img/00pencil.png)
+4. 配置外部主机：
+   - 从下拉列表中选择命名空间
+   - 选择模式：
+     - `*/*` 全局
+     - `./*` 当前命名空间
+     - 自定义命名空间
+5. 点击 **确认**
+
+**限制条件**：
+
+- 必须位于 `istio-system` 命名空间中
+- 影响所有没有自定义配置的命名空间
+
+## 自定义配置设置
+
+### 配置模板
+
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: ns-custom
+  namespace: target-ns
+spec:
+  egress:
+  • hosts:
+    ◦ "dev/*"
+    ◦ "prod/db-service"
+```
+
+### 实施步骤
+
+1. 访问网格详情页面
+2. 导航到 **Sidecar 配置**选项卡
+3. 点击 **创建 Sidecar 配置**
+4. 选择目标命名空间
+5. 配置外部主机模式：
+   - 使用 `*` 通配符以进行广泛匹配
+   - `.` 代表当前命名空间
+6. 验证优先级覆盖
+
+## 配置示例
+
+### 示例 1：命名空间隔离
+
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: ns-prod
+  namespace: prod
+spec:
+  egress:
+  • hosts:
+    ◦ "prod/*"  # 当前命名空间
+    ◦ "monitoring/*"  # 特定命名空间
+```
+
+### 示例 2：完全集群访问
+
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  egress:
+  • hosts:
+    ◦ "*/*"  # 所有命名空间
+```
+
+## 参数说明
+
+| 参数       | 必需   | 类型    | 描述                                            |
+| ---------- | ------ | ------- | ----------------------------------------------- |
+| namespace  | 是     | 字符串  | 默认配置必须为 `istio-system`                  |
+| egress     | 是     | 数组    | 包含主机模式数组                              |
+| hosts      | 是     | 数组    | `namespace/dnsName` 格式，支持通配符         |
+
+## 操作限制
+
+1. **命名空间绑定**：
+   - 自定义配置仅影响指定命名空间
+   - 默认配置要求使用 `istio-system` 命名空间
+
+2. **模式规则**：
+   - 通配符 (\*) 仅允许出现在最左侧的 DNS 组件
+   - `prod/*.svc.cluster.local` 匹配 prod 服务
+
+3. **更新延迟**：
+   - 配置更改在 60 秒内生效
+   - 需要 Istio 1.9 及以上版本的控制平面

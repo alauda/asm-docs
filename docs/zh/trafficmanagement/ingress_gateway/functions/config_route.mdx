@@ -1,0 +1,140 @@
+---
+weight: 30
+sourceSHA: 98109f2d053ef33b7aa87e2c31324c560be906a948ea41f58e00c6e0d08ade1a
+---
+
+# 路由配置
+
+## 概述
+
+路由配置定义了入口流量的路由规则和处理策略，以便于：
+
+- 控制请求流向后端服务
+- 实现基于路径的流量操作
+- 实现跨源资源共享（CORS）
+- 管理 HTTP 重定向和重写
+
+核心价值：对入口网关操作进行细粒度的流量控制
+
+## 特性
+
+- 路径前缀匹配
+- 请求重写能力
+- CORS 策略配置
+- HTTP 重定向管理
+- 多规则优先级设置
+
+## 优势
+
+**安全性**：严格的 CORS 来源验证  
+**灵活性**：并行重写/重定向策略  
+**合规性**：遵循 HTTP 标准  
+**可扩展性**：无限制的规则序列
+
+## 创建路由配置
+
+### 步骤 1：访问路由接口
+
+1. 导航至：**服务网格** > **网关**
+2. 选择目标入口网关
+3. 打开 **网关路由** 标签
+4. 点击 **创建路由配置**
+
+### 步骤 2：基本参数
+
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: product-route
+spec:
+  hosts:
+  • "www.example.com"
+  gateways:
+  • main-gateway
+```
+
+| 参数       | 必填 | 约束条件                  |
+| ---------- | ---- | ----------------------- |
+| 命名空间   | 是   | 服务部署范围            |
+| 主机       | 是   | 必须与网关配置匹配      |
+| 匹配       | 是   | URI 前缀模式            |
+
+### 步骤 3：策略选择
+
+**请求重写示例**：
+
+```yaml
+http:
+• match:
+  • uri:
+      prefix: /app/product
+  rewrite:
+    uri: /foo
+```
+
+**重定向配置**：
+
+```yaml
+redirect:
+  uri: /new-location
+  authority: new.example.com
+  redirectCode: 301
+```
+
+**互斥性**：
+
+- 请求重写和重定向不能共存
+- 最后匹配的规则优先
+
+## 跨源资源共享（CORS）
+
+### 策略配置
+
+```yaml
+corsPolicy:
+  allowOrigins:
+  • exact: https://origin-site.com
+  allowMethods:
+  • GET
+  • POST
+  allowHeaders: X-Custom-Header
+  maxAge: "86400"
+```
+
+### CORS 参数
+
+| 参数     | HTTP 头等效代表              | 值示例                 |
+| -------- | --------------------------- | --------------------- |
+| 来源     | Access-Control-Allow-Origin  | `https://trusted.com` |
+| 方法     | Access-Control-Allow-Methods | GET,POST              |
+| 头部     | Access-Control-Allow-Headers | X-API-Key             |
+| 最大缓存 | Access-Control-Max-Age       | 86400 (24h)           |
+
+## 配置约束
+
+### 主机限制
+
+- 通配符 (`*`) 主机仅支持单一路由
+- 特定域名的主机允许多个路由
+
+### 规则优先级
+
+1. 规则从上到下进行评估
+2. 第一个匹配规则执行策略
+3. 提供拖放排序功能
+
+## 访问验证
+
+1. 使用路由详细信息中的 **外部访问地址**
+2. 使用 curl 验证：
+
+```bash
+curl -v -H "Origin: https://client.com" https://gateway-domain.com/app/product
+```
+
+## 管理注意事项
+
+- 项目管理员可以查看/修改配置
+- 建议在生产部署前进行路由测试
+- 监控 4xx/5xx 错误以发现配置错误

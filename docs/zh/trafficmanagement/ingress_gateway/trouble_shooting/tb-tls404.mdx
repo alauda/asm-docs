@@ -1,0 +1,182 @@
+---
+weight: 10
+sourceSHA: b01aaadaeec39cde395f659bd00e12003050771bb8999b8ccc1ddab6260a9741
+---
+
+# 当多个网关配置了相同的 TLS 证书时出现 404 错误
+
+## 问题描述
+
+### 症状
+
+通过 Istio Ingress Gateway 使用 HTTP/2 协议访问服务时，会出现 404 错误。这是 Istio 社区已知的问题。
+
+### 根本原因
+
+配置多个具有相同 TLS 证书的网关会导致 HTTP/2 浏览器在初始连接建立后访问二级主机时生成 404 错误。这是由于浏览器中 HTTP/2 连接重用造成的。
+
+**示例场景**：
+• 域名 `a.example.com` 和 `b.example.com` 共享相同的 TLS 证书
+• 配置在单独的 Gateway 资源中
+• 浏览器通过相同连接先访问 `a.example.com` 然后访问 `b.example.com`
+
+## 故障排除
+
+### 验证脚本
+
+在托管 Istio Ingress Gateway 的集群主节点上执行此脚本：
+
+```bash
+#!/bin/bash
+nslist=$(kubectl get ns -o jsonpath='{.items[*].metadata.name}')
+declare -A cred_map
+
+echo "开始检查网关"
+for ns in $nslist; do
+  gateways=$(kubectl get gw -n $ns -o jsonpath='{.items[*].metadata.name}')
+  for gateway in $gateways; do
+    gateway_yaml=$(kubectl get gw -n $ns $gateway -o yaml)
+    secname=$(echo "$gateway_yaml" | grep 'credentialName:' | awk '{print $2}')
+
+    if [[ -n "$secname" ]]; then
+      if [[ -n "${cred_map[$secname]}" ]]; then
+        echo -e "\033[31m 检测到网关中重复的 TLS： ${cred_map[$secname]} \033[0m"
+        hosts=$(kubectl get gw -n $ns $gateway -o json | jq -r '.spec.servers[] | .hosts[]')
+        echo -e "\033[31m 冲突网关： $gateway 在 $ns \033[0m"
+        echo "受影响的主机： $hosts"
+      else
+        cred_map["$secname"]="$gateway~$ns"
+      fi
+    fi
+  done
+done
+```
+
+**预期输出**：
+
+```plaintext
+检测到网关中重复的 TLS： drawdb-gateway~drawdb
+冲突网关： authory-gateway 在 nm-edu-authory
+受影响的主机： rzzx-test.jiaxiurc.com
+```
+
+## 针对根本原因 1 的解决方案：合并网关资源
+
+### 注意事项
+
+• 这是社区推荐的解决方案
+• 保持 HTTP/2 性能优势
+• 需要修改现有网关配置
+
+### 前提条件
+
+1. 集群节点上安装 `jq` v1.7 及以上版本
+2. 具有 kubectl 权限的集群访问
+
+### 步骤
+
+1. **使用验证脚本识别冲突的网关**
+2. **合并主机配置**：
+   ```yaml
+   apiVersion: networking.istio.io/v1beta1
+   kind: Gateway
+   metadata:
+     name: unified-gateway
+     namespace: istio-system
+   spec:
+     selector:
+       istio: ingressgateway
+     servers:
+     - hosts:
+         - "a.example.com"
+         - "b.example.com"
+       tls:
+         mode: SIMPLE
+         credentialName: shared-cert
+       port:
+         name: https
+         number: 443
+         protocol: HTTPS
+   ```
+3. **更新 VirtualServices** 以引用合并后的网关
+4. **删除冗余网关**
+5. **验证配置**：
+   ```bash
+   kubectl get gw -A
+   istioctl analyze
+   ```
+
+## 针对根本原因 2 的解决方案：421 响应代码
+
+### 注意事项
+
+• 需要客户端支持 421 状态码
+• 与 Chrome/Firefox/Safari 15.1+ 兼容
+
+### 前提条件
+
+1. Istio 版本 ≥ 1.12
+2. 集群管理员权限
+
+### 步骤
+
+1. **应用 EnvoyFilter**：
+   ```yaml
+   apiVersion: networking.istio.io/v1alpha3
+   kind: EnvoyFilter
+   metadata:
+     name: misdirected-request
+     namespace: istio-system
+   spec:
+     configPatches:
+       - applyTo: HTTP_FILTER
+         match:
+           context: GATEWAY
+           listener:
+             filterChain:
+               filter:
+                 name: envoy.filters.network.http_connection_manager
+         patch:
+           operation: INSERT_BEFORE
+           value:
+             name: envoy.lua
+             typed_config:
+               "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+               inlineCode: |
+                 function envoy_on_request(request_handle)
+                   local authority = request_handle:headers():get(":authority")
+                   local sni = request_handle:streamInfo().requestedServerName
+
+                   if sni ~= "" and sni ~= authority:match("([^:]+)") then
+                     request_handle:respond({[":status"] = "421"}, "Misdirected Request")
+                   end
+                 end
+   ```
+2. **验证实现**：
+   ```bash
+   curl -I -H "Host: b.example.com" https://gateway-ip
+   ```
+
+## 预防措施
+
+1. **证书管理**：
+   • 使用通配符证书 (\*.example.com)
+   • 避免在不同环境中重复使用证书
+2. **网关设计**：
+   • 实现每个域名使用单一网关的模式
+   • 采用基于命名空间的证书隔离
+3. **定期审核**：
+   ```bash
+   istioctl experimental precheck
+   kubectl get secret --all-namespaces -o json | jq '.items[].metadata.name' | sort | uniq -d
+   ```
+
+## 相关内容
+
+**HTTP/2 连接重用机制**：
+• 单个 TLS 连接处理多个请求
+• 服务器使用 SNI 路由请求
+• 不匹配的 SNI 头导致路由失败
+
+**Istio 文档参考**：
+[Istio 常见问题 - 404 错误](https://istio.io/latest/docs/ops/common-problems/network-issues/#404-errors-occur-when-multiple-gateways-configured-with-same-tls-certificate)
