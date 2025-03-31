@@ -3,9 +3,15 @@ weight: 20
 sourceSHA: 2ffcc54470ceb1699921d7a92b18563f60ee056e8ea380196d48400e5d732f6b
 ---
 
-# Feature Overview
 
-## Traffic Control
+# Features
+
+## Traffic Management Architecture
+- **Dual-layer Gateway Design (Tier1 + Tier2)**  
+  Implements Tier1 gateway for external traffic routing management and Tier2 transparent proxy for service-level routing rule execution, resolving routing rule conflicts between gateway and service layers while maintaining policy consistency.
+
+- **Protocol Support**  
+  Supports HTTP/1.1, HTTP/2, gRPC and WebSocket protocols for external service exposure, adapting to various modern application communication requirements.
 
 - **Dynamic Routing**  
   Supports weight-based and header-based traffic routing for A/B testing and canary deployments.
@@ -15,6 +21,20 @@ sourceSHA: 2ffcc54470ceb1699921d7a92b18563f60ee056e8ea380196d48400e5d732f6b
 
 - **Request Retries**  
   Configures automatic retries for failed requests with customizable retry conditions and backoff policies.
+
+## Security & Access Control
+- **TLS Termination**  
+  Provides SSL/TLS certificate management capabilities, supporting HTTPS encrypted access and certificate automatic rotation for north-south traffic.
+
+- **Cross-cluster Traffic Management**  
+  Enables unified management of external access traffic across multiple clusters through gateway instance groups, supporting centralized certificate and routing policy configuration.
+
+## Service Governance Integration
+- **Canary Release Support**  
+  Implements service-level canary release strategies through Tier2 proxy, allowing gray traffic rules configured for backend services to take effect on ingress gateway traffic.
+
+- **Routing Policy Synchronization**  
+  Automatically synchronizes service routing rules (timeout retry, traffic mirroring, etc.) to gateway traffic through dual-layer architecture design, maintaining policy consistency.
 
 ## Resilience & Fault Handling
 
@@ -26,4 +46,19 @@ sourceSHA: 2ffcc54470ceb1699921d7a92b18563f60ee056e8ea380196d48400e5d732f6b
 
 - **Timeout Control**  
   Sets service-level timeout thresholds to prevent cascading failures and improve system responsiveness.
- 
+
+## Observability & Monitoring
+- **Real-time Monitoring**  
+  Provides QPS, success rate, latency and other core metrics monitoring for gateway instances, supporting custom monitoring dashboards and alert policies.
+
+- **Access Log Analysis**  
+  Records complete HTTP request logs including source IP, request method, response code and latency, supporting log query and traffic analysis.
+
+## Deployment Flexibility
+- **Cross-cloud Deployment**  
+  Supports deployment of gateway instances across multiple cloud platforms (AWS, Azure, private cloud), achieving unified management of hybrid cloud traffic through instance groups.
+
+- **Horizontal Scaling**  
+  Enables dynamic scaling of gateway instances based on traffic load, supporting both manual scaling and HPA-based automatic scaling strategies.
+
+

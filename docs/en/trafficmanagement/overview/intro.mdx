@@ -7,47 +7,58 @@ sourceSHA: f004f8b0f9bbecaa15de28d21a8a367a113c07b6af44a6de5e86fc96d5f13741
 
 ## Traffic Management Module Overview
 
-Traffic Management is based on istio and is a core capability feature in a service mesh architecture, serving as the intelligent control layer for cloud-native application communication. This module deeply integrates with the Istio service mesh, providing visual traffic routing, canary releases, fault recovery, and other governance capabilities. It enables dynamic control of traffic behavior in microservices architectures through a non-invasive approach, significantly enhancing the reliability and observability of distributed systems.
+Traffic Management Advanced Operations provide comprehensive traffic management and service governance capabilities for cloud-native applications. This module enables fine-grained control over service communication through features like traffic passthrough, circuit breakers, canary releases, and global rate limiting. It supports both inbound and outbound traffic management while maintaining high observability and security standards across multi-cluster environments.
 
-## Advantages of Traffic Management
+## Advantages
 
-The core advantages include:
+The core advantages of Traffic Management Advanced Operations are:
 
-- **Intelligent Traffic Scheduling**  
-  Supports dynamic routing strategies based on weight/request headers, enabling advanced deployment patterns like canary releases and A/B testing to ensure smooth business transitions.
+• **Flexible Traffic Control**  
+  Supports traffic passthrough configuration and bypass mode to optimize service call chains while maintaining governance capabilities.
 
-- **End-to-End Resilience**  
-  Built-in circuit breakers, retry mechanisms, timeout controls, and fault injection testing to improve fault tolerance and system availability.
+• **Comprehensive Service Governance**  
+  Provides circuit breaker policies, load balancing strategies, and connection pool management to ensure service stability under high concurrency.
 
-- **Zero-Code-Invasive Governance**  
-  Implements traffic interception and control via Sidecar proxies, requiring no modifications to business code for policy enforcement.
+• **Multi-scenario Release Management**  
+  Enables manual/automatic canary releases with visual monitoring, supporting blue-green deployments and A/B testing scenarios.
 
-- **Multi-Dimensional Observability**  
-  Integrates with Prometheus/Grafana for real-time traffic monitoring and distributed tracing, enabling full-link visibility and rapid anomaly diagnosis.
+• **Hybrid Environment Support**  
+  Manages external services through egress gateways and integrates non-mesh services via external service configurations.
 
-## Application Scenarios
+• **Enhanced Observability**  
+  Offers real-time monitoring of access logs, rate limiting effects, and Pod health status through visual dashboards.
 
-Key application scenarios include:
+## Scenarios
 
-- **Progressive Delivery**  
-  Achieve controlled rollouts and rollbacks by precisely managing traffic distribution between service versions.
+The main application scenarios include:
 
-- **Multi-Environment Traffic Isolation**  
-  Implement request header/identity-based routing for shadow testing and environment segregation (dev/test/prod).
+• **Performance Optimization**  
+  Use traffic passthrough for middleware services to bypass unnecessary Sidecar processing.
 
-- **Failure Mitigation**  
-  Rapidly configure circuit-breaking rules or traffic shifting to isolate faulty service instances.
+• **Rapid Fault Diagnosis**  
+  Enable bypass mode to verify if service anomalies are caused by Sidecar proxies.
 
-- **Multi-Cluster Traffic Orchestration**  
-  Enable cross-Kubernetes-cluster service discovery and traffic management for hybrid cloud deployments.
+• **Microservice Version Management**  
+  Implement canary releases for safe production deployments of new service versions.
 
-## Usage Limitations
+• **High-concurrency Protection**  
+  Configure global rate limiting and circuit breakers to prevent service avalanches.
 
-Current version considerations:
+• **Hybrid Architecture Management**  
+  Connect traditional services and cloud-native services through external service registration.
 
-- Requires Kubernetes clusters v1.20+
-- Canary release strategies depend on Prometheus metric collection
-- Cross-cluster traffic management requires pre-established network connectivity
-- UDP protocol traffic management is not supported
+• **Network Security Control**  
+  Isolate abnormal Pods promptly while maintaining normal service operations.
 
----
+## Limitations
+
+1. Requires Sidecar injection for full functionality (except external services)
+2. Canary release cannot coexist with existing service routing configurations
+3. Pod isolation status resets during deployments/scale operations
+4. Global rate limiting requires Redis cluster configuration
+5. Cross-cluster service discovery constraints for canary releases
+6. Bypass mode requires Kubernetes v1.23+ clusters
+7. Egress gateway configuration needs regional consistency in multi-cluster scenarios
+8. Policies don't apply to traffic-passthrough configured services
+
+
