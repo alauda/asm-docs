@@ -6,7 +6,7 @@ sourceSHA: 2c71a6cb6917ad343f4af402466e3c2fc2e99a49171c6941010d4451927d1d33
 
 **注意：适用于 ACP v3.14.3、v3.16.2、v3.18 及以上版本。**
 
-只有当 Java 应用程序使用 JAVA\_TOOL\_OPTIONS 环境变量时，以下容器化规范必须遵循，以确保应用程序自身对 JAVA\_TOOL\_OPTIONS 环境变量的配置生效。具体而言，在容器平台上部署时，应用程序的 Deployment 应该明确声明 JAVA\_TOOL\_OPTIONS 环境变量。示例如下：
+只有在 Java 应用程序使用了 JAVA\_TOOL\_OPTIONS 环境变量时，必须遵循以下容器化规范，以确保应用程序对 JAVA\_TOOL\_OPTIONS 环境变量的自定义配置生效。具体而言，在容器平台上部署时，应用程序的 Deployment 应显式声明 JAVA\_TOOL\_OPTIONS 环境变量。示例如下：
 
 ```yaml
 apiVersion: apps/v1
@@ -23,11 +23,11 @@ spec:
           name: your-java-app
 ```
 
-原因：当 Java 应用程序（Deployment）作为服务（OpenTelemetry 治理）添加到平台时，Java Agent 会通过将 `-javaagent` 参数附加到 pod 的 JAVA\_TOOL\_OPTIONS 环境变量中自动注入，例如 `-javaagent:/otel-auto-instrumentation-java/javaagent.jar`。如果以其他方式配置了 JAVA\_TOOL\_OPTIONS，则可能会被覆盖。
+原因：当 Java 应用程序（Deployment）作为服务添加到平台时（OpenTelemetry 治理），Java Agent 通过将 `-javaagent` 参数附加到 pod 的 JAVA\_TOOL\_OPTIONS 环境变量中自动注入，例如 `-javaagent:/otel-auto-instrumentation-java/javaagent.jar`。如果以其他方式配置了 JAVA\_TOOL\_OPTIONS，则可能会覆盖此设置。
 
-### <span id="java-old">Java 应用程序容器化规范（旧版本）</span>
+### <span id="java-old">Java 应用程序容器化规范（旧版）</span>
 
-**注意：适用于除上述新规范以外的 ACP 版本。**
+**注意：适用于上述新规范以外的 ACP 版本。**
 
 为了确保平台的治理能力可以有效应用于您的 Java 应用程序，请在开发和构建过程中遵循以下 Java 应用程序容器化规范：
 
@@ -37,7 +37,7 @@ spec:
 
 #### **Dockerfile 模板**
 
-请参阅本文件提供的 Dockerfile 模板和说明，并相应地修改您 Java 应用程序项目中使用的 Dockerfile 文件。
+请参考本文档中提供的 Dockerfile 模板和说明，并相应地修改您 Java 应用程序项目中使用的 Dockerfile 文件。
 
 Dockerfile 模板如下：
 
@@ -46,22 +46,22 @@ FROM eclipse-temurin:8-alpine
 
 VOLUME /tmp
 
-# 设置容器的时区并添加管理员账户，同时创建其主目录。
-# 注意：设置时区的指令可能会因基础镜像的操作系统而异。
-# 注意：此步骤需要访问互联网以下载依赖项。如果您处于隔离的内部网络中，考虑使用公共基础镜像以完成此步骤。
+# 设置容器的时区，添加管理员账户，并创建其主目录。
+# 注意：设置时区的指令可能因基础镜像的操作系统而异。
+# 注意：此步骤需要访问互联网以下载依赖项。如果您在隔离的内部网络中，请考虑使用公共基础镜像以完成此步骤。
 RUN apk update \
     && apk add --no-cache tzdata \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone \
     && adduser -D admin
 
-# WORKDIR 指令使接下来指令中使用相对路径更方便，从而简化脚本。
+# WORKDIR 指令使在后续指令中使用相对路径更为便捷，以简化脚本。
 WORKDIR /home/admin/
 
-# 出于安全考虑，使用非 root 账户，以避免执行类似于 apt-get 的命令。
+# 出于安全考虑，请使用非 root 账户，以避免运行诸如 apt-get 的命令。
 USER admin
 
-# COPY --chown 选项消除了再次运行 chown 的必要性。
+# COPY --chown 选项消除了再次运行 chown 的需要。
 # 注意：确保 start.sh 具有可执行权限。
 COPY --chown=admin:admin start.sh \
      target/app.jar \
@@ -71,17 +71,17 @@ COPY --chown=admin:admin start.sh \
 ENTRYPOINT ["./start.sh"]
 ```
 
-Dockerfile 模板中参考的 **start.sh** 脚本内容如下。请将脚本文件保存在与 Dockerfile 相同的目录中。
+Dockerfile 模板中引用的 **start.sh** 脚本内容如下。请将脚本文件保存在与 Dockerfile 相同的目录中。
 
 ```bash
 #!/bin/sh
 
-# -e 若命令以非零状态退出，则立即退出。
-# -x 在执行时显示命令及其参数。
+# -e 如果某个命令以非零状态退出，则立即退出。
+# -x 显示命令及参数，在执行时显示。
 set -ex
 
-# 将 JAVA_OPTS 环境变量的值作为 JAVA 服务的启动参数，在运行时自动用当前环境中的 JAVA_OPTS 环境变量的值进行替换。
-# 使用 exec 以使 Java 程序可以接收 SIGTERM 信号。
+# 使用 JAVA_OPTS 环境变量的值作为 JAVA 服务的启动参数，在运行时自动用当前环境中的 JAVA_OPTS 环境变量的值替换。
+# 使用 exec，使 Java 程序能够接收 SIGTERM 信号。
 exec /usr/bin/java ${JAVA_OPTS} \
      -Djava.security.egd=file:/dev/./urandom \
      -jar /home/admin/app.jar ${RUN_ARGS} "$@"

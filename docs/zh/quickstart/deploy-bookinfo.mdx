@@ -4,29 +4,29 @@ weight: 20
 sourceSHA: c10f390ae9caf58c4da28ddc622cf55a0ccc9919ea3fbb33e7502b89b9d77fd8
 ---
 
-本指南将帮助您在您的环境中部署 Bookinfo 应用程序，并验证部署的成功。
+本指南将帮助您在您的环境中部署 Bookinfo 应用程序，并验证部署的成功性。
 
-在开始之前，请确保：
+在开始之前，请确保您已：
 
-- 您拥有 **Customer Portal** 账户，并可以访问 **App Market** 进行下载。如果您没有账户，请联系技术支持。
+- 拥有 **客户门户** 帐户，并具有对 **应用市场** 的下载访问权限。如果您没有帐户，请联系技术支持。
 
 ## 步骤 1：创建 Bookinfo 项目和命名空间
 
 1. **创建项目和命名空间**\
-   在 **项目管理** 中，点击 **创建项目**，将其命名为 `demo`，并选择您计划部署 Bookinfo 应用程序的集群。项目创建后，前往项目详情页面。在左侧导航面板中，点击 **命名空间**，然后 **创建命名空间**，将其命名为 `demo-dev`。\
-   如果您已经有一个适合 Bookinfo 部署的项目和命名空间，可以跳过此步骤，并在以下命令中将命名空间替换为您自己的命名空间。
+   在 **项目管理** 中，点击 **创建项目**，将其命名为 `demo`，并选择您计划部署 Bookinfo 应用的集群。项目创建后，转到项目详情页面。在左侧导航面板中，点击 **命名空间**，然后点击 **创建命名空间**，命名为 `demo-dev`。\
+   如果您已经有一个适合 Bookinfo 部署的项目和命名空间，可以跳过此步骤，并在以下命令中用您自己的命名空间替换命名空间。
 
-   **注意**：创建项目需要平台管理员权限。如果您没有必要的访问权限，请联系管理员以获得帮助。
+   **注意**：创建项目需要平台管理员权限。如果您没有必要的访问权限，请联系管理员寻求帮助。
 
 ## 步骤 2：下载 Bookinfo 资源
 
 1. **登录并下载**\
-   登录到 **Customer Portal**，在 App Market 中搜索 “Bookinfo”，并下载资源。
+   登录 **客户门户**，在应用市场中搜索 "Bookinfo"，并下载资源。
 
 ## 步骤 3：推送镜像
 
 1. **上传并解压包**\
-   将下载的包上传到能够连接到您镜像注册表的服务器或 PC。解压包以获取以下文件：
+   将下载的包上传到可以连接到您的镜像注册表的服务器或 PC。解压包以获取以下文件：
 
    ```bash
    tar -xzvf <package>
@@ -38,14 +38,14 @@ sourceSHA: c10f390ae9caf58c4da28ddc622cf55a0ccc9919ea3fbb33e7502b89b9d77fd8
    - `bookinfo.yaml`：用于 Bookinfo 部署的 YAML 文件，包括服务和部署配置。
 
 2. **设置脚本权限**\
-   为脚本赋予执行权限：
+   为脚本分配执行权限：
 
    ```bash
    chmod +x push-images.sh
    ```
 
 3. **运行脚本以推送镜像**\
-   执行以下命令，将镜像推送到您的目标注册表：
+   执行以下命令将镜像推送到您的目标注册表：
 
    ```bash
    # 示例 ./push-images.sh ./bookinfo-images-amd64.tar 192.168.143.0:32767 true admin 'Aa123!@#' bookinfo-demo
@@ -58,8 +58,8 @@ sourceSHA: c10f390ae9caf58c4da28ddc622cf55a0ccc9919ea3fbb33e7502b89b9d77fd8
    - `target-registry`：镜像注册表的地址和端口。**注意**：前缀不应包括 `https://` 或 `http://`。
    - `requires-auth`：是否需要身份验证。如果不需要，输入 `false`；如果需要，输入 `true` 并提供 `username` 和 `password`。
    - `username`：镜像注册表的用户名。
-   - `password`：镜像注册表的密码。**建议**：用单引号括起来，以避免因密码中的特殊字符引起的命令行解析错误。
-   - `harbor-project`：如果使用 Harbor 镜像注册表，请在 Harbor 中输入项目名称；如果使用 Docker Registry，此参数可以留空。
+   - `password`：镜像注册表的密码。**建议**：用单引号将其括起来，以避免由于密码中的特殊字符导致的命令行解析错误。
+   - `harbor-project`：如果使用 Harbor 镜像注册表，则在 Harbor 中输入项目名称；如果使用 Docker Registry，此参数可以留空。
 
 ## 步骤 4：部署 Bookinfo 应用程序
 
@@ -67,7 +67,7 @@ sourceSHA: c10f390ae9caf58c4da28ddc622cf55a0ccc9919ea3fbb33e7502b89b9d77fd8
    打开容器平台或平台管理页面，然后点击右下角的 `kubectl` 工具。
 
 2. **应用 YAML 文件**\
-   使用 `vi` 或其他终端编辑器粘贴 `bookinfo.yaml` 的内容，并运行以下命令：
+   使用 `vi` 或其他终端编辑器将 `bookinfo.yaml` 的内容粘贴并运行以下命令：
 
    ```bash
    kubectl apply -f bookinfo.yaml -n <your-namespace>
@@ -75,7 +75,7 @@ sourceSHA: c10f390ae9caf58c4da28ddc622cf55a0ccc9919ea3fbb33e7502b89b9d77fd8
 
 3. **验证部署成功**
 
-   - 检查所有 Pods 的状态是否为 `Running`：
+   - 检查所有 Pods 是否处于 `Running` 状态：
 
      ```bash
      kubectl get pods -n <your-namespace>

@@ -5,55 +5,55 @@ sourceSHA: 72257930ee3a6f5a62e7729ec7056d88d97f16a8ec87d655846499ed63440f46
 
 # 配置和验证跨集群故障转移
 
-本文档说明如何实现基于多集群服务网格的应用程序的跨集群故障转移，以 Bookinfo 应用程序为例。
+本文档解释了如何使用 Bookinfo 应用程序作为示例，实现基于多集群服务网格的跨集群故障转移。
 
 ## 步骤
 
-1. 在左侧导航栏中，点击 **Service Mesh** > **Mesh**。
+1. 在左侧导航栏中，单击 **服务网格** > **网格**。
 
-2. 点击要配置的 ***服务网格名称***。
+2. 单击要配置的 ***服务网格名称***。
 
-3. 在 **Mesh Policies** 选项卡上，点击集群 `c1` 右侧的 **Create Policy** > **Circuit Breaker**。
+3. 在 **网格策略** 选项卡上，单击 **创建策略** > **断路器**，位于集群 `c1` 的右侧。
 
    :::note
 
-   - 如果没有特殊要求，请使用默认参数。
+   - 如果没有特别要求，请使用默认参数。
 
-   - 如果服务未配置 **Circuit Breaker Policy**，则 **Failover** 配置将对其无效，进入流量将在服务网格中的所有集群的服务 Pods 之间随机转发。如果服务配置了 **Circuit Breaker Policy**，则进入流量将在服务的集群内路由，直到该集群中的所有 Pods 被触发。
+   - 如果某个服务未配置 **断路器政策**，则 **故障转移** 配置将不对其生效，入口流量将随机转发到服务网格中所有集群的服务 Pods。 如果某个服务配置了 **断路器政策**，则入口流量将在服务的集群内路由，直到该集群中的所有 Pods 都被触发。
 
    :::
 
-4. 在 **Mesh Policies** 选项卡上，点击集群 `c1` 右侧的 **Create Policy** > **Regional Load Balancing**。
+4. 在 **网格策略** 选项卡上，单击 **创建策略** > **区域负载均衡**，位于集群 `c1` 的右侧。
 
-5. 选择 **Failover** 作为 **Policy Type**，并按照以下描述配置相关参数。
+5. 选择 **故障转移** 作为 **策略类型**，并按如下所述配置相关参数。
 
-   | 参数                         | 描述                                                                                                                               |
+   | 参数                          | 描述                                                                                                                              |
    | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-   | **Failure Region**           | 服务 Pods 失败所在的集群区域，即配置该策略的集群区域。                                                                            |
-   | **Disaster Recovery Region** | 为服务 Pods 失败所在的集群提供负载均衡的区域。                                                                                     |
+   | **故障区域**                 | 发生故障的服务 Pods 所在的集群区域，即配置该政策的集群区域。                                                                   |
+   | **灾难恢复区域**             | 为发生故障的服务 Pods 所在的集群提供负载均衡的区域。                                                                           |
 
    :::note
 
-   配置故障转移策略后，当故障区域集群中的服务 Pods 被触发且该集群中服务 Pods 的健康比例低于 71.43%（100/[Overprovisioning Factor](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/overprovisioning#arch-overview-load-balancing-overprovisioning-factor））时，该集群中服务的部分入站流量将优先转发到灾难恢复区域集群中的服务 Pods。
+   配置故障转移策略后，当故障区域集群中的服务 Pods 被触发且该集群中的服务 Pods 健康比例低于 71.43%（100/[超额配置因子](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/overprovisioning#arch-overview-load-balancing-overprovisioning-factor)）时，该集群中服务的部分入口流量将优先转发到灾难恢复区域集群中的服务 Pods。
 
-   例如，在为集群 `c1` 配置故障转移策略后（灾难恢复区域为集群 `c2` 的区域），如果故障区域集群 `c1` 中 productpage 服务 Pods 的健康比例为 50%，则集群 `c1` 中服务的 `50% * 1.4 = 70%` 的流量将由故障区域集群 `c1` 中的服务 Pods 处理，其余 30% 的流量将由灾难恢复区域集群 `c2` 中的服务 Pods 处理。<br />如果未设置故障转移，流量将在网格中的集群之间随机转发。
+   例如，在集群 `c1` 中配置故障转移策略后（灾难恢复区域为集群 `c2` 的区域），如果故障区域集群 `c1` 中 productpage 服务 Pods 的健康比例为 50%，那么 `50% * 1.4 = 70%` 的服务流量将由故障区域集群 `c1` 中的服务 Pods 处理，其余 30% 的流量将由灾难恢复区域集群 `c2` 中的服务 Pods 处理。<br />如果未设置故障转移，则流量将在网格中的集群之间随机转发。
 
-   有关流量负载优先级的详细信息，请参阅 [Priority levels](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/priority)。
+   有关流量负载优先级的详细信息，请参见 [优先级水平](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/priority)。
 
    :::
 
-6. 点击 **Create**。
+6. 单击 **创建**。
 
 ## 验证方法
 
-1. 在顶部导航栏中，点击产品视图切换到 **Container Platform** 并进入集群 `c1` 下的命名空间 `ns1`。
+1. 在顶部导航栏中，单击产品视图切换，切换到 **容器平台**，并进入集群 `c1` 下的命名空间 `ns1`。
 
-2. 在左侧导航栏中，点击 **Compute Components** > **Deployments**。
+2. 在左侧导航栏中，单击 **计算组件** > **部署**。
 
-3. 点击 productpage 的 ***Deployment name***。
+3. 单击 productpage 的 ***部署名称***。
 
-4. 在右上角点击 **Stop** 停止所有 productpage 的 Pods。
+4. 单击右上角的 **停止**，以停止所有 productpage 的 Pods。
 
-5. 根据在集群 `c1` 部署的 gateway 创建的路由配置（`External Access Address`），参考产品页面服务的 [Access Verification](../how_to/deploy_bookinfo.mdx#access-verification) 方法持续访问 productpage 服务。
+5. 根据在集群 `c1` 中部署的网关创建的路由配置（`外部访问地址`），参考 productpage 服务的 [访问验证](../how_to/deploy_bookinfo.mdx#access-verification) 方法，持续访问 productpage 服务。
 
-   **注意**：如果 Bookinfo 应用程序仍可以正常访问，则表示已经实现跨集群故障转移。此外，您还可以进入服务网格平台，通过查看服务拓扑（跨集群）和调用链进一步验证流量转发情况。
+   **注意**：如果可以正常访问 Bookinfo 应用程序，则表示已实现跨集群故障转移。此外，您可以进入服务网格平台，通过查看服务拓扑（跨集群）和调用链进一步验证流量转发。

@@ -4,48 +4,48 @@ weight: 30
 sourceSHA: e412ab94c103ccd502dfacbdd9998a8c3871401310c4b1cb9aec1daf4a250ed8
 ---
 
-本指南将引导您通过 Istio Ingress Gateway 访问 Bookinfo 并验证其功能。此指南中的 Ingress Gateway 使用经典的 Istio `VirtualService` API。
+本指南将引导您通过 Istio Ingress Gateway 访问 Bookinfo 并验证其功能。本指南中的 Ingress Gateway 使用经典的 Istio `VirtualService` API。
 
-**在您开始之前，请确保：**
+**在开始之前，请确保：**
 
-- [Bookinfo 示例应用程序已经部署](quickstart/deploy-bookinfo.html)。
-- [服务网格已经创建](install/create_service_mesh/index.html)。
-- 您需要具有平台管理员权限。请确保您的账户已分配平台管理员角色。
+- [Bookinfo 示例应用已部署](quickstart/deploy-bookinfo.html)。
+- 已创建 [服务网格](install/create_service_mesh/index.html)。
+- 您将需要平台管理员权限。请确保您的账户已分配平台管理员角色。
 
-为简化设置过程，本教程使用 `NodePort` 方法访问 Ingress Gateway，消除了对 `LoadBalancer` 的需求。访问 Bookinfo 应用程序将通过节点 IP 和节点端口。
+为了简化设置过程，本教程使用 `NodePort` 方法访问 Ingress Gateway，免去对 `LoadBalancer` 的需求。访问 Bookinfo 应用将通过节点 IP 和节点端口进行。
 
-## 第一步：部署 Ingress Gateway
+## 第 1 步：部署 Ingress Gateway
 
 1. **创建项目和命名空间**
-   请前往 **项目管理** 页面，点击 **创建项目**，命名为 `platform`，并选择 Bookinfo 应用程序所在的集群。
-   在项目详情中，在左侧导航面板下，点击 **命名空间** 并创建一个名为 `platform-gateway` 的命名空间。
+   导航到 **项目管理** 页面，点击 **创建项目**，命名为 `platform`，并选择 Bookinfo 应用所在的集群。
+   在项目详情中，左侧导航面板下，点击 **命名空间** 创建名为 `platform-gateway` 的命名空间。
 
 2. **部署 Ingress Gateway**
-   前往 **平台管理**，导航至 **服务网格** > **网关**，然后点击 **部署网关**。填写网关参数：
+   前往 **平台管理**，导航至 **服务网格** > **网关**，点击 **部署网关**。填写网关参数：
 
-   - 基本信息：命名为 `public-ingressgw`，网关类型为 `Ingress Gateway`，网关类型选择为 `Shared`，其余参数保持默认。
+   - 基本信息：命名为 `public-ingressgw`，网关类型为 `Ingress Gateway`，选择网关类型为 `Shared`，其余参数保持默认。
    - 部署配置：选择命名空间 `platform-gateway`，节点标签选择 `ingress:true`，其余参数保持默认。
-   - 网络配置：选择 `NodePort`，设置 HTTP 协议主机端口为 `30665`，HTTPS 主机端口为 `30666`。
+   - 网络配置：选择 `NodePort`，将 HTTP 协议主机端口设置为 `30665`，HTTPS 主机端口设置为 `30666`。
    - 检查端口可用性：执行以下命令以确保端口未被占用：
 
      ```bash
      kubectl get svc --all-namespaces -o custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,TYPE:.spec.type,NODEPORT:.spec.ports[*].nodePort' | grep NodePort
      ```
 
-## 第二步：创建网关配置
+## 第 2 步：创建网关配置
 
-1. 前往网关详情页面，切换到 **网关配置** 选项卡，点击 **创建网关配置**。
-2. 命名为 `public-ingressgw-gateway`，选择 `HTTP` 端口 `80`，设置 Host 为 `*`，然后点击创建。
+1. 导航至网关详情页面，切换到 **网关配置** 选项卡，点击 **创建网关配置**。
+2. 命名为 `public-ingressgw-gateway`，选择 `HTTP` 端口 `80`，将主机设置为 `*`，然后点击创建。
 
-## 第三步：创建虚拟服务
+## 第 3 步：创建虚拟服务
 
 1. 切换到 **虚拟服务** 选项卡，点击 **创建路由配置**。
-2. 命名为 `public-ingressgw-vs`，选择命名空间 `platform-gateway`，路由目标选择 `命名空间: demo-dev`，`服务: productpage`，`端口: 9080`。
+2. 命名为 `public-ingressgw-vs`，选择命名空间 `platform-gateway`，路由目标选择 `命名空间：demo-dev`，`服务：productpage`，`端口：9080`。
 
 ## 测试 Ingress 流量
 
 1. 获取 `GATEWAY_IP_PORT`：
-   - 首先，通过执行以下命令找到 Ingress Gateway 所在的节点 IP 地址：
+   - 首先，通过执行以下命令找到 Ingress Gateway 所在节点的 IP 地址：
 
      ```bash
      kubectl get nodes -o wide

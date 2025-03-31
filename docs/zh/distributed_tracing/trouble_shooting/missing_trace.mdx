@@ -3,35 +3,35 @@ weight: 10
 sourceSHA: 07a0f0ae63a3e5dec4a4a338a5ed45d92fdc7539206a7e4e9c30d2386be8ffe2
 ---
 
-# 无法查询所需的追踪信息
+# 无法查询所需的跟踪信息
 
 ## 问题描述
 
-在服务网格中查询追踪信息时，可能会遇到目标追踪信息无法检索的情况。
+在服务网格中查询跟踪信息时，您可能会遇到无法获取目标跟踪的情况。
 
 ## 根本原因分析
 
-### 1. 追踪采样率配置过低
+### 1. 跟踪采样率配置过低
 
-当追踪的采样率参数设置过低时，系统将仅按比例收集追踪数据。在请求量不足或低峰期，这可能导致采样数据低于可见性阈值。
+当跟踪的采样率参数设置过低时，系统将仅按比例收集跟踪数据。在请求量不足或低峰期，这可能导致采样的数据低于可见性阈值。
 
 ### 2. Elasticsearch 实时限制
 
-Elasticsearch 索引的默认配置为 `"refresh_interval": "10s"`，这导致在数据从内存缓冲区刷新到可搜索状态之前有 10 秒的延迟。当查询最近生成的追踪信息时，结果可能会缺失，因为数据尚未被持久化。
+Elasticsearch 索引的默认配置是`"refresh_interval": "10s"`，这导致数据在从内存缓冲区刷新到可搜索状态之前存在 10 秒的延迟。当查询最近生成的跟踪信息时，结果可能会缺失，因为数据尚未持久化。
 
-此索引配置可以有效减少 Elasticsearch 上的数据合并压力，提高索引速度和首次查询速度，但也在一定程度上降低了数据的实时性。
+此索引配置可以有效减少 Elasticsearch 上的数据合并压力，提高索引速度和首次查询速度，但在一定程度上也降低了数据的实时性。
 
 ### 3. 查询条件设置不当
 
-在执行追踪查询时，如果对 `Span kind` 参数背后的技术原理理解不足，可能导致未返回任何数据。因此，不建议随意使用该参数。特别是当同时指定 `Client` 和 `Server` 时，可能会导致查询结果为空。
+在进行跟踪查询时，如果对 `Span kind` 参数背后的技术原理理解不透彻，可能导致没有数据返回。因此，不建议随意使用该参数。特别是同时指定 `Client` 和 `Server` 时，可能会导致查询结果为空。
 
-#### 示例 1：`Span kind` 设置为 `Root Span`，同时指定 `Client` 和 `Server`
+#### 示例 1: `Span kind` 设置为 `Root Span`，同时指定 `Client` 和 `Server`
 
-在这种情况下，查询将返回 **无数据**。原因是当客户端和服务器都由 OTel Agent 管理时，追踪的根跨度通常位于客户端，服务器数据将无法检索。要解决此问题，请移除 `Server` 条件或避免选择 `Root Span`。
+在这种情况下，查询将返回**无数据**。原因是当客户和服务器都由 OTel Agent 管理时，跟踪的根 span 通常位于客户端，服务器数据将无法检索。为了解决此问题，请删除 `Server` 条件或避免选择 `Root Span`。
 
-#### 示例 2：`Span kind` 设置为 `Service Entry Span`，同时指定 `Client` 和 `Server`
+#### 示例 2: `Span kind` 设置为 `Service Entry Span`，同时指定 `Client` 和 `Server`
 
-类似地，这个查询也将返回 **无数据**。原因是当客户端和服务器都注入了 Sidecar 时，`Service Entry Span` 指的是由服务器接收的第一个请求，但追踪数据存储在客户端。要解决此问题，请移除 `Client` 条件或避免选择 `Service Entry Span`。
+同样，这个查询也将返回**无数据**。原因是当客户和服务器都有 Sidecar 注入时，`Service Entry Span` 指的是服务器接收到的第一个请求，但跟踪数据存储在客户端。为了解决此问题，请删除 `Client` 条件或避免选择 `Service Entry Span`。
 
 ## 根本原因 1 的解决方案
 
@@ -40,20 +40,20 @@ Elasticsearch 索引的默认配置为 `"refresh_interval": "10s"`，这导致�
 
 ## 根本原因 2 的解决方案
 
-通过 `jaeger-collector` 启动参数 `--es.asm.index-refresh-interval` 调整刷新间隔，默认值为 `10s`。
+通过 `jaeger-collector` 的 `--es.asm.index-refresh-interval` 启动参数调整刷新间隔，默认值为 `10s`。
 
-如果该参数的值为 `"null"`，则索引的 `refresh_interval` 将没有配置。
+如果该参数的值为`"null"`，则不会对索引的 `refresh_interval` 进行配置。
 
-**注意**：将其设置为 `"null"` 将影响 Elasticsearch 的性能和查询速度。
+**注意**：设置为 `"null"` 将影响 Elasticsearch 的性能和查询速度。
 
 ## 根本原因 3 的解决方案
 
-在使用 `Span kind` 参数进行追踪查询时：
+在使用 `Span kind` 参数进行跟踪查询时：
 
 - 避免同时使用 `Client` 和 `Server` 条件
 - 对于 `Root Span` 查询：
-  - 如果客户端和服务器同时存在，请移除 `Server` 条件
-  - 或者如果需要服务器端数据，请避免选择 `Root Span`
+  - 如果客户端和服务器都存在，则移除 `Server` 条件
+  - 或者如果需要服务器端数据，则避免选择 `Root Span`
 - 对于 `Service Entry Span` 查询：
-  - 如果客户端和服务器同时存在，请移除 `Client` 条件
-  - 或者如果需要客户端数据，请避免选择 `Service Entry Span`
+  - 如果客户端和服务器都存在，则移除 `Client` 条件
+  - 或者如果需要客户端数据，则避免选择 `Service Entry Span`

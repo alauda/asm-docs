@@ -5,21 +5,21 @@ sourceSHA: a794a8d01423bfffa4cb4114f2f6322ee53324532a20d3fc5a58727d824cf80c
 
 # Alauda Service Mesh Essentials 集群插件
 
-Alauda Service Mesh Essentials 集群插件提供用户界面、先进的 API 服务器和全球 asm 控制器。
+Alauda Service Mesh Essentials 集群插件提供了 UI、高级 API 服务器和全球 ASM 控制器。
 
 ## 下载
 
 :::info
-Alauda Service Mesh Essentials 集群插件可以从灵雀云获取。
+Alauda Service Mesh Essentials 集群插件可以从 Alauda Cloud 获取。
 
-请联系客户支持以获取更多信息。
+如需更多信息，请联系消费支持。
 :::
 
 ## 上传
 
-我们需要将 Alauda Service Mesh Essentials 集群插件上传到 ACP **global** 集群。
+我们需要将 Alauda Service Mesh Essentials 集群插件上传至 ACP **global** 集群。
 
-### 操作步骤
+### 步骤
 
 <Steps>
   ### 下载 violet 工具
@@ -30,13 +30,13 @@ Alauda Service Mesh Essentials 集群插件可以从灵雀云获取。
 
   1. 点击 **市场 / 上传包**。
   2. 点击 **下载打包和列表工具**。
-  3. 在 **执行环境** 下找到正确的操作系统 / CPU 架构。
-  4. 点击 **下载** 来下载 `violet` 工具。
-  5. 运行 `chmod +x ${PATH_TO_THE_VIOLET_TOOL}` 来使该工具可执行。
+  3. 在 **执行环境** 下找到合适的操作系统 / CPU 架构。
+  4. 点击 **下载** 以下载 `violet` 工具。
+  5. 运行 `chmod +x ${PATH_TO_THE_VIOLET_TOOL}` 以使工具可执行。
 
   ### 上传包
 
-  然后，运行以下命令将 **Alauda Service Mesh Essentials** 集群插件上传到 ACP global 集群：
+  然后，运行以下命令将 **Alauda Service Mesh Essentials** 集群插件上传至 ACP global 集群：
 
   ```bash
   # [!code callout:5]
@@ -49,28 +49,28 @@ Alauda Service Mesh Essentials 集群插件可以从灵雀云获取。
   ```
 
   <Callouts>
-    1. 执行 `violet push` 来上传集群插件。
-    2. `${PKG_NAME}` 为 **Alauda Service Mesh Essentials** 集群插件的 tarball 名称。
-    3. `${PLATFORM_ADDRESS}` 为您的 ACP 平台地址。
-    4. `${PLATFORM_ADMIN_USER}` 为 ACP 平台管理员的用户名。
-    5. `${PLATFORM_ADMIN_PASSWORD}` 为 ACP 平台管理员的密码。
+    1. 执行 `violet push` 上传集群插件。
+    2. `${PKG_NAME}` 是 **Alauda Service Mesh Essentials** 集群插件的压缩包名称。
+    3. `${PLATFORM_ADDRESS}` 是您的 ACP 平台地址。
+    4. `${PLATFORM_ADMIN_USER}` 是 ACP 平台管理员的用户名。
+    5. `${PLATFORM_ADMIN_PASSWORD}` 是 ACP 平台管理员的密码。
   </Callouts>
 </Steps>
 
 ## 安装
 
-### 操作步骤
+### 步骤
 
 在 ACP 控制台的 **平台管理** 中：
 
 1. 从控制台顶部的 **集群** 下拉列表中选择 **global** 集群。
 2. 点击 **市场 / 集群插件**。
-3. 找到 **Alauda Service Mesh Essentials**。
+3. 定位到 **Alauda Service Mesh Essentials**。
 4. 点击 **安装**。
 
 ### 验证
 
 确认 **Alauda Service Mesh Essentials** 瓦片显示以下状态之一：
 
-- `正在安装`：安装正在进行中；请等待其变为 `已安装`。
-- `已安装`：安装已完成。
+- `Installing`：安装正在进行中；请等待其变为 `Installed`。
+- `Installed`：安装完成。

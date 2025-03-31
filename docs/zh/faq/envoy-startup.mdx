@@ -1,56 +1,56 @@
 ---
 title: Envoy Proxy 启动故障排除
-description: 当容器组无法启动或流量未按预期功能运行时，请使用以下工具和技术进行故障排除。
+description: 当容器组无法启动或流量无法正常工作时，请使用以下工具和技术进行故障排除。
 weight: 100
 sourceSHA: bf7eb7c9f7741bce49cbe9a38bce6231b78310afafee96e761bc723d4931a1e6
 ---
 
-Envoy 代理，当作为工作负载容器组中的 sidecar 使用时，也称为 `istio-proxy`，会截获服务网格中容器组内的所有入站和出站流量。
+Envoy 代理，在您的工作负载容器组中作为侧车使用时也称为 `istio-proxy`，会拦截您容器组内服务网格中的所有入站和出站流量。
 
-当容器组无法启动或流量未按预期功能运行时，请使用以下工具和技术进行故障排除：
+当容器组无法启动或流量无法按预期工作时，请使用以下工具和技术进行故障排除：
 
 ## PostStarHookError
 
-如果您遇到 `PostStarHookError` 错误，且容器组的错误消息指示如下内容：
+如果您遇到 `PostStarHookError` 错误，并且容器组的错误信息表明类似以下内容：
 
 ```
-错误：等待 Envoy 代理变为就绪超时。
+Error: timeout waiting for Envoy proxy to become ready.
 ```
 
-这意味着代理在指定时间内（`30s`）无法变为就绪。以下是导致此错误的常见原因：
+这意味着代理在指定的时间内（`30s`）无法变为就绪状态。此错误的常见原因包括：
 
-***sidecar 的 CPU 或内存限制不足***
+***侧车的 CPU 或内存限制不足***
 
 当：
 
-- 主机机器负载过高
+- 主机的负载过高
 - CPU 频率不足
-- 服务网格中有过多的服务
+- 服务网格中的服务过多
 - 等等
 
-则 sidecar 无法在合理时间内（30s）处理来自 `istiod` 的 xDS 配置。
+则侧车无法在合理的时间（30s）内处理来自 `istiod` 的 xDS 配置。
 
-**解决措施：** 增加 sidecar 的 CPU 和内存限制。
+**解决方案：** 增加侧车的 CPU 和内存限制。
 
 ***防火墙***
 
-服务网格要求 sidecar 流量访问 `istio-system` 命名空间中的服务。
+服务网格要求侧车流量访问 `istio-system` 命名空间中的服务。
 
-如果您在 `istio-proxy` 日志中发现"无法连接到 istiod"的消息，请检查您平台上的防火墙配置，并联系平台管理员允许工作负载流量访问 `istio-system` 命名空间：
+如果您在 `istio-proxy` 日志中发现“无法连接到 istiod”的消息，请检查您平台上的防火墙配置，并联系平台管理员以允许工作负载流量访问 `istio-system` 命名空间：
 
-具体配置取决于您的平台上使用的 CNI：
+具体配置取决于您平台上使用的 CNI：
 
-- （通用） `NetworkPolicy`
-- （Calico）`NetworkPolicy`，`GlobalNetworkPolicy` 在 `projectcalico.org/v3`
+- （通用）`NetworkPolicy`
+- （Calico）`NetworkPolicy`，`GlobalNetworkPolicy` 在 `projectcalico.org/v3` 中
 - （Cilium/KubeOVN）`CiliumNetworkPolicy`
 
-然而，在少数情况下（例如，华为云 CCE 和 Ubuntu 22.04），由于 CCE VPC CNI 引起的错误，您无法使用 `istio-init` initContainer 来截获网络流量。在这种情况下，请使用 Istio CNI 来配置拦截。
+但是在少数情况下（例如，华为云 CCE 和 Ubuntu 22.04），由于 CCE VPC CNI 引起的错误，您无法使用 `istio-init` initContainer 来拦截网络流量。在这种情况下，请使用 Istio CNI 配置拦截。
 
 ## 有问题的 WASM / EnvoyFilter 插件
 
-WASM 和 EnvoyFilters 是 Istio 中强大但可能会破坏的功能。
+WASM 和 EnvoyFilters 是 Istio 中强大但潜在破坏性的功能。
 
-配置不当的 WASM 或 EnvoyFilter 插件可能会导致服务网格中不可预测的行为。
-因此，当 Istio sidecar 在启动期间似乎停滞时，请首先检查是否存在可疑的 EnvoyFilters。
+配置不正确的 WASM 或 EnvoyFilter 插件可能会导致服务网格中的不可预测行为。
+因此，当 Istio 侧车在启动时似乎停滞不前时，请首先检查可疑的 EnvoyFilters。
 
-或者，如果为工作负载专用或全局安装了 WASM 插件，请将其卸载以验证 Istio 代理是否按预期功能运行。
+或者，如果为特定工作负载或全局安装了 WASM 插件，请将其卸载，以验证之后 Istio 代理是否正常工作。
