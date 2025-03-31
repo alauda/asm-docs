@@ -1,96 +1,67 @@
 ---
 weight: 10
-sourceSHA: f004f8b0f9bbecaa15de28d21a8a367a113c07b6af44a6de5e86fc96d5f13741
+sourceSHA: 3a0b9955e435a81f86ca14714066c807b29ccdc10f84b0d311e394a588b9cc92
 ---
-
-:::tip
-
-1、什么是介绍
-
-「介绍」章节是产品文档或者功能模块的开篇，提供对产品或功能的总体描述。它涵盖了核心概念、主要功能、目标用户和预期用途，为读者提供清晰的初步了解。
-
-我们一般会将介绍、优势、功能总览这三篇根据文章的整体篇幅长短决定是否存在在一篇文档中。对于复杂产品（如包含多个核心模块的平台类产品），建议将这些内容拆分为独立文档；对于单一功能模块，可以合并在同一篇文档中。
-
-2、介绍的重要性
-
-产品或者功能模块涉及的点可能会很多，在开篇添加一个介绍可以：
-
-- 统一理解：可以作为开篇提供一个一致的认知，减少沟通误差。
-- 引导阅读：为读者提供清晰的产品背景，方便深入了解后续详细内容。
-- 提升效率：减少重复解释对于产品基础认知的时间。
-
-3、如何去构思介绍这个章节
-
-- 简洁明了：用简洁的语言概括产品的核心要点，避免冗长。
-- 突出关键点：强调产品的独特卖点和主要功能。
-- 面向读者：考虑目标读者的背景，提供他们关心的信息。
-
-4、介绍的特殊之处
-
-本模板为文档提供标准化的功能模块描述框架。通过结构化的内容组织和清晰的表达方式，帮助团队更好地传达产品功能价值，使用户快速理解和使用产品功能。
-
-产品级别的介绍和模块级别的介绍我们会发现存在一些差异：
-
-产品级别介绍的特点
-
-- **产品定位**：明确说明产品在行业中的位置和竞争优势。
-- **完整生态**：描述产品包含的所有核心模块和功能体系。
-- **适用场景**：产品的适用场景会更全面，需要根据不同模块的特性联合说明。
-
-模块级别介绍的特点
-
-- **模块定位**：说明该模块在产品中的角色和职责。
-- **模块特性**：侧重描述单一模块的特性以及优势。
-- **适用场景**：重点说明单一模块的支持的适用场景。
-
----
-
-可以访问[介绍文档示例](https://product-doc-guide.alauda.cn/template/intro/example.html)查看对应文档的示例。
-
-:::
 
 # 介绍
 
-## \<产品/模块> 介绍
+## EnvoyFilter 介绍
 
-> 介绍中的除了介绍这一篇幅，如果其他章节过长或者相对复杂，都可以独立开。
+EnvoyFilter API 是 Istio 服务网格中的一种强大定制机制，能够对 istiod 生成的 Envoy 代理配置进行细粒度控制。此功能专为高级用户设计，允许对特定的 Envoy 配置字段进行修改、插入自定义过滤器，甚至可以添加全新的监听器或集群。尽管提供了无与伦比的灵活性，但 EnvoyFilter 的使用需要谨慎，因为不当的配置可能会影响网格的稳定性。
 
-此处为短描述。具体介绍 \<产品/模块名称> 预期用途是什么。比如：
+EnvoyFilter 资源在工作负载中是以累加的方式应用的。多个过滤器可以共存于同一命名空间，应用顺序遵循以下层级：首先是[根配置命名空间](https://istio.io/latest/docs/reference/config/istio.mesh.v1alpha1/#MeshConfig)中的所有 EnvoyFilter，然后是工作负载特定命名空间中的那些。
 
-\<容器管理> 是基于 Kubernetes 构建的面向云原生应用的容器化管理模块。它是 ACP 的核心，基于原生多集群架构，解耦底层基础设施，实现多云与多集群统一化管理，大幅简化企业的应用上云流程，有效降低运维管理和人力成本。通过容器管理，您可以便捷创建 Kubernetes 集群，快速搭建企业级的容器云管理平台。
+## 优势
 
-## \<产品/模块> 优势
+EnvoyFilter 的核心优势包括：
 
-> 罗列该产品/模块的性能、可视化、安全等领域的优势，推荐使用无序列表格式。
+- **高级配置灵活性**\
+  Enables direct manipulation of Envoy proxy settings beyond Istio's standard networking APIs. This allows implementation of protocol-specific optimizations, custom retry logic, or experimental features not yet natively supported by Istio.
 
-\<产品/模块名称> 的核心优势如下：
+- **细粒度工作负载控制**\
+  Supports targeted customization using workload selectors, letting operators apply specific configurations to particular services or gateways without affecting the entire mesh.
 
-- 优势 1
+- **与 Istio 集成**\
+  Seamlessly integrates with Istio's control plane while maintaining compatibility with existing Istio resources like VirtualServices and DestinationRules.
 
-  （提供具体的说明，比如在性能、可视化、安全等方面的优势）
+- **协议可扩展性**\
+  Facilitates insertion of custom Envoy filters (L4/L7) to handle proprietary protocols or implement specialized traffic handling logic at the proxy level.
 
-- 优势 2
+## 应用场景
 
-  （具体说明）
+EnvoyFilter 主要用于以下场景：
 
-- ......
+- **协议扩展**\
+  Implement custom protocol parsers or HTTP filters for specialized communication requirements not covered by Istio's default support.
 
-## \<产品/模块> 应用场景
+- **流量操作**\
+  Insert custom WASM filters to modify request/response headers, implement complex routing logic, or perform protocol translation at the proxy level.
 
-> 罗列该 \<产品/模块> 的主要应用场景并提供必要说明，推荐使用无序列表格式。
+- **安全增强**\
+  Add custom authorization filters or implement request validation logic that requires deeper integration with Envoy's data plane.
 
-\<产品/模块> 的主要应用场景如下：
+- **可观察性扩展**\
+  Configure custom access log formats, inject trace headers, or implement metrics collection filters for specialized monitoring requirements.
 
-- 场景 1
+- **性能调优**\
+  Override default Envoy configuration parameters (e.g., connection pool settings, timeouts) for specific services requiring optimized performance characteristics.
 
-  （具体说明）
+## 使用注意事项
 
-- 场景 2
+使用 EnvoyFilter 时，请注意以下关键考虑事项：
 
-  （具体说明）
+- **版本兼容性**\
+  EnvoyFilter 配置与特定的 Envoy 代理版本紧密相关。对 Istio 的控制平面或代理版本的任何更改都可能需要配置更新。始终测试跨版本升级的配置。
 
-- ......
+- **配置冲突**\
+  应用于同一工作负载的多个 EnvoyFilter 按照创建时间戳顺序依次处理。冲突的配置可能会导致未定义的行为——确保过滤器的顺序经过仔细验证。
 
-## \<产品/模块> 使用限制
+- **实现耦合**\
+  某些配置可能依赖于 Istio 的内部实现细节。在可能的情况下，考虑使用标准 Istio API 的替代方法，以确保长期兼容性。
 
-> 若 \<产品/模块> 有使用限制，可在此处说明。
+- **全局应用**\
+  要在整个网格中应用配置，请在根命名空间中创建 EnvoyFilter **而不**使用工作负载选择器。谨慎使用此功能，以避免意外的副作用。
+
+:::danger 操作警告
+EnvoyFilter 的操作级别低于标准 Istio 资源。尽可能优先使用原生 Istio API（VirtualService, DestinationRule），并将 EnvoyFilter 保留给需要通过代理级别自定义无法通过更高级别抽象实现的用例。
+:::

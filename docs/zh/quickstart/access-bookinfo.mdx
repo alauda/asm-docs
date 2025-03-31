@@ -1,7 +1,7 @@
 ---
 title: 访问 Bookinfo
 weight: 30
-sourceSHA: 24e7f63994a690a95cf277810448305778a88490695b4dfb79256e6fbb9dcced
+sourceSHA: e412ab94c103ccd502dfacbdd9998a8c3871401310c4b1cb9aec1daf4a250ed8
 ---
 
 本指南将引导您通过 Istio Ingress Gateway 访问 Bookinfo 并验证其功能。此指南中的 Ingress Gateway 使用经典的 Istio `VirtualService` API。
@@ -9,7 +9,7 @@ sourceSHA: 24e7f63994a690a95cf277810448305778a88490695b4dfb79256e6fbb9dcced
 **在您开始之前，请确保：**
 
 - [Bookinfo 示例应用程序已经部署](quickstart/deploy-bookinfo.html)。
-- [服务网格已经创建](create_service_mesh/index.html)。
+- [服务网格已经创建](install/create_service_mesh/index.html)。
 - 您需要具有平台管理员权限。请确保您的账户已分配平台管理员角色。
 
 为简化设置过程，本教程使用 `NodePort` 方法访问 Ingress Gateway，消除了对 `LoadBalancer` 的需求。访问 Bookinfo 应用程序将通过节点 IP 和节点端口。
