@@ -1,7 +1,7 @@
 ---
 weight: 15
 title: 创建服务网格
-sourceSHA: 7827241892b7da4ee73a9cfec85ad709372b29ffd2cf0ceed67628918a8e3bb8
+sourceSHA: da85713958cc693e1a5fec99ae6386c3db895a6a6d769bf6db85eba80657426a
 ---
 
 本文档介绍如何创建单集群服务网格。在继续之前，请确保您熟悉以下主题：

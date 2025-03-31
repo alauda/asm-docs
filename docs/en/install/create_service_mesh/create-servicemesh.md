@@ -7,10 +7,10 @@ title: Creating a Service Mesh
 
 This document explains how to create a single-cluster service mesh. Before proceeding, please ensure you are familiar with the following topics:
 
-- [Mesh Deployment Models]({{< relref "mesh-u-servicemesh/create-servicemesh/mesh-deploy-model.md" >}}): Select the mesh deployment model that suits your needs.
-- [Mesh Component Descriptions]({{< relref "mesh-u-servicemesh/create-servicemesh/component-descriptions.md" >}}): Understand the roles of mesh components and prepare the necessary CPU and memory resources for the service mesh.
+- Mesh Deployment Models: Select the mesh deployment model that suits your needs.
+- Mesh Component Descriptions: Understand the roles of mesh components and prepare the necessary CPU and memory resources for the service mesh.
 
-For instructions on creating a multi-cluster service mesh, please refer to the [Multi-Cluster Service Mesh]({{< relref "mesh-u-servicemesh/multicluster-mesh" >}}) documentation.
+For instructions on creating a multi-cluster service mesh, please refer to the Multi-Cluster Service Mesh documentation.
 
 ## Constraints and Limitations
 
@@ -51,10 +51,10 @@ For more information, please see [Mesh Parameter Description](#mesh_parm_desc)
 
 ## Next Steps
 
-- [Enable Istio CNI]({{< relref "mesh-u-servicemesh/create-servicemesh/istio-cni.md" >}}) to eliminate the need for privileged init containers in each Pod.
-- [Enable Global Rate Limiting]({{< relref "mesh-u-servicemesh/create-servicemesh/global_rate_limit.md" >}}).
-- [Use the Istioctl Tool]({{< relref "mesh-u-servicemesh/create-servicemesh/istioctl.md" >}}).
-- [Monitor Mesh Components]({{< relref "mesh-u-servicemesh/create-servicemesh/monitoring_component.md" >}}).
+- Enable Istio CNI to eliminate the need for privileged init containers in each Pod.
+- Enable Global Rate Limiting.
+- Use the Istioctl Tool.
+- Monitor Mesh Components.
 
 ## <span id="mesh_parm_desc">Mesh Parameter Description</span>
 
@@ -75,7 +75,7 @@ The cluster dimension configuration applies only to the selected cluster.
 | --------- | ----------- |
 | **Sidecar Configuration** | **Resource Quota**: The default value of the sidecar resource quota at the cluster level. It can be modified based on actual conditions when injecting sidecars for specific services but cannot exceed the maximum limit of the namespace container quota (LimitRange) where the sidecar is located. |
 | **Trace Configuration** | **Sampling Rate**: The default sampling rate of the sidecar trace at the cluster level. |
-| **Redis Configuration** | Must be configured only when using the **Global Rate Limiting** function in the data plane. For specific configuration methods, please refer to [Enable Global Rate Limiting]({{< relref "mesh-u-servicemesh/create-servicemesh/global_rate_limit.md" >}}). |
+| **Redis Configuration** | Must be configured only when using the **Global Rate Limiting** function in the data plane. For specific configuration methods, please refer to Enable Global Rate Limiting. |
 | **HTTP Retry Policy** | **Retry Count**: The default maximum retry count for HTTP at the cluster level.<br>**Note**: The **Retry Count** in the service routing **Timeout and Retry** policy will override this default value. |
 
 ### Component Configuration

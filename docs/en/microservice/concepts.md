@@ -18,5 +18,3 @@ After adding microservices, users will have access to a range of advanced featur
 These tools allow users to have a deeper understanding and control over service performance, aiding in high-quality service delivery and continuous performance optimization.
 
 **Note**: Some services deployed on the platform using Git or Chart methods can automatically integrate into platform governance. The governance mode on the platform depends on the service configuration, for example, GitOps applications hosted in Git repositories, Java services deployed as OAM applications, Dubbo applications deployed via Chart, etc.
-
-For a detailed explanation of MicroService resources, please refer to [Microservice Resource Description]({{<relref "/mesh-u-servicemesh/add-services/1microservice.md">}}).

@@ -26,8 +26,8 @@ This document provides a brief overview of the various components of the service
 | -------------- | ----------- |
 | **Istio** | |
 | <span class="nowrap">istiod | The control plane component of Istio, with its name distinguishing different major versions of Istio. |
-| <span class="nowrap">istio-cni | Istio CNI node agent used for configuring traffic redirection for Pods within the mesh. This component is not deployed by default unless using OpenShift clusters. For deployment details, see [Enable Istio CNI]({{< relref "mesh-u-servicemesh/create-servicemesh/istio-cni.md" >}}). |
-| <span class="nowrap">tier2-gateway | The Tier2 gateway, in conjunction with the Tier1 gateway, provides advanced traffic management features like gray releases and service routing for ingress traffic in the mesh. <br> For more information on Tier1 and Tier2, see [Traffic Routing for Ingress Traffic in the Mesh]({{< relref "mesh-u-servicemesh/managing-traffic/1ingress-gateway/1understand-ingress-gateway.md#tier2" >}}). |
+| <span class="nowrap">istio-cni | Istio CNI node agent used for configuring traffic redirection for Pods within the mesh. This component is not deployed by default unless using OpenShift clusters. |
+| <span class="nowrap">tier2-gateway | The Tier2 gateway, in conjunction with the Tier1 gateway, provides advanced traffic management features like gray releases and service routing for ingress traffic in the mesh. |
 | <span class="nowrap">istio-eastwestgateway | The east-west gateway in Istio for multi-cluster service mesh communication. Its primary function is to ensure that services in different clusters can communicate with each other. This component is deployed only in `multi-network` and `multi-cluster` service meshes. |
 | <span class="nowrap">asm-core | Component providing global rate limiting for Istio. It is deployed by default but only functions when the service mesh is integrated with Redis. |
 | **OpenTelemetry** | |
@@ -54,7 +54,7 @@ This document provides a brief overview of the various components of the service
 
 This section outlines the minimum recommended computing resources for service mesh components in the cluster.
 
-CPU and memory allocation for each component are [configurable]({{< relref "mesh-u-servicemesh/create-servicemesh/create-servicemesh.md#config_com" >}}).
+CPU and memory allocation for each component are configurable.
 
 Before creating a service mesh, ensure that the cluster nodes have sufficient CPU and memory to run all service mesh components.
 

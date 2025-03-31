@@ -1,10 +1,10 @@
 ---
 weight: 10
 title: 服务网格组件描述
-sourceSHA: 3c7459b01c37148f3962e0ac741bf9a8235ec206e60d8997222a360d90d34659
+sourceSHA: bdbd2eaf472aabfde309d8a2f57c28acfb1230aca8e5f0f545911008a37a0136
 ---
 
-本文档提供了服务网格的各种组件及其在平台中角色的简要概述。
+本文档提供了服务网格的各种组件及其在平台中的角色的简要概述。
 
 ## 涉及的开源解决方案
 
@@ -27,7 +27,7 @@ sourceSHA: 3c7459b01c37148f3962e0ac741bf9a8235ec206e60d8997222a360d90d34659
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Istio**                                  |                                                                                                                                                                                                                                                                                                                                                                                               |
 | <span class="nowrap">istiod                | Istio 的控制平面组件，其名称区分不同主要版本的 Istio。                                                                                                                                                                                                                                                                                                                                 |
-| <span class="nowrap">istio-cni             | Istio CNI 节点代理，用于配置网格内 Pods 的流量重定向。此组件在默认情况下不被部署，除非使用 OpenShift 集群。有关部署的详细信息，请参阅 \[启用 Istio CNI]\({{< relref "mesh-u-servicemesh/create-servicemesh/istio-cni.md" >}})。                                                                                                                                                     |
+| <span class="nowrap">istio-cni             | Istio CNI 节点代理，用于配置网格内 Pods 的流量重定向。此组件在默认情况下不被部署，除非使用 OpenShift 集群。                                                                                                                                                                                                                                                                                     |
 | <span class="nowrap">tier2-gateway         | Tier2 网关与 Tier1 网关配合，提供高级流量管理功能，如灰度发布和网格中入口流量的服务路由。<br>有关 Tier1 和 Tier2 的更多信息，请参见 \[网格中入口流量的流量路由]\({{< relref "mesh-u-servicemesh/managing-traffic/1ingress-gateway/1understand-ingress-gateway.md#tier2" >}})。                                                                 |
 | <span class="nowrap">istio-eastwestgateway | Istio 中用于多集群服务网格通信的东西网关。其主要功能是确保不同集群中的服务可以相互通信。此组件仅在 `multi-network` 和 `multi-cluster` 服务网格中部署。                                                                                                                                                                                                                        |
 | <span class="nowrap">asm-core              | 提供 Istio 的全局速率限制的组件。此组件默认部署，但仅在服务网格与 Redis 集成时才会起作用。                                                                                                                                                                                                                                                                                               |
