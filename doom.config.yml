@@ -1,6 +1,6 @@
 title: Alauda Service Mesh
 logoText: Alauda Service Mesh
-lang: zh
+lang: en
 api:
   crds:
     - docs/shared/crds/*.yaml

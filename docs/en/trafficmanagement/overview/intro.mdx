@@ -3,94 +3,62 @@ weight: 10
 sourceSHA: f004f8b0f9bbecaa15de28d21a8a367a113c07b6af44a6de5e86fc96d5f13741
 ---
 
-:::tip
-
-1. What is an Introduction?
-
-The "Introduction" section is the opening part of the product documentation or feature module, providing an overall description of the product or feature. It covers core concepts, main functionalities, target users, and intended uses, offering readers a clear preliminary understanding.
-
-We generally decide whether to include the introduction, advantages, and feature overview sections in a single document based on the overall length of the article. For complex products (such as platform products containing multiple core modules), it is recommended to separate these contents into independent documents; for single feature modules, they can be combined into the same document.
-
-2. The Importance of an Introduction
-
-There may be many points involved in a product or feature module. Adding an introduction at the beginning can:
-
-- Unified Understanding: It can provide a consistent cognition at the beginning, reducing communication errors.
-- Guide Reading: It provides readers with a clear product background, facilitating a deeper understanding of the subsequent detailed content.
-- Improve Efficiency: It reduces the time for repetitive explanations related to basic product knowledge.
-
-3. How to Conceptualize the Introduction Section
-
-- Concise and Clear: Summarize the core points of the product using concise language, avoiding verbosity.
-- Highlight Key Points: Emphasize the product's unique selling points and main features.
-- Audience-Oriented: Consider the background of the target audience and provide information that matters to them.
-
-4. The Uniqueness of the Introduction
-
-This template provides a standardized framework for describing feature modules in documents. By organizing content in a structured manner and expressing it clearly, it helps the team convey the product's functional value better, enabling users to quickly understand and utilize the product features.
-
-There are some differences between product-level introductions and module-level introductions:
-
-Characteristics of Product-Level Introductions
-
-- **Product Positioning**: Clearly state the product's position in the industry and competitive advantages.
-- **Complete Ecosystem**: Describe all core modules and functional systems included in the product.
-- **Applicable Scenarios**: The applicable scenarios of the product will be more comprehensive and need to be jointly described according to the characteristics of different modules.
-
-Characteristics of Module-Level Introductions
-
-- **Module Positioning**: Explain the role and responsibilities of this module within the product.
-- **Module Features**: Focus on describing the characteristics and advantages of a single module.
-- **Applicable Scenarios**: Emphasize the applicable scenarios supported by a single module.
-
----
-
-You can visit the [Introduction Document Example](https://product-doc-guide.alauda.cn/template/intro/example.html) to see the corresponding document example.
-
-:::
-
 # Introduction
 
-## \<Product/Module> Introduction
+## Traffic Management Module Overview
 
-> Except for this introduction section, if other sections are lengthy or relatively complex, they can be opened independently.
+Traffic Management Advanced Operations provide comprehensive traffic management and service governance capabilities for cloud-native applications. This module enables fine-grained control over service communication through features like traffic passthrough, circuit breakers, canary releases, and global rate limiting. It supports both inbound and outbound traffic management while maintaining high observability and security standards across multi-cluster environments.
 
-This is a short description. It specifically introduces the expected use of \<Product/Module Name>. For example:
+## Advantages
 
-\<Container Management> is a container management module for cloud-native applications built on Kubernetes. It is the core of ACP, based on a native multi-cluster architecture, decoupling the underlying infrastructure, achieving unified management of multi-cloud and multi-cluster, significantly simplifying the process of migrating applications to the cloud, and effectively reducing operational management and labor costs. With container management, you can easily create Kubernetes clusters and quickly build an enterprise-level container cloud management platform.
+The core advantages of Traffic Management Advanced Operations are:
 
-## \<Product/Module> Advantages
+• **Flexible Traffic Control**  
+  Supports traffic passthrough configuration and bypass mode to optimize service call chains while maintaining governance capabilities.
 
-> List the advantages of the product/module in terms of performance, visualization, security, etc., preferably using a bulleted list format.
+• **Comprehensive Service Governance**  
+  Provides circuit breaker policies, load balancing strategies, and connection pool management to ensure service stability under high concurrency.
 
-The core advantages of \<Product/Module Name> are as follows:
+• **Multi-scenario Release Management**  
+  Enables manual/automatic canary releases with visual monitoring, supporting blue-green deployments and A/B testing scenarios.
 
-- Advantage 1
+• **Hybrid Environment Support**  
+  Manages external services through egress gateways and integrates non-mesh services via external service configurations.
 
-  (Provide specific explanations, such as advantages in performance, visualization, security, etc.)
+• **Enhanced Observability**  
+  Offers real-time monitoring of access logs, rate limiting effects, and Pod health status through visual dashboards.
 
-- Advantage 2
+## Scenarios
 
-  (Specific explanation)
+The main application scenarios include:
 
-- ......
+• **Performance Optimization**  
+  Use traffic passthrough for middleware services to bypass unnecessary Sidecar processing.
 
-## \<Product/Module> Application Scenarios
+• **Rapid Fault Diagnosis**  
+  Enable bypass mode to verify if service anomalies are caused by Sidecar proxies.
 
-> List the main application scenarios of the \<Product/Module> and provide necessary explanations, preferably using a bulleted list format.
+• **Microservice Version Management**  
+  Implement canary releases for safe production deployments of new service versions.
 
-The main application scenarios of \<Product/Module> are as follows:
+• **High-concurrency Protection**  
+  Configure global rate limiting and circuit breakers to prevent service avalanches.
 
-- Scenario 1
+• **Hybrid Architecture Management**  
+  Connect traditional services and cloud-native services through external service registration.
 
-  (Specific explanation)
+• **Network Security Control**  
+  Isolate abnormal Pods promptly while maintaining normal service operations.
 
-- Scenario 2
+## Limitations
 
-  (Specific explanation)
+1. Requires Sidecar injection for full functionality (except external services)
+2. Canary release cannot coexist with existing service routing configurations
+3. Pod isolation status resets during deployments/scale operations
+4. Global rate limiting requires Redis cluster configuration
+5. Cross-cluster service discovery constraints for canary releases
+6. Bypass mode requires Kubernetes v1.23+ clusters
+7. Egress gateway configuration needs regional consistency in multi-cluster scenarios
+8. Policies don't apply to traffic-passthrough configured services
 
-- ......
 
-## \<Product/Module> Usage Limitations
-
-> If there are usage limitations for the \<Product/Module>, they can be explained here.

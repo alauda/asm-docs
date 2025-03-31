@@ -1,0 +1,97 @@
+---
+weight: 10
+---
+
+# Pod Isolation
+
+## Introduction
+Pod Isolation enables dynamic exclusion of malfunctioning Pods from service traffic while maintaining their operational state. This functionality:
+
+- Prevents failed requests to defective endpoints
+- Maintains service availability during troubleshooting
+- Allows seamless reintegration post-recovery
+
+Core value: Ensures continuous service reliability through targeted traffic management
+
+## Features
+- Single-click Pod exclusion/inclusion
+- Real-time health metrics integration
+- Legacy service compatibility mode
+- Non-destructive isolation (Pod remains running)
+
+## Advantages
+**Precision**: Target specific Pods without service restart
+**Safety**: Maintains quorum for remaining Pods
+**Visibility**: Integrated success rate/latency tracking
+**Compliance**: Works within Kubernetes orchestration
+
+## Isolating Pods
+
+### Step 1: Access Pod Management
+1. Navigate: **Service List** > **Target Service**
+2. Select **Pod Group** tab
+3. Locate target Pod via metrics or logs
+
+### Step 2: Execute Isolation
+```yaml
+# Isolation state annotation
+metadata:
+  annotations:
+    asm.cpaas.io/isolated: "true"
+```
+
+| UI Control | Action |
+|------------|--------|
+| ![](/zh/img/333point.png) | Open context menu |
+| **Set Isolation** | Toggle isolation state |
+| **Set** | Confirm configuration |
+
+## Legacy Service Activation
+
+### Requirement Checklist
+- Kubernetes v1.18+
+- Service created prior to isolation feature release
+- Cluster admin privileges
+
+### Configuration Update
+1. Modify Deployment labels:
+```yaml
+metadata:
+  labels:
+    asm.cpaas.io/msselector: product-service
+```
+
+2. Update internal route selector:
+```yaml
+spec:
+  selector:
+    asm.cpaas.io/msselector: product-service
+```
+
+## Monitoring & Validation
+
+### Key Metrics Dashboard
+| Metric | Threshold | Refresh Control |
+|--------|-----------|-----------------|
+| Error Rate | \<5% | ![](/zh/img/33metricrefresh.png) |
+| Latency | \<500ms | ![](/zh/img/33metricautorefresh.png) |
+| Active Connections | ±10% variance | ![](/zh/img/33legend.png) |
+
+### Status Verification
+```bash
+kubectl get endpoints <service-name> -o jsonpath='{.subsets[].notReadyAddresses}'
+```
+
+## Operational Constraints
+1. **State Limitations**:
+   - Only affects Pods in Running state
+   - Excludes Pods in Completed/CrashLoopBackOff
+
+2. **Conflict Scenarios**:
+   - Disabled during canary releases
+   - Overridden by scale-in/scale-out events
+
+3. **Persistence**:
+   - Isolation resets on Pod restart
+   - Manual re-isolation required after recovery
+
