@@ -8,25 +8,29 @@ weight: 10
 
 Service Governance Policies provide traffic management capabilities through Istio's DestinationRule configurations. These policies:
 
-- Prevent cascading failures via circuit breaking
-- Optimize resource utilization with load balancing
-- Protect services from overload using connection pools
-- Ensure request reliability through retry mechanisms
+- Prevent cascading failures via circuit breaking  
+- Optimize resource distribution with load balancing  
+- Protect services from overload using connection pools  
+- Ensure request reliability through retry mechanisms  
 
-Core value: Maintain service stability under varying load conditions
+Core value: Maintain service stability and performance under varying load conditions  
 
-## Advantages
-- ​**Multi-level Protection**: Pod-level isolation & cluster-wide policies
-- ​**Protocol Awareness**: HTTP/1.1, HTTP2, and TCP support
-- ​**Dynamic Adjustment**: Real-time policy updates without downtime
-- ​**Observability**: Integrated with service mesh metrics
+## Advantages  
+- ​**Multi-level Protection**: Pod-level isolation & cluster-wide policies  
+- ​**Protocol Awareness**: HTTP/1.1, HTTP2, and TCP support  
+- ​**Dynamic Adjustment**: Real-time policy updates without downtime  
+- ​**Priority Control**: Service-level override capability  
 
-## Circuit Breaker Policy
+## Scenarios  
+- ​**High Availability Systems**  
+  Automatically isolate faulty pods in financial transaction services  
 
-### Policy Parameters
-```yaml
-outlierDetection:
-  consecutiveErrors: 5
-  interval: 30s
-  baseEjectionTime: 30s
-  maxEjectionPercent: 50%
+- ​**E-commerce Peak Handling**  
+  Manage sudden traffic spikes during promotional events  
+
+- ​**Microservice Coordination**  
+  Maintain session consistency in distributed systems  
+
+- ​**API Rate Control**  
+  Prevent third-party API overconsumption  
+
