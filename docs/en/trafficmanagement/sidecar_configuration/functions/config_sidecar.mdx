@@ -1,0 +1,126 @@
+---
+weight: 10
+---
+
+# Sidecar Configuration Management
+
+## Introduction
+Sidecar Configuration enables precise control over Envoy proxy behavior in Istio service meshes. This functionality:
+
+- Defines traffic policy execution scope
+- Optimizes proxy resource utilization
+- Implements namespace-level access control
+- Supports hierarchical configuration strategies
+
+Core value: Balance service mesh performance and security through granular traffic management
+
+## Features
+- Default cluster-wide configuration
+- Namespace-specific custom rules
+- Wildcard pattern matching
+- Priority override mechanism
+
+## Advantages
+**Performance Optimization**: Reduce proxy processing overhead
+**Security Control**: Limit service exposure scope
+**Flexibility**: Multiple namespace matching patterns
+**Compatibility**: Full Istio API support
+
+## Default Configuration Management
+
+### Configuration Parameters
+| Parameter | Format | Example |
+|-----------|--------|---------|
+| Egress Hosts | namespace/dnsName | `istio-system/*` |
+
+### Update Process
+1. Navigate: **Service Mesh** > **Meshes**
+2. Select target mesh > **Sidecar Config** tab
+3. Locate cluster > Click edit icon ![](/zh/img/00pencil.png)
+4. Configure egress hosts:
+   - Select namespace from dropdown
+   - Choose pattern:
+     - `*/*` Cluster-wide
+     - `./*` Current namespace
+     - Custom namespace
+5. Click **Confirm**
+
+**Constraints**:
+- Must reside in `istio-system` namespace
+- Affects all namespaces without custom config
+
+## Custom Configuration Setup
+
+### Configuration Template
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: ns-custom
+  namespace: target-ns
+spec:
+  egress:
+  • hosts:
+    ◦ "dev/*"
+    ◦ "prod/db-service"
+```
+
+### Implementation Steps
+1. Access mesh details page
+2. Navigate to **Sidecar Config** tab
+3. Click **Create Sidecar Configuration**
+4. Select target namespace
+5. Configure egress hosts patterns:
+   - Use `*` wildcard for broad matching
+   - `.` represents current namespace
+6. Validate priority override
+
+## Configuration Examples
+
+### Example 1: Namespace Isolation
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: ns-prod
+  namespace: prod
+spec:
+  egress:
+  • hosts:
+    ◦ "prod/*"  # Current namespace
+    ◦ "monitoring/*"  # Specific namespace
+```
+
+### Example 2: Full Cluster Access
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  egress:
+  • hosts:
+    ◦ "*/*"  # All namespaces
+```
+
+## Parameter Specifications
+| Parameter | Required | Type | Description |
+|-----------|----------|------|-------------|
+| namespace | Yes | String | Must be `istio-system` for default config |
+| egress | Yes | Array | Contains hosts patterns array |
+| hosts | Yes | Array | `namespace/dnsName` format with wildcard support |
+
+## Operational Constraints
+1. **Namespace Binding**:
+   - Custom configs only affect designated namespace
+   - Default config requires `istio-system` namespace
+
+2. **Pattern Rules**:
+   - Wildcard (*) only allowed in leftmost DNS component
+   - `prod/*.svc.cluster.local` matches prod services
+
+3. **Update Latency**:
+   - Configuration changes take effect within 60s
+   - Requires Istio 1.9+ control plane
+

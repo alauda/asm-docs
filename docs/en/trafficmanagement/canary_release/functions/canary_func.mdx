@@ -1,0 +1,124 @@
+---
+weight: 10
+---
+
+# Use Canary Release
+
+## Introduction
+Canary Release enables controlled deployment of service updates through gradual traffic shifting and real-time monitoring. This functionality:
+
+- Mitigates deployment risks in production environments
+- Supports multiple release strategies (canary/blue-green/A/B testing)
+- Provides automated rollback mechanisms
+- Integrates with GitOps workflows
+
+Core value: Safe and observable service version upgrades
+
+## Features
+- Manual/Automatic traffic control modes
+- Header/path-based routing rules
+- Real-time success rate/latency metrics
+- CRD-based configuration for GitOps
+
+## Advantages
+**Precision Control**: 1% granular traffic splitting
+**Visibility**: Integrated monitoring dashboard
+**Safety**: Auto-rollback on error thresholds
+**Compliance**: Maintains security policies during release
+
+## Enabling Canary Release
+
+### Step 1: Access Service Configuration
+1. Navigate: **Service List** > **Target Service**
+2. Select **Canary Release** tab
+3. Click **Enable** under Release Configuration
+
+### Step 2: Configure Release Parameters
+```yaml
+analysis:
+  interval: 2m
+  maxWeight: 50
+  stepWeight: 10
+  threshold: 10
+maxResponseTime: 500
+minSuccessRate: 95
+```
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| interval | Yes | 2m | Traffic shift interval |
+| maxWeight | Yes | 50% | Promotion threshold |
+| threshold | Yes | 10 | Max allowed errors |
+
+## Routing Configuration Management
+
+### Traffic Distribution
+```yaml
+http:
+• route:
+  • destination: reviews-primary
+    weight: 80
+  • destination: reviews-canary
+    weight: 20
+```
+
+### Header-Based Routing
+```yaml
+• match:
+  • headers: { "user-type": "internal" }
+  route:
+    ◦ destination: reviews-canary
+```
+
+### Path-Specific Testing
+```yaml
+• match:
+  • uri: { prefix: "/api/v2" }
+  route:
+    ◦ destination: reviews-canary
+      weight: 20
+```
+
+## CanaryDelivery CRD Reference
+
+### Metadata Requirements
+| Field | Constraint | Example |
+|-------|------------|---------|
+| name | Must match service name | reviews |
+| namespace | Must match service ns | prod |
+
+### Specification Details
+```yaml
+spec:
+  delivertype: canary
+  targetRef:
+    name: reviews-v1
+  trafficControl: system
+```
+
+| Field | Valid Values | Description |
+|-------|--------------|-------------|
+| promoteControl | user/system | Release confirmation mode |
+| trafficControl | user/system | Traffic management mode |
+
+## Monitoring & Validation
+
+### Key Metrics
+| Metric | Calculation | Threshold |
+|--------|-------------|-----------|
+| Success Rate | 2xx/Total | >95% |
+| Latency | avg(response_time) | \<500ms |
+| Errors | 5xx count | \<10/period |
+
+### Release States
+1. Initializing ➔ 2. Progressing ➔ 3. Promoting ➔ 4. Completed
+```bash
+kubectl get canarydeliveries -n prod
+```
+
+## Operational Constraints
+- Incompatible with existing service routing
+- Requires unique service naming per cluster
+- GitOps-managed services have limited UI controls
+- Security policies remain active during release
+

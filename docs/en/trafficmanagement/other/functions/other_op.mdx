@@ -1,0 +1,114 @@
+---
+weight: 10
+---
+
+# Advanced Sidecar Operations
+
+## Introduction  
+Advanced Sidecar Operations provide granular control over Istio proxy behavior within service meshes. This functionality:
+
+- Optimizes network performance through targeted traffic handling  
+- Enables non-disruptive debugging and troubleshooting  
+- Offers emergency bypass capabilities  
+- Maintains operational flexibility in complex environments  
+
+Core value: Enhanced observability and control over service mesh components  
+
+## Features  
+- Traffic passthrough configuration  
+- Pod-level bypass mode  
+- Dynamic log level adjustment  
+- Full Sidecar removal  
+
+## Advantages  
+**Precision Control**: Port/IP-range specific traffic management  
+**Non-Disruptive**: Bypass mode without pod restart  
+**Diagnostic Support**: Runtime log level modifications  
+**Fail-Safe**: Complete Sidecar removal capability  
+
+## Traffic Passthrough Configuration
+
+### Configuration Parameters  
+| Parameter | Type | Description |  
+|-----------|------|-------------|  
+| Destination Port | Outbound | Target service port (e.g., 6379) |  
+| IP Segment | Outbound | CIDR notation (e.g., 10.0.0.0/8) |  
+| Container Port | Inbound | Service's exposed port (e.g., 8080) |  
+
+### Implementation Steps  
+1. Navigate: **Service List** > **Target Service**  
+2. Select **Details** > **Sidecar Configuration**  
+3. Configure passthrough rules:  
+   - Add outbound ports/IP ranges  
+   - Specify inbound container ports  
+4. Confirm Deployment restart  
+
+**Note**: Triggers full Deployment restart - plan maintenance window  
+
+## Bypass Mode Management
+
+### Operational Workflow  
+```mermaid
+graph TD
+A[Detect Service Issue] --> B{Isolate Sidecar?}
+B -->|Yes| C[Enable Bypass]
+B -->|No| D[Standard Troubleshooting]
+C --> E[Verify Service Behavior]
+E --> F{Issue Resolved?}
+F -->|Yes| G[Root Cause: Sidecar]
+F -->|No| H[Root Cause: Application]
+```
+
+### Execution Steps  
+1. Locate target Pod: **Pods** tab  
+2. Activate bypass: ![](/zh/img/333point.png) > **Bypass Mode**  
+3. Toggle switch ➔ **OK**  
+4. Restart Istiod component (admin required)  
+
+**Requirements**:  
+- Kubernetes ≥v1.23  
+- Pod in Running state  
+- No pending Sidecar updates  
+
+## Sidecar Log Control
+
+### Log Levels  
+| Level | Persistence | Use Case |  
+|-------|-------------|----------|  
+| trace | Temporary | Protocol-level debugging |  
+| debug | Both | Connection issues |  
+| info | Permanent | Production monitoring |  
+
+### Update Process  
+1. Access service details  
+2. Click ![](/zh/img/33sidecar.png)  
+3. Select level and mode:  
+   ```yaml
+   logLevel: debug
+   persistence: temporary
+   ```  
+4. Confirm update  
+
+**Cluster Sync**: Automatically propagates to multi-cluster deployments  
+
+## Sidecar Removal
+
+### Impact Analysis  
+```mermaid
+graph LR
+A[Sidecar Removed] --> B[Disabled Features]
+B --> C[Security Policies]
+B --> D[Rate Limiting]
+B --> E[Canary Releases]
+B --> F[Monitoring Metrics]
+```
+
+### Removal Procedure  
+1. Verify no active canary releases  
+2. Execute **Actions** > **Remove Sidecar**  
+3. Confirm operation:  
+   ```bash
+   kubectl delete sidecar <service-name>
+   ```  
+
+**Recovery**: Requires re-injection through service mesh configuration  
