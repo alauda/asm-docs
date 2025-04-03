@@ -1,0 +1,108 @@
+---
+weight: 30
+---
+
+# Install Operator
+
+## Glossary
+
+| Term              | Definition                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| operator package  | A tgz compressed package containing image files and configuration files                    |
+| upload tool       | An executable file used to parse the operator package and import/upload it to the platform |
+| operation machine | The machine used to perform installation operations                                        |
+| working directory | The directory where the operator package and upload tool are stored                        |
+
+## Prerequisites
+
+1. Prepare an operation machine with Windows, Linux, or macOS that can access the platform. Linux is recommended, and the following instructions will use Linux as an example.
+2. Ensure the operation machine can access the `platform`.
+3. Download the operator package and save it to the working directory on the operation machine.
+4. Admin privileges are required to install the operator.
+
+## Obtaining the Upload Tool
+
+From `Platform Management` -> `Marketplace` -> `Upload Packages`, download the upload tool (`violet`).
+After download, set appropriate permissions for the executable.
+
+## Uploading the Operator
+
+> Whether importing a new operator or adding a new version to an existing operator,
+> you can use the `violet` tool to complete the task, and the commands are the same.
+
+Execute the following command in the working directory:
+
+```bash
+# [!code callout:6]
+./violet push \
+    <operator-package> \
+    --platform-address <platform-address> \
+    --platform-username <platform-username> \
+    --platform-password <platform-password> \
+    --clusters <clusters>
+```
+
+<Callouts>
+
+1. Run the `violet` tool to upload the operator package to the platform.
+2. `<operator-package>`: The name of the operator package (Example: `operator.4.0.1.ALL.tgz`).
+3. `<platform-address>`: The url address of the platform (Example: `https://platform.example.com`).
+4. `<platform-username>`: The platform username, which requires Platform Administrator privileges.
+5. `<platform-password>`: The platform password.
+6. `<clusters>`: The list of clusters where the operator needs to be uploaded, separated by comma (Example: `global,business`).
+
+</Callouts>
+
+After executing successfully, it will output the following information:
+
+```
+INFO[0024] artifactversion <operator-name>.<operator-version> not found, create it  cluster=business type=bundle
+INFO[0024] artifactversion <operator-name>.<operator-version> has been created successfully  cluster=business type=bundle
+```
+
+Then go to the platform's `Platform Management` -> `Marketplace` -> `Upload Packages` page,
+search for the operator keyword, and then click on the operator name to enter the operator details page.
+
+The details page will display the new version of the operator.
+If the status is `Uploaded`, it indicates that the upload was successful.
+
+## Next Steps
+
+After the Operator is uploaded, you can go to the `Platform Management` -> `Marketplace` -> `Operator Hub` page, switch to the target cluster, and then deploy the corresponding Operator.
+
+## Troubleshooting
+
+### Pushing Package To External Image Registry
+
+If you want to push the operator package to an external image registry, you can use the following parameters:
+
+| Parameter    | Definition                          | Example                          |
+| ------------ | ----------------------------------- | -------------------------------- |
+| `--dst-repo` | The address of the target registry  | `--dst-repo registry.example.com` |
+| `--username` | The username of the target registry | `--username admin`                |
+| `--password` | The password of the target registry | `--password *******`     |
+
+For example:
+
+```bash
+./violet push \
+    <operator-package> \
+    --platform-address <platform-address> \
+    --platform-username <platform-username> \
+    --platform-password <platform-password> \
+    --clusters <clusters> \
+    --dst-repo <dst-repo> \
+    --username <username> \
+    --password <password>
+```
+
+If the target image registry uses the plaintext (http) protocol, you need to specify the additional `--plain` parameter as follows:
+
+```bash
+./violet push \
+    ... \
+    --dst-repo <dst-repo> \
+    --username <username> \
+    --password <password> \
+    --plain
+```
