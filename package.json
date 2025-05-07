@@ -1,14 +1,15 @@
 {
   "devDependencies": {
-    "@alauda/doom": "^0.19.4",
+    "@alauda/doom": "^0.22.2",
     "typescript": "^5.8.2"
   },
   "scripts": {
     "dev": "doom dev",
-    "build": "doom build",
+    "build-online": "doom build -i --base asm -v 4.0",
+    "build-offline": "doom build -i --export -p /docs --base asm -v unversioned",
     "serve": "doom serve",
     "translate": "doom translate",
-    "export": "doom export"
+    "export": "doom export -i -p /docs --base asm -v unversioned"
   },
   "packageManager": "yarn@4.8.1"
 }

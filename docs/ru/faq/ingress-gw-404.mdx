@@ -1,0 +1,363 @@
+---
+title: >-
+  404 ошибки возникают при конфигурации нескольких шлюзов с одинаковым TLS
+  сертификатом
+description: >-
+  Этот документ рассматривает 404 ошибку, которая возникает, когда несколько
+  шлюзов сконфигурированы с одинаковым TLS сертификатом, подробно описывая
+  причины данного явления, методы диагностики и решения. Представлены два
+  подхода для устранения проблемы, включая объединение ресурсов Gateway и
+  возврат кода ответа 421, что помогает пользователям эффективно устранять
+  ошибки, вызванные повторным использованием соединений HTTP/2.
+weight: 200
+sourceSHA: 7452de08bf6b3e4dcc7c159d092bc9780dc3323e518695f9d84bc9b137500dda
+---
+
+## Описание проблемы
+
+**Симптом**
+
+При доступе через шлюз входа Istio с использованием протокола HTTP/2 возникает ошибка 404.
+
+Эта проблема известна в сообществе Istio. Для получения дополнительной информации, пожалуйста, обратитесь к статье [404 ошибки возникают при конфигурации нескольких шлюзов с одинаковым TLS сертификатом](https://istio.io/latest/docs/ops/common-problems/network-issues/#404-errors-occur-when-multiple-gateways-configured-with-same-tls-certificate).
+
+**Анализ**
+
+Конфигурирование более одного шлюза с использованием одинакового TLS сертификата приведет к тому, что браузеры, использующие повторное соединение HTTP/2 (т.е. большинство браузеров), будут выдавать ошибки 404 при доступе к второму хосту после того, как соединение с другим хостом уже было установлено.
+
+**Пример:** Если домены `a.example.com` и `b.example.com` используют один и тот же TLS сертификат и доступны через один и тот же шлюз входа Istio, но конфигурированы в двух разных ресурсах Gateway, клиент браузера HTTP/2 столкнется с ошибкой 404 при доступе к `b.example.com` после доступа к `a.example.com`. Это связано с повторным использованием соединения HTTP/2 браузера.
+
+## Метод диагностики
+
+Вы можете использовать следующий скрипт для быстрой проверки, если ваша среда имеет конфигурации Gateway, соответствующие описанной проблеме. Скрипт необходимо выполнять на основном узле бизнес-кластера, где находится шлюз входа Istio.
+
+**Заметка:**
+
+- Скрипт зависит от инструмента `jq`. Если в узле вашего кластера нет инструмента `jq`, пожалуйста, установите `jq` в кластере перед выполнением скрипта. Ссылка для скачивания инструмента: [jq download](https://jqlang.github.io/jq/download/).
+- Версия инструмента `jq` должна быть 1.7 или выше.
+
+```bash
+#!/bin/bash
+
+nslist=$(kubectl get ns  -o jsonpath='{.items[*].metadata.name}')
+declare -A cred_map
+
+echo "начинаем проверку gw"
+for ns in $nslist; do
+  # Получаем ресурсы gw
+  #echo "начинаем перечисление gw в $ns"
+  gateways=$(kubectl get gw -n $ns -o jsonpath='{.items[*].metadata.name}')
+  # Получаем YAML файл ресурса Gateway
+  for gateway in $gateways; do
+    gateway_yaml=$(kubectl get gw -n $ns $gateway  -o yaml)
+    gateway_json=$(kubectl get gw -n $ns $gateway  -o json)
+
+    tls_lines=$(echo "$gateway_yaml" | grep  'credentialName:')
+    secname=$(echo "$gateway_yaml" | grep  'credentialName:'|awk '{print $2}')
+
+    if [[ -n "$tls_lines" ]]; then
+      found=false
+      for key in "${!cred_map[@]}"; do
+        if [[ "$key" == "$secname" ]]; then
+          found=true
+          break
+        fi
+      done
+
+      if [[ $found == true ]]; then
+        echo -e "\033[31m учетные данные уже существуют в другом gw ресурсе, пожалуйста, объедините хосты в ресурсе gw  ${cred_map[$secname]} , и удалите этот gw!  \033[0m"
+        hosts=$(echo "$gateway_json" | jq -r '.spec.servers[] | .hosts[]')
+        # Выводим информацию о имени Gateway и хостах
+        echo -e  "\033[31m неверное имя gw пространство имен: $gateway ,  $ns \033[0m"
+        echo "Хосты: $hosts"
+      else
+        echo "первый получен секретное имя $secname gw это $gateway $ns"
+        cred_map["$secname"]="$gateway~$ns"
+      fi
+
+
+      #for key in "${!cred_map[@]}"; do
+        #echo "Ключ: $key, Значение: ${cred_map[$key]}"
+      #done
+
+      echo ""
+    fi
+  done
+done
+```
+
+**Пример вывода выполнения скрипта:**
+
+```plaintext
+[root@idp-lihuang-w9x9w-9n9jv-cluster0-dt2n4 gwtls]# sh check.sh
+начинаем проверку gw
+первый получен секретное имя jiaxiurc-com gw это drawdb-gateway drawdb
+первый получен секретное имя gyssg-com gw это ec jxb-ec
+первый получен секретное имя nexus gw это nexus-gateway nexus
+ учетные данные уже существуют в другом gw ресурсе, пожалуйста, объедините хосты в ресурсе gw drawdb-gateway~drawdb, и удалите этот gw!
+ неверное имя gw пространство имен: authory-gateway, nm-edu-authory
+Хосты: rzzx-test.jiaxiurc.com
+rzzx-test.jiaxiurc.com
+```
+
+Если вы видите в выводе аналогичное сообщение: “учетные данные уже существуют в другом gw ресурсе, пожалуйста, объедините хосты в ресурсе gw drawdb-gateway\~drawdb, и удалите этот gw!”, это указывает на то, что вы сталкиваетесь с проблемой, описанной в этом документе.
+
+## Обзор решений
+
+Для устранения этой проблемы мы предлагаем два решения. Вы можете обратиться к сравнению ниже и выбрать любое решение для реализации в своей среде.
+
+**Сравнение решений**
+
+| Решение                                                            | Преимущества                                                                                                             | Недостатки                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [(Рекомендуемое) Решение 1: Объединение ресурсов Gateway](#merge_gateway) | - Исправление, рекомендованное сообществом, с обратной совместимостью.<br />- Поддерживает производительность HTTP/2 для клиента.          | - Если в кластере имеется большое количество связанных ресурсов Gateway, операция объединения может быть трудоемкой.                                                                                                                                                                                         |
+| [Решение 2: Код ответа 421](#res_401)                           | - Не нужно изменять существующие ресурсы Gateway и VirtualService.<br />- Поддерживает производительность HTTP/2 для клиента. | - Сильно зависит от поддержки клиентом кода ответа 421. Большинство популярных браузеров поддерживают код ответа 421, такие как Chrome, Firefox и Safari (версия Safari должна быть 15.1 или выше, т.е. macOS Monterey).<br />- Перед обновлением Istio необходимо проверить совместимость EnvoyFilter. |
+
+### <span id="merge_gateway">Решение 1: Объединение ресурсов Gateway</span>
+
+**Описание решения**
+
+Объединить несколько ресурсов Gateway, использующих один и тот же TLS сертификат, в один.
+
+**Шаги для реализации**
+
+1. Объедините несколько ресурсов Gateway в одну конфигурацию Gateway, используя один и тот же список `spec.servers.hosts` или конфигурацию домена с подстановочным знаком.
+2. Измените связанные ресурсы VirtualService, чтобы убедиться, что они указывают на объединенный Gateway.
+
+Например, в исходной конфигурации два шлюза используют один и тот же TLS сертификат `testhl`:
+
+```yaml
+# Пример ошибки Gateway 1: Два шлюза используют один и тот же TLS сертификат
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm2.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm1.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+# Пример ошибки Gateway 2: Один и тот же Gateway использует один и тот же TLS сертификат в различных секциях Hosts
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: error-3
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm1.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https-2
+      number: 443
+      protocol: HTTPS
+  - hosts:
+    - "asm2.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+# Пример VirtualService
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default2
+  namespace: bus-system
+spec:
+  gateways:
+  - istio-system/default2
+  hosts:
+  - asm2.test.com
+  http:
+  - route:
+    - destination:
+        host: asm-0.testhl.svc.cluster.local
+        port:
+          number: 80
+  ...
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default
+  namespace: bus-system
+spec:
+  gateways:
+  - istio-system/default
+  hosts:
+  - asm1.test.com
+  ...
+```
+
+Корректная конфигурация после объединения:
+
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "asm2.test.com"
+    - "asm1.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default1
+  namespace: istio-system
+spec:
+  gateways:
+  - istio-system/default2
+  hosts:
+  - asm2.test.com
+  ...
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  gateways:
+  - istio-system/default2
+  hosts:
+  - asm1.test.com
+  ...
+```
+
+Вы также можете записать это в формате подстановочного знака:
+
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: default2
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "*.test.com"
+    tls:
+      mode: SIMPLE
+      credentialName: "testhl"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+```
+
+**Резюме шагов**
+
+- Объедините `spec.servers.hosts` ресурсов Gateway, объединив все ресурсы Gateway, использующие одинаковый сертификат, в одну конфигурацию `server`.
+- Измените ресурсы VirtualService, чтобы они указывали на объединенный Gateway.
+- Убедитесь, что `destination` в VirtualService использует формат FQDN Kubernetes.
+
+**Важно:** После выполнения вышеуказанных шагов, пожалуйста, повторно запустите скрипт проверки, чтобы убедиться, что проблема была устранена.
+
+### <span id="res_401">Решение 2: Код ответа 421</span>
+
+**Описание решения**
+
+Код состояния 421 при возникновении проблемы позволяет клиенту установить соединение заново, которое будет направлено к правильному целевому хосту.
+
+**Шаги для реализации**
+
+Примените следующую конфигурацию EnvoyFilter:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: misdirected-request
+  namespace: istio-system
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.router
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.lua
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+            inlineCode: |
+              local function get_host_from_authority(authority)
+                local colon_pos = authority:find(":", 1, true)
+                return colon_pos and authority:sub(1, colon_pos - 1) or authority
+              end
+
+              function envoy_on_request(request_handle)
+                local streamInfo = request_handle:streamInfo()
+                local requestedServerName = streamInfo:requestedServerName()
+
+                if requestedServerName ~= "" then
+                  local host = get_host_from_authority(request_handle:headers():get(":authority"))
+                  local isWildcard = string.sub(requestedServerName, 1, 2) == "*."
+
+                  if isWildcard and not string.find(host, string.sub(requestedServerName, 3)) then
+                    request_handle:respond({[":status"] = "421"}, "Ошибка обращения")
+                  elseif not isWildcard and requestedServerName ~= host then
+                    request_handle:respond({[":status"] = "421"}, "Ошибка обращения")
+                  end
+                end
+              end
+```

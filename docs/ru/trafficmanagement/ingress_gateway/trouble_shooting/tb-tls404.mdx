@@ -1,0 +1,182 @@
+---
+weight: 10
+sourceSHA: b01aaadaeec39cde395f659bd00e12003050771bb8999b8ccc1ddab6260a9741
+---
+
+# Ошибки 404 возникают, когда несколько шлюзов настроены с одним и тем же TLS сертификатом
+
+## Описание проблемы
+
+### Симптом
+
+При доступе к службам через Istio Ingress Gateway с использованием протокола HTTP/2 возникают ошибки 404. Это известная проблема в сообществе Istio.
+
+### Причина
+
+Настройка нескольких шлюзов с одним и тем же TLS сертификатом вызывает появление ошибок 404 в браузерах HTTP/2 при доступе к вторичным хостам после установления первоначального соединения. Это происходит из-за повторного использования соединений HTTP/2 в браузерах.
+
+**Пример сценария**:
+• Домены `a.example.com` и `b.example.com` используют один и тот же TLS сертификат
+• Настроены в отдельных ресурсах Gateway
+• Браузер обращается к `a.example.com`, а затем к `b.example.com` через одно и то же соединение
+
+## Устранение неполадок
+
+### Скрипт проверки
+
+Выполните этот скрипт на главном узле кластера, хостящего Istio Ingress Gateway:
+
+```bash
+#!/bin/bash
+nslist=$(kubectl get ns -o jsonpath='{.items[*].metadata.name}')
+declare -A cred_map
+
+echo "начинаем проверку gw"
+for ns in $nslist; do
+  gateways=$(kubectl get gw -n $ns -o jsonpath='{.items[*].metadata.name}')
+  for gateway in $gateways; do
+    gateway_yaml=$(kubectl get gw -n $ns $gateway -o yaml)
+    secname=$(echo "$gateway_yaml" | grep 'credentialName:' | awk '{print $2}')
+
+    if [[ -n "$secname" ]]; then
+      if [[ -n "${cred_map[$secname]}" ]]; then
+        echo -e "\033[31m Обнаружено дублирование TLS в шлюзе: ${cred_map[$secname]} \033[0m"
+        hosts=$(kubectl get gw -n $ns $gateway -o json | jq -r '.spec.servers[] | .hosts[]')
+        echo -e "\033[31m Конфликтующий шлюз: $gateway в $ns \033[0m"
+        echo "Затронутые хосты: $hosts"
+      else
+        cred_map["$secname"]="$gateway~$ns"
+      fi
+    fi
+  done
+done
+```
+
+**Ожидаемый вывод**:
+
+```plaintext
+Обнаружено дублирование TLS в шлюзе: drawdb-gateway~drawdb
+Конфликтующий шлюз: authory-gateway в nm-edu-authory
+Затронутые хосты: rzzx-test.jiaxiurc.com
+```
+
+## Решение для Причины 1: Объединить ресурсы шлюзов
+
+### Соображения
+
+• Это решение рекомендовано сообществом
+• Поддерживает преимущества производительности HTTP/2
+• Требует изменения существующих конфигураций Gateway
+
+### Предварительные условия
+
+1. `jq` версии v1.7+ установлено на узлах кластера
+2. Доступ к кластеру с правами kubectl
+
+### Шаги
+
+1. **Идентифицировать конфликтующие шлюзы** с помощью скрипта проверки
+2. **Объединить конфигурации хостов**:
+   ```yaml
+   apiVersion: networking.istio.io/v1beta1
+   kind: Gateway
+   metadata:
+     name: unified-gateway
+     namespace: istio-system
+   spec:
+     selector:
+       istio: ingressgateway
+     servers:
+     - hosts:
+         - "a.example.com"
+         - "b.example.com"
+       tls:
+         mode: SIMPLE
+         credentialName: shared-cert
+       port:
+         name: https
+         number: 443
+         protocol: HTTPS
+   ```
+3. **Обновить VirtualServices**, чтобы сослаться на объединенный Gateway
+4. **Удалить избыточные шлюзы**
+5. **Проверить конфигурацию**:
+   ```bash
+   kubectl get gw -A
+   istioctl analyze
+   ```
+
+## Решение для Причины 2: Код ответа 421
+
+### Соображения
+
+• Требует поддержки клиентом кода состояния 421
+• Совместимо с Chrome/Firefox/Safari 15.1+
+
+### Предварительные условия
+
+1. Версия Istio ≥ 1.12
+2. Привилегии администратора кластера
+
+### Шаги
+
+1. **Применить EnvoyFilter**:
+   ```yaml
+   apiVersion: networking.istio.io/v1alpha3
+   kind: EnvoyFilter
+   metadata:
+     name: misdirected-request
+     namespace: istio-system
+   spec:
+     configPatches:
+       - applyTo: HTTP_FILTER
+         match:
+           context: GATEWAY
+           listener:
+             filterChain:
+               filter:
+                 name: envoy.filters.network.http_connection_manager
+         patch:
+           operation: INSERT_BEFORE
+           value:
+             name: envoy.lua
+             typed_config:
+               "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+               inlineCode: |
+                 function envoy_on_request(request_handle)
+                   local authority = request_handle:headers():get(":authority")
+                   local sni = request_handle:streamInfo().requestedServerName
+
+                   if sni ~= "" and sni ~= authority:match("([^:]+)") then
+                     request_handle:respond({[":status"] = "421"}, "Неверный запрос")
+                   end
+                 end
+   ```
+2. **Проверить реализацию**:
+   ```bash
+   curl -I -H "Host: b.example.com" https://gateway-ip
+   ```
+
+## Профилактические меры
+
+1. **Управление сертификатами**:
+   • ИспользуйтеWildcard сертификаты (\*.example.com)
+   • Избегайте повторного использования сертификатов между окружениями
+2. **Дизайн шлюза**:
+   • Реализуйте шаблон единого шлюза на домен
+   • Используйте изоляцию сертификатов на основе пространств имен
+3. **Регулярные аудиты**:
+   ```bash
+   istioctl experimental precheck
+   kubectl get secret --all-namespaces -o json | jq '.items[].metadata.name' | sort | uniq -d
+   ```
+
+## Связанный контент
+
+**Механизм повторного использования соединений HTTP/2**:
+• Одно TLS соединение обрабатывает несколько запросов
+• Сервер использует SNI для маршрутизации запросов
+• Несоответствующие заголовки SNI вызывают сбои маршрутизации
+
+**Ссылка на документацию Istio**:
+[Общие проблемы Istio - Ошибки 404](https://istio.io/latest/docs/ops/common-problems/network-issues/#404-errors-occur-when-multiple-gateways-configured-with-same-tls-certificate)
