@@ -69,7 +69,7 @@ Service s1 has 2 ports `80` (HTTP protocol) and `81` (TCP protocol). When creati
 
 7. In the namespace where the service is located, search for the DestinationRule resource named `asm-<service name>`.
 
-8. Click <img src="/en/003point.png" alt="003point" style={{display: "inline"}} /> > **Update** on the right of DestinationRule.
+8. Click <img src='./assets/003point.png' style={{ display: 'inline' }} /> > **Update** on the right of DestinationRule.
 
    Referencing the example below, add the annotation `asm.cpaas.io/user-managed: "true"` and configure [load balancing policies](https://istio.io/latest/docs/reference/config/networking/destination-rule/) for the service's ports separately.
 
