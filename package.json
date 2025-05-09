@@ -11,5 +11,5 @@
     "translate": "doom translate",
     "export": "doom export -i -p /docs --base asm -v unversioned"
   },
-  "packageManager": "yarn@4.8.1"
+  "packageManager": "yarn@4.9.1"
 }
