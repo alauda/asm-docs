@@ -1,0 +1,197 @@
+---
+weight: 20
+title: Install the Istio CNI node agent
+---
+
+The Istio CNI node agent is used to configure traffic redirection for pods in the mesh.
+It runs as a DaemonSet, on every node, with elevated permissions.
+The Istio CNI node agent can be used in two Istio data plane modes.
+
+For the sidecar data plane mode, the Istio CNI node agent is optional.
+It removes the requirement of running privileged init containers in every pod in the mesh,
+replacing that model with a single privileged node agent pod on each Kubernetes node.
+
+The Istio CNI node agent is **required** in the ambient data plane mode.
+
+This document is focused on using the Istio CNI node agent as an optional part of the sidecar data plane mode.
+
+> [!TIP]
+>
+> If you are creating a service mesh in an **OpenShift** cluster, Istio CNI is enabled by default, so you do not need to follow the steps in this document.
+
+## Prerequisites
+
+### Environments where Istio CNI must be used
+
+- Huawei Cloud CCE
+- Environments with high security constraints. (For example, environments that prohibit the use of `NET_ADMIN` and `NET_RAW` permissions in business workloads)
+
+### Environments where Istio CNI can be used
+
+- Any Kubernetes cluster with CNI support enabled
+
+### Environments where Istio CNI cannot be used
+
+- Clusters with Kubernetes CNI support disabled (Only development environments like `KIND`)
+
+## Installing the Istio CNI Node Agent
+
+First, install the service mesh as usual. After installation, do not add any services (i.e., do not inject the Sidecar) for the time being. Then follow the steps below to install and configure Istio CNI.
+
+### Installing with ServiceMesh Istio CNI Component
+
+In most environments, a basic Istio cluster with the **istioCni** component enabled can be installed using the following commands:
+
+```yaml
+apiVersion: asm.alauda.io/v1alpha1
+kind: ServiceMesh
+spec:
+  componentConfig:
+    - name: istioCni  #[!code callout]
+      group: istio
+      cni:
+        namespace: kube-system  #[!code callout]
+```
+
+<Callouts>
+
+1. **istioCni** is required to install the Istio CNI node agent.
+2. Typically installed in `kube-system` namespace.
+
+</Callouts>
+
+### Additional Configuration
+
+```yaml
+apiVersion: asm.alauda.io/v1alpha1
+kind: ServiceMesh
+spec:
+  componentConfig:
+    - name: istioCni
+      group: istio
+      cni:
+        namespace: kube-system
+        # Advanced configuration
+        values:
+          logLevel: info  #[!code callout]
+          cniBinDir: "" #[!code callout]
+          cniConfDir: /etc/cni/net.d  #[!code callout]
+          cniConfFileName: ""  #[!code callout]
+          cniNetnsDir: #[!code callout]
+          excludeNamespaces:
+            - istio-system
+            - kube-system
+          chained: true  #[!code callout]
+          provider: default  #[!code callout]
+```
+
+<Callouts>
+
+> [!CAUTION]
+>
+> When using **OpenShift** or **Multus CNI**:
+>
+> - **cni.values.chained** should be `false`.
+> - **cnivalues.provider** should be `multus`.
+
+1. The log level. (Default: `info`)
+2. The CNI binary directory. (Default: `/opt/cni/bin`)
+3. The CNI configuration directory. (Default: `/etc/cni/net.d`)
+4. Configuration file to insert istioCni plugin configuration, by default this will be the first file found in the **cniConfiDir**.
+5. This directory must exist on the node, if it does not, consult your container runtime documentation for the appropriate path. (Default: `/var/run/netns`, in minikube/docker/others can be `/var/run/docker/netns`)
+6. Deploy the config files as plugin chain (value `true`) or as standalone files in the conf dir (value `false`).
+7. Custom configuration happens based on the CNI provider, possible values: `default` and `multus`. (Default: `default`)
+
+</Callouts>
+
+### Verification
+
+> [!NOTE]
+> Ensure all CNI node agent pods are int the Running state proceeding to the next step.
+
+```bash
+# Adjust the -nkube-system part if the Istio CNI agent is installed in another namespace:
+kubectl -nkube-system get po -lk8s-app=istio-cni-node
+```
+
+## Handling init container injection
+
+By default, Istio uses a webhook to inject the `istio-init` container for transparent traffic interception.
+To use Istio CNI instead of the `istio-init` container, we need to adjust ServiceMesh resource as follows:
+
+```yaml
+apiVersion: asm.alauda.io/v1alpha1
+kind: ServiceMesh
+spec:
+  istioConfig:
+    cni:
+      enabled: true  #[!code callout]
+      provider: default  #[!code callout]
+```
+
+<Callouts>
+
+1. Whether to enable Istio CNI instead of the `istio-init` container. (Default: `false`)
+2. CNI provider. Should be `multus` if **Multus CNI** is used. (Default: `default`)
+
+</Callouts>
+
+## Usage & Verification
+
+After installation and configuration, use the normal service injection process without any additional changes.
+
+After Istio CNI component is installed and properly configured, the following changes will be made to the pods:
+
+- The `istio-init` container will no longer be present (transparent traffic interception will be handled by the Istio CNI node agent).
+- Instead, Istio will inject a container named `istio-validation` that checks if the iptables rules for transparent traffic interception are successfully set.
+
+## Race condition & mitigation
+
+The Istio CNI DaemonSet installs the CNI network plugin on every node. However, a time gap exists between when the
+DaemonSet pod gets scheduled onto a node, and the CNI plugin is installed and ready to be used.
+There is a chance that an application pod starts up during that time gap, and the `kubelet` has no knowledge of
+the Istio CNI plugin.
+The result is that the application pod comes up without Istio traffic redirection and bypasses Istio sidecar.
+
+To mitigate the race between an application pod and the Istio CNI DaemonSet, an `istio-validation` init container
+is added as part of the sidecar injection, which detects if traffic redirection is set up correctly, and blocks the
+pod starting up if not.
+The CNI DaemonSet will detect and handle any pod stuck in such state; how the pod is handled is dependent on
+configuration described below.
+This mitigation is enabled by default and can be turned off by setting `cni.values.repair.enabled` to `false`.
+
+
+```yaml
+apiVersion: asm.alauda.io/v1alpha1
+kind: ServiceMesh
+spec:
+  componentConfig:
+    - name: istioCni
+      group: istio
+      cni:
+        values:
+          repair:
+            enabled: true  #[!code callout]
+            repairPods: true  #[!code callout]
+            deletePods: false  #[!code callout]
+            labelPods: false  #[!code callout]
+```
+
+<Callouts>
+
+1. Whether to enable the mitigation. (Default: `true`)
+2. When enabled, pods are dynamically reconfigured to have appropriate configuration. When the container restarts, the pod will continue normal execution. (Default: `true`)
+3. When enabled, pods are **deleted** when rescheduled they will have the correct configuration. (Default: `false`)
+4. When enabled, pods are only labeled with `cni.istio.io/uninitialized=true`. User will need to take manual action to resolve. (Default: `false`)
+
+</Callouts>
+
+> [!NOTE]
+>
+> Configuration Priority: `repairPods` > `deletePods` > `labelPods`. So the first `true` field with higher priority will be used.
+>
+> For example, to make `deletePods` take effect, Set `true` to `deletePods` is not sufficient, set `false` to `repairPods` is also required.
+
+## See also
+
+[Troubleshooting the Istio CNI plugin](../../faq/troubleshooting-istio-cni.mdx)

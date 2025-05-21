@@ -1,0 +1,107 @@
+---
+weight: 30
+sourceSHA: f1471ce20319cb2708418d895347f0f4787ee7881f0bcbcf6edae8e998126bfd
+---
+
+# 安装 Operator
+
+## 术语表
+
+| 术语              | 定义                                                                                     |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| operator package  | 包含镜像文件和配置文件的 tgz 压缩包                                                    |
+| upload tool       | 用于解析 operator 包并将其导入/上传到平台的可执行文件                                    |
+| operation machine | 用于执行安装操作的机器                                                                  |
+| working directory | 存放 operator 包和上传工具的目录                                                        |
+
+## 先决条件
+
+1. 准备一台可以访问平台的操作机器，操作系统可以是 Windows、Linux 或 macOS。建议使用 Linux，下面的说明将以 Linux 作为示例。
+2. 确保操作机器可以访问 `platform`。
+3. 下载 operator 包并将其保存到操作机器的工作目录中。
+4. 安装 operator 需要管理员权限。
+
+## 获取上传工具
+
+从 `平台管理` -> `市场` -> `上架软件包` 下载上传工具（`violet`）。
+下载后，为可执行文件设置适当的权限。
+
+## 上传 Operator
+
+> 无论是导入新 operator 还是向现有 operator 添加新版本，
+> 您都可以使用 `violet` 工具完成此任务，命令是相同的。
+
+在工作目录中执行以下命令：
+
+```bash
+# [!code callout:6]
+./violet push \
+    <operator-package> \
+    --platform-address <platform-address> \
+    --platform-username <platform-username> \
+    --platform-password <platform-password> \
+    --clusters <clusters>
+```
+
+<Callouts>
+  1. 运行 `violet` 工具将 operator 包上传到平台。
+  2. `<operator-package>`：operator 包的名称（示例：`operator.4.0.1.ALL.tgz`）。
+  3. `<platform-address>`：平台的 URL 地址（示例：`https://platform.example.com`）。
+  4. `<platform-username>`：平台用户名，需要平台管理员权限。
+  5. `<platform-password>`：平台密码。
+  6. `<clusters>`：需要上传 operator 的集群列表，用逗号分隔（示例：`global,business`）。
+</Callouts>
+
+成功执行后，将输出以下信息：
+
+```
+INFO[0024] artifactversion <operator-name>.<operator-version> not found, create it  cluster=business type=bundle
+INFO[0024] artifactversion <operator-name>.<operator-version> has been created successfully  cluster=business type=bundle
+```
+
+然后前往平台的 `平台管理` -> `市场` -> `上架软件包` 页面，
+搜索 operator 关键字，然后单击 operator 名称以进入 operator 详情页面。
+
+详情页面将显示 operator 的新版本。
+如果状态为 `Uploaded`，则表示上传成功。
+
+## 下一步
+
+上传 Operator 后，您可以前往 `平台管理` -> `市场` -> `Operator Hub` 页面，切换到目标集群，然后部署相应的 Operator。
+
+## 故障排除
+
+### 将包推送到外部镜像注册表
+
+如果您想将 operator 包推送到外部镜像注册表，可以使用以下参数：
+
+| 参数          | 定义                                | 示例                               |
+| ------------- | ----------------------------------- | ---------------------------------- |
+| `--dst-repo` | 目标注册表的地址                  | `--dst-repo registry.example.com` |
+| `--username` | 目标注册表的用户名                | `--username admin`                 |
+| `--password` | 目标注册表的密码                  | `--password *******`               |
+
+例如：
+
+```bash
+./violet push \
+    <operator-package> \
+    --platform-address <platform-address> \
+    --platform-username <platform-username> \
+    --platform-password <platform-password> \
+    --clusters <clusters> \
+    --dst-repo <dst-repo> \
+    --username <username> \
+    --password <password>
+```
+
+如果目标镜像注册表使用明文（http）协议，则需要指定附加的 `--plain` 参数，如下所示：
+
+```bash
+./violet push \
+    ... \
+    --dst-repo <dst-repo> \
+    --username <username> \
+    --password <password> \
+    --plain
+```
