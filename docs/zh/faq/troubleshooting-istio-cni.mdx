@@ -1,0 +1,64 @@
+---
+title: 故障排除 Istio CNI 插件
+weight: 400
+sourceSHA: 51249f56fbc4f4b79944d03330dca1bc509fe249238497646b33081cdb13e62e
+---
+
+## 日志
+
+Istio CNI 插件日志提供了有关插件如何根据 `PodSpec` 配置应用程序 Pod 流量重定向的信息。
+
+插件在容器运行时进程空间中运行，因此可以在 `kubelet` 日志中查看 CNI 日志条目。
+为了简化调试，CNI 插件还将其日志发送到 `istio-cni-node` DaemonSet。
+
+CNI 插件的默认日志级别为 `info`。要获取更详细的日志输出，可以通过编辑 ServiceMesh 组件配置中的 **istioCNI** 的 `cni.values.logLevel` 来更改级别。
+
+Istio CNI DaemonSet Pod 日志还提供了关于 CNI 插件安装以及 [竞态条件修复](../install/create_service_mesh/istio-cni.mdx#race-condition--mitigation) 的信息。
+
+## DaemonSet 就绪性
+
+CNI DaemonSet 的就绪性表示 Istio CNI 插件已正确安装和配置。
+如果 Istio CNI DaemonSet 不处于就绪状态，这表明存在问题。请查看 `istio-cni-node` DaemonSet 日志以进行诊断。
+
+## 竞态条件修复
+
+默认情况下，Istio CNI DaemonSet 启用 [竞态条件修复](../install/create_service_mesh/istio-cni.mdx#race-condition--mitigation)，
+这将驱逐在 CNI 插件准备好之前启动的 Pod。
+要了解哪些 Pods 被驱逐，请查找类似以下的日志行：
+
+```
+2021-07-21T08:32:17.362512Z     info   删除损坏的 Pod: service-graph00/svc00-0v1-95b5885bf-zhbzm
+```
+
+## 诊断 Pod 启动失败
+
+CNI 插件常见的问题是由于容器网络设置失败导致 Pod 启动失败。
+通常，失败原因会被写入 Pod 事件中，并可通过 Pod 描述查看：
+
+```
+$ kubectl describe pod POD_NAME -n POD_NAMESPACE
+```
+
+如果 Pod 不断出现初始化错误，请检查初始化容器 `istio-validation` 日志中的“连接被拒绝”错误，如下所示：
+
+```
+$ kubectl logs POD_NAME -n POD_NAMESPACE -c istio-validation
+...
+2021-07-20T05:30:17.111930Z     error   连接到 127.0.0.6:15002 时出错: dial tcp 127.0.0.1:0->127.0.0.6:15002: connect: connection refused
+2021-07-20T05:30:18.112503Z     error   连接到 127.0.0.6:15002 时出错: dial tcp 127.0.0.1:0->127.0.0.6:15002: connect: connection refused
+...
+2021-07-20T05:30:22.111676Z     error   验证超时
+```
+
+`istio-validation` 初始化容器设置一个本地虚拟服务器，该服务器监听流量重定向目标的入站/出站端口，并检查测试流量是否可以重定向到该虚拟服务器。
+当 CNI 插件未正确设置 Pod 流量重定向时，`istio-validation` 初始化容器将阻止 Pod 启动，以防止流量绕过。
+要查看是否存在任何错误或意外的网络设置行为，请在 `istio-cni-node` 中搜索 Pod ID。
+
+CNI 插件故障的另一个症状是应用程序 Pod 在启动时被连续驱逐。
+这通常是因为插件未正确安装，因此无法设置 Pod 的流量重定向。
+CNI [竞态修复](../install/create_service_mesh/istio-cni.mdx#race-condition--mitigation) 逻辑将此 Pod 视为由于竞态条件而损坏，并不断驱逐该 Pod。
+在遇到此问题时，请检查 CNI DaemonSet 日志以获取有关插件未能正确安装的原因。
+
+当使用 **Multus** 链接多个 CNI 提供者时，例如 **Kube-OVN**，这可能导致 Istio CNI 插件多次安装配置（在 **Multus** 和 **Kube-OVN** 中），
+从而产生循环的 CNI 链，无法为 Pod 配置网络。为了解决此问题，可以显式指定 `cni.values.cniConfFileName` 为 **Multus** 的配置文件名。
+同时手动检查所有 CNI 配置，以确保没有重复配置。
