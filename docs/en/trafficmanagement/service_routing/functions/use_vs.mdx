@@ -31,8 +31,8 @@ Core value: Enables fine-grained traffic management for microservice architectur
 ### Rule Types
 ```yaml
 http:
-• match:
-  • headers:
+- match:
+  - headers:
       user-type: internal
   route:
     ◦ destination:
@@ -88,8 +88,8 @@ Global Timeout (100ms) ≥
 
 ```yaml
 # Sample Route Configuration
-• match:
-  • uri:
+- match:
+  - uri:
       prefix: "/checkout"
   route:
     ◦ destination:
