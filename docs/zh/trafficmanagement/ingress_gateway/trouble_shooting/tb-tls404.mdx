@@ -16,9 +16,9 @@ sourceSHA: b01aaadaeec39cde395f659bd00e12003050771bb8999b8ccc1ddab6260a9741
 配置多个具有相同 TLS 证书的网关会导致 HTTP/2 浏览器在初始连接建立后访问二级主机时生成 404 错误。这是由于浏览器中 HTTP/2 连接重用造成的。
 
 **示例场景**：
-• 域名 `a.example.com` 和 `b.example.com` 共享相同的 TLS 证书
-• 配置在单独的 Gateway 资源中
-• 浏览器通过相同连接先访问 `a.example.com` 然后访问 `b.example.com`
+- 域名 `a.example.com` 和 `b.example.com` 共享相同的 TLS 证书
+- 配置在单独的 Gateway 资源中
+- 浏览器通过相同连接先访问 `a.example.com` 然后访问 `b.example.com`
 
 ## 故障排除
 
@@ -64,9 +64,9 @@ done
 
 ### 注意事项
 
-• 这是社区推荐的解决方案
-• 保持 HTTP/2 性能优势
-• 需要修改现有网关配置
+- 这是社区推荐的解决方案
+- 保持 HTTP/2 性能优势
+- 需要修改现有网关配置
 
 ### 前提条件
 
@@ -110,8 +110,8 @@ done
 
 ### 注意事项
 
-• 需要客户端支持 421 状态码
-• 与 Chrome/Firefox/Safari 15.1+ 兼容
+- 需要客户端支持 421 状态码
+- 与 Chrome/Firefox/Safari 15.1+ 兼容
 
 ### 前提条件
 
@@ -160,11 +160,11 @@ done
 ## 预防措施
 
 1. **证书管理**：
-   • 使用通配符证书 (\*.example.com)
-   • 避免在不同环境中重复使用证书
+   - 使用通配符证书 (\*.example.com)
+   - 避免在不同环境中重复使用证书
 2. **网关设计**：
-   • 实现每个域名使用单一网关的模式
-   • 采用基于命名空间的证书隔离
+   - 实现每个域名使用单一网关的模式
+   - 采用基于命名空间的证书隔离
 3. **定期审核**：
    ```bash
    istioctl experimental precheck
@@ -174,9 +174,9 @@ done
 ## 相关内容
 
 **HTTP/2 连接重用机制**：
-• 单个 TLS 连接处理多个请求
-• 服务器使用 SNI 路由请求
-• 不匹配的 SNI 头导致路由失败
+- 单个 TLS 连接处理多个请求
+- 服务器使用 SNI 路由请求
+- 不匹配的 SNI 头导致路由失败
 
 **Istio 文档参考**：
 [Istio 常见问题 - 404 错误](https://istio.io/latest/docs/ops/common-problems/network-issues/#404-errors-occur-when-multiple-gateways-configured-with-same-tls-certificate)
