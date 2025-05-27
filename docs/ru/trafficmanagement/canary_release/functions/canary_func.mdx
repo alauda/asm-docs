@@ -62,18 +62,18 @@ minSuccessRate: 95
 
 ```yaml
 http:
-• route:
-  • destination: reviews-primary
+- route:
+  - destination: reviews-primary
     weight: 80
-  • destination: reviews-canary
+  - destination: reviews-canary
     weight: 20
 ```
 
 ### Маршрутизация на основе заголовков
 
 ```yaml
-• match:
-  • headers: { "user-type": "internal" }
+- match:
+  - headers: { "user-type": "internal" }
   route:
     ◦ destination: reviews-canary
 ```
@@ -81,8 +81,8 @@ http:
 ### Тестирование для конкретного пути
 
 ```yaml
-• match:
-  • uri: { prefix: "/api/v2" }
+- match:
+  - uri: { prefix: "/api/v2" }
   route:
     ◦ destination: reviews-canary
       weight: 20
