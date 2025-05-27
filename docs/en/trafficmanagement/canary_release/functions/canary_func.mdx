@@ -55,25 +55,25 @@ minSuccessRate: 95
 ### Traffic Distribution
 ```yaml
 http:
-• route:
-  • destination: reviews-primary
+- route:
+  - destination: reviews-primary
     weight: 80
-  • destination: reviews-canary
+  - destination: reviews-canary
     weight: 20
 ```
 
 ### Header-Based Routing
 ```yaml
-• match:
-  • headers: { "user-type": "internal" }
+- match:
+  - headers: { "user-type": "internal" }
   route:
     ◦ destination: reviews-canary
 ```
 
 ### Path-Specific Testing
 ```yaml
-• match:
-  • uri: { prefix: "/api/v2" }
+- match:
+  - uri: { prefix: "/api/v2" }
   route:
     ◦ destination: reviews-canary
       weight: 20

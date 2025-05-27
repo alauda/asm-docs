@@ -36,8 +36,8 @@ sourceSHA: 00563b96faf91f4629e44c1af8edfef50332fd1036236c473b648846a8199d26
 
 ```yaml
 http:
-• match:
-  • headers:
+- match:
+  - headers:
       user-type: internal
   route:
     ◦ destination:
@@ -98,8 +98,8 @@ retries:
 
 ```yaml
 # Пример конфигурации маршрута
-• match:
-  • uri:
+- match:
+  - uri:
       prefix: "/checkout"
   route:
     ◦ destination:
