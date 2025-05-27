@@ -43,9 +43,9 @@ metadata:
   name: product-route
 spec:
   hosts:
-  • "www.example.com"
+  - "www.example.com"
   gateways:
-  • main-gateway
+  - main-gateway
 ```
 
 | Parameter | Required | Constraints |
@@ -58,8 +58,8 @@ spec:
 **Request Rewrite Example**:
 ```yaml
 http:
-• match:
-  • uri:
+- match:
+  - uri:
       prefix: /app/product
   rewrite:
     uri: /foo
@@ -83,10 +83,10 @@ redirect:
 ```yaml
 corsPolicy:
   allowOrigins:
-  • exact: https://origin-site.com
+  - exact: https://origin-site.com
   allowMethods:
-  • GET
-  • POST
+  - GET
+  - POST
   allowHeaders: X-Custom-Header
   maxAge: "86400"
 ```

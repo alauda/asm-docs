@@ -12,9 +12,9 @@ When accessing services through Istio Ingress Gateway using HTTP/2 protocol, 404
 Configuring multiple gateways with the same TLS certificate causes HTTP/2 browsers to generate 404 errors when accessing secondary hosts after initial connection establishment. This occurs due to HTTP/2 connection reuse in browsers.
 
 **Example Scenario**:
-• Domains `a.example.com` and `b.example.com` share same TLS certificate
-• Configured in separate Gateway resources
-• Browser accesses `a.example.com` then `b.example.com` via same connection
+- Domains `a.example.com` and `b.example.com` share same TLS certificate
+- Configured in separate Gateway resources
+- Browser accesses `a.example.com` then `b.example.com` via same connection
 
 ## Troubleshooting
 
@@ -57,9 +57,9 @@ Affected hosts: rzzx-test.jiaxiurc.com
 ## Solution for Root Cause 1: Merge Gateway Resources
 
 ### Considerations
-• This is the community-recommended solution
-• Maintains HTTP/2 performance benefits
-• Requires modification of existing Gateway configurations
+- This is the community-recommended solution
+- Maintains HTTP/2 performance benefits
+- Requires modification of existing Gateway configurations
 
 ### Prerequisites
 1. `jq` v1.7+ installed on cluster nodes
@@ -100,8 +100,8 @@ Affected hosts: rzzx-test.jiaxiurc.com
 ## Solution for Root Cause 2: 421 Response Code
 
 ### Considerations
-• Requires client support for 421 status code
-• Compatible with Chrome/Firefox/Safari 15.1+
+- Requires client support for 421 status code
+- Compatible with Chrome/Firefox/Safari 15.1+
 
 ### Prerequisites
 1. Istio version ≥ 1.12
@@ -147,11 +147,11 @@ Affected hosts: rzzx-test.jiaxiurc.com
 
 ## Preventive Measures
 1. **Certificate Management**:
-   • Use wildcard certificates (*.example.com)
-   • Avoid certificate reuse across environments
+   - Use wildcard certificates (*.example.com)
+   - Avoid certificate reuse across environments
 2. **Gateway Design**:
-   • Implement single gateway per domain pattern
-   • Use namespace-based certificate isolation
+   - Implement single gateway per domain pattern
+   - Use namespace-based certificate isolation
 3. **Regular Audits**:
    ```bash
    istioctl experimental precheck
@@ -160,9 +160,9 @@ Affected hosts: rzzx-test.jiaxiurc.com
 
 ## Related Content
 **HTTP/2 Connection Reuse Mechanism**:
-• Single TLS connection handles multiple requests
-• Server uses SNI to route requests
-• Mismatched SNI headers cause routing failures
+- Single TLS connection handles multiple requests
+- Server uses SNI to route requests
+- Mismatched SNI headers cause routing failures
 
 **Istio Documentation Reference**:
 [Istio Common Problems - 404 Errors](https://istio.io/latest/docs/ops/common-problems/network-issues/#404-errors-occur-when-multiple-gateways-configured-with-same-tls-certificate)

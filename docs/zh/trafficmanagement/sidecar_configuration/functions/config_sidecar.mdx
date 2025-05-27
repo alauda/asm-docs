@@ -68,7 +68,7 @@ metadata:
   namespace: target-ns
 spec:
   egress:
-  • hosts:
+  - hosts:
     ◦ "dev/*"
     ◦ "prod/db-service"
 ```
@@ -96,7 +96,7 @@ metadata:
   namespace: prod
 spec:
   egress:
-  • hosts:
+  - hosts:
     ◦ "prod/*"  # 当前命名空间
     ◦ "monitoring/*"  # 特定命名空间
 ```
@@ -111,7 +111,7 @@ metadata:
   namespace: istio-system
 spec:
   egress:
-  • hosts:
+  - hosts:
     ◦ "*/*"  # 所有命名空间
 ```
 
