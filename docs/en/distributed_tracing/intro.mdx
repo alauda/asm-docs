@@ -8,38 +8,9 @@ Distributed tracing is a key module in the observability system, used for achiev
 
 By integrating with open-source technology stacks and self-developed components, this module supports end-to-end distributed tracing capabilities: applications generate tracing data through injection or SDK integration methods, which are then uniformly collected and stored in Elasticsearch, ultimately realized through a customized UI for multi-dimensional visual analysis. Users can conduct precise searches using rich conditions such as `TraceID`, service name, tags, and more.
 
-## Advantages
-
-The core advantages of tracing are as follows:
-
-- **End-to-End Tracing Capability**\
-  Supports complete tracing restoration across services, processes, and container boundaries, accurately presenting complex call relationships in microservice architectures.
-
-- **Flexible Data Collection Methods**\
-  Supports service mesh-based automatic tracing through Istio's sidecar proxy injection, which captures service-to-service communication data without any code changes. Additionally provides dual modes of OpenTelemetry automatic injection (no code modification) and SDK integration, compatible with mainstream language applications such as Java/Python/Go.
-
-- **High-Performance Storage Solutions**\
-  Utilizes Elasticsearch as the storage backend, supporting the writing and fast retrieval of massive span data.
-
-- **Flexible Querying and Analysis Capabilities**\
-  The self-developed UI integrates with the `jaeger-query` API, supporting flexible queries based on multi-dimensional conditions such as TraceID, service affiliation, tags, and span types, facilitating users in quickly pinpointing root causes of issues.
-
-## Application Scenarios
-
-The main application scenarios of tracing are as follows:
-
-- **Distributed System Fault Diagnosis**\
-  In microservice architectures, complete tracing enable quick identification of service faults and anomalous calls, reducing fault diagnosis time.
-
-- **Performance Bottleneck Analysis**\
-  By examining the latency between service calls, performance bottlenecks can be identified, guiding system optimization and resource adjustments.
-
-- **Service Dependency Analysis**\
-  A time-series waterfall diagram clearly shows the call paths and dependencies between services, assisting architects in system design and improvement.
-
 ## Usage Limitations
 
-When using tracing, the following constraints should be noted:
+When using tracing, the following constraints should be note1d:
 
 - **Balancing Sampling Strategies and Performance**
   - In high-load scenarios, the collection of tracing data may exert certain pressure on Elasticsearch's performance and storage; it is recommended to configure the sampling rate reasonably based on business conditions.

@@ -12,22 +12,6 @@ The Global Rate Limiting module protects services from overload in high-concurre
 - Fine-grained access control via multi-dimensional rules
 - Safe capacity planning through shadow mode analysis
 
-## Advantages
-- ​**High-Concurrency Protection**: Maintains service stability within resource limits
-- ​**Precision Control**: API path/method/header-based rate limiting
-- ​**Risk-Free Testing**: Shadow mode simulation without affecting production
-- ​**Real-Time Visibility**: Visual monitoring of throttling effects
-
-## Scenarios
-- ​**API Overload Protection**
-  Safeguard critical APIs from sudden traffic surges
-
-- ​**Sensitive Operation Throttling**
-  Enforce strict limits on write/delete operations
-
-- ​**Multi-Tenant Quota Management**
-  Implement fair usage policies across client groups
-
 ## Limitations
 - Requires Redis cluster integration pre-configured
 - Sidecar injection mandatory for target services

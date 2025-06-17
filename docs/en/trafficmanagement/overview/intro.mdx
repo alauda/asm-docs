@@ -9,47 +9,6 @@ sourceSHA: f004f8b0f9bbecaa15de28d21a8a367a113c07b6af44a6de5e86fc96d5f13741
 
 Traffic Management Advanced Operations provide comprehensive traffic management and service governance capabilities for cloud-native applications. This module enables fine-grained control over service communication through features like traffic passthrough, circuit breakers, canary releases, and global rate limiting. It supports both inbound and outbound traffic management while maintaining high observability and security standards across multi-cluster environments.
 
-## Advantages
-
-The core advantages of Traffic Management Advanced Operations are:
-
-- **Flexible Traffic Control**  
-  Supports traffic passthrough configuration and bypass mode to optimize service call chains while maintaining governance capabilities.
-
-- **Comprehensive Service Governance**  
-  Provides circuit breaker policies, load balancing strategies, and connection pool management to ensure service stability under high concurrency.
-
-- **Multi-scenario Release Management**  
-  Enables manual/automatic canary releases with visual monitoring, supporting blue-green deployments and A/B testing scenarios.
-
-- **Hybrid Environment Support**  
-  Manages external services through egress gateways and integrates non-mesh services via external service configurations.
-
-- **Enhanced Observability**  
-  Offers real-time monitoring of access logs, rate limiting effects, and Pod health status through visual dashboards.
-
-## Scenarios
-
-The main application scenarios include:
-
-- **Performance Optimization**  
-  Use traffic passthrough for middleware services to bypass unnecessary Sidecar processing.
-
-- **Rapid Fault Diagnosis**  
-  Enable bypass mode to verify if service anomalies are caused by Sidecar proxies.
-
-- **Microservice Version Management**  
-  Implement canary releases for safe production deployments of new service versions.
-
-- **High-concurrency Protection**  
-  Configure global rate limiting and circuit breakers to prevent service avalanches.
-
-- **Hybrid Architecture Management**  
-  Connect traditional services and cloud-native services through external service registration.
-
-- **Network Security Control**  
-  Isolate abnormal Pods promptly while maintaining normal service operations.
-
 ## Limitations
 
 1. Requires Sidecar injection for full functionality (except external services)

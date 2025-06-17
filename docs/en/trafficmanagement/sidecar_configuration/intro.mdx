@@ -16,26 +16,6 @@ Sidecar Configuration enables granular control over Envoy proxy behavior in Isti
 
 Core value: Precise traffic management across microservice boundaries
 
-## Advantages
-- **Performance Optimization**: Reduces proxy resource overhead
-- **Granular Control**: Port/protocol-level restrictions
-- **Hierarchical Policies**: Namespace & cluster-level configurations
-- **Priority System**: Custom overrides default configurations
-
-## Scenarios
-- **Multi-Namespace Management**
-  Restrict payment service access to designated namespaces
-
-- **Cluster-Wide Defaults**
-  Set baseline policies for all services
-
-- **Security Isolation**
-  Limit sensitive service exposure
-
-- **Performance Tuning**
-  Reduce proxy processing for high-throughput services
-
-
 ## Limitations
 1. **Namespace Binding**:
    - Custom configs only affect designated namespace

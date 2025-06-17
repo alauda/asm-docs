@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "@alauda/doom": "^0.22.2",
+    "@alauda/doom": "^1.4.0",
     "typescript": "^5.8.2"
   },
   "scripts": {
