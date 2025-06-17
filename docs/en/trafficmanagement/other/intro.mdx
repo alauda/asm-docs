@@ -16,25 +16,6 @@ Advanced Sidecar Operations provide granular control over Istio proxy behavior. 
 
 Core value: Enhanced control over service mesh components
 
-## Advantages
-- ​**Non-Disruptive**: Bypass mode without pod restart
-- ​**Precision**: Port/IP-range specific passthrough
-- ​**Diagnostics**: Runtime log level adjustment
-- ​**Fallback**: Full Sidecar removal capability
-
-## Scenarios
-- ​**Middleware Optimization**
-  Exempt Redis traffic from Sidecar processing
-
-- ​**Performance Troubleshooting**
-  Temporarily bypass Sidecar to isolate issues
-
-- ​**Debugging Support**
-  Enable debug logs for specific services
-
-- ​**Legacy Compatibility**
-  Remove Sidecar for case-sensitive header requirements
-
 ## Limitations
 - Bypass mode requires Kubernetes 1.23+
 - Passthrough configuration triggers deployment restart

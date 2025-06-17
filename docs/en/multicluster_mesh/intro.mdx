@@ -28,18 +28,3 @@ The platform's multi-cluster service mesh is implemented based on Istio's [multi
 * Compare traffic monitoring data of services in different clusters within the mesh.
 * View cross-cluster service topology.
 * View cross-cluster call chains.
-
-## Application Scenarios
-
-### Cross-Cluster Failover
-
-Deploy services in clusters located in different regions within the mesh. If services in a cluster in one region fail to handle traffic, the platform can smoothly shift the traffic to clusters in disaster recovery regions according to the pre-configured failover strategy, ensuring normal business operations.
-
-### Cross-Cluster Weighted Distribution
-
-* Scenario 1: Load traffic proportionally to multiple clusters
-    * When services have specific regional requirements and can only meet availability, latency, and other needs by being deployed in specific regions, you can adjust the cluster's traffic distribution weight to route a designated proportion of traffic to the clusters in those regions.
-    * When service operation demands high performance from the hosting cluster, you can adjust the cluster's traffic distribution weight to route more traffic to clusters with better performance.
-
-* Scenario 2: Cross-cluster service migration
-    When enterprises need to migrate services across clusters (across clouds or regions), they can add the target cluster to the mesh and deploy the services in that cluster. Then, by configuring traffic distribution weights for the source and target clusters through the platform, services can be smoothly migrated to the target cluster without interrupting business operations. During this process, you can monitor the service performance in the target cluster and adjust weights in real-time.

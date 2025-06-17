@@ -13,32 +13,6 @@ Pod Isolation enables immediate traffic cutoff to malfunctioning Pods while main
 
 Core purpose: Ensure service continuity by dynamically managing endpoint participation
 
-## Advantages
-- ​**Quick Isolation**
-  Single-click removal from service mesh without pod termination
-
-- ​**Stability Preservation**
-  Maintains optimal success rates by excluding faulty instances
-
-- ​**K8s Native Integration**
-  Works with standard Deployment resources
-
-- ​**Observability**
-  Integrated with monitoring dashboards for health validation
-
-## Scenarios
-- ​**Abnormal Pod Handling**
-  Isolate Pods with elevated 5xx errors or latency spikes
-
-- ​**Maintenance Windows**
-  Temporarily remove nodes during infrastructure updates
-
-- ​**Performance Debugging**
-  Test fixes on isolated Pod without affecting production traffic
-
-- ​**Rolling Recovery**
-  Gradually reintroduce repaired Pods after validation
-
 ## Limitations
 - ​**State Constraints**
   Only affects Running Pods, excludes Completed/CrashLoopBackOff
