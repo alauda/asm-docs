@@ -105,7 +105,11 @@ spec:
 | Errors | 5xx count | \<10/period |
 
 ### Release States
+
 1. Initializing ➔ 2. Progressing ➔ 3. Promoting ➔ 4. Completed
+
+{/* lint ignore code-block-split-list */}
+
 ```bash
 kubectl get canarydeliveries -n prod
 ```
@@ -115,4 +119,3 @@ kubectl get canarydeliveries -n prod
 - Requires unique service naming per cluster
 - GitOps-managed services have limited UI controls
 - Security policies remain active during release
-

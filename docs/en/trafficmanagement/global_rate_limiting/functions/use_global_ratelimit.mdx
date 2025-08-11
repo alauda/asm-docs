@@ -4,70 +4,70 @@ weight: 10
 
 # Global Rate Limiting for Services
 
-## Introduction  
+## Introduction
 Global rate limiting protects services from overload in high-concurrency scenarios by:
 
-- Maintaining request volumes within service capacity  
-- Preventing resource exhaustion through traffic shaping  
-- Enabling precise access control via conditional policies  
+- Maintaining request volumes within service capacity
+- Preventing resource exhaustion through traffic shaping
+- Enabling precise access control via conditional policies
 
-Core value: Ensures service stability while maximizing resource utilization  
+Core value: Ensures service stability while maximizing resource utilization
 
-## Features  
-- Global and conditional policy modes  
-- Multi-dimension rule matching (Path/Method/Headers)  
-- Shadow mode for policy validation  
-- Real-time monitoring dashboard  
+## Features
+- Global and conditional policy modes
+- Multi-dimension rule matching (Path/Method/Headers)
+- Shadow mode for policy validation
+- Real-time monitoring dashboard
 
 ## Creating Rate Limiting Policies
 
-### Step 1: Access Policy Interface  
-1. Navigate: ​**Service List** > ​**Target Service**  
-2. Select ​**Rate Limiting** tab  
-3. Click ​**Create Rate Limiting Policy**  
+### Step 1: Access Policy Interface
+1. Navigate: **Service List** > **Target Service**
+2. Select **Rate Limiting** tab
+3. Click **Create Rate Limiting Policy**
 
-### Step 2: Policy Type Selection  
-| Type | Constraints |  
-|------|-------------|  
-| Global Policy | • Single policy per service OR relationship with conditional policies |  
-| Conditional Policy | • Multiple policies allowed AND relationship between rules |  
+### Step 2: Policy Type Selection
+| Type | Constraints |
+|------|-------------|
+| Global Policy | • Single policy per service OR relationship with conditional policies |
+| Conditional Policy | • Multiple policies allowed AND relationship between rules |
 
-### Step 3: Configure Policy Rules  
-**Rule Components**  
-| Category | Example | Matching Methods |  
-|----------|---------|------------------|  
-| API PATH | `/api/v1` | Equal/Not Equal/Regex |  
-| HTTP METHOD | POST | Equal/Not Equal |  
-| Headers | `User-Agent: Mobile` | Equal/Not Equal/Regex |  
+### Step 3: Configure Policy Rules
+**Rule Components**
+| Category | Example | Matching Methods |
+|----------|---------|------------------|
+| API PATH | `/api/v1` | Equal/Not Equal/Regex |
+| HTTP METHOD | POST | Equal/Not Equal |
+| Headers | `User-Agent: Mobile` | Equal/Not Equal/Regex |
 
-**Configuration Notes**  
-- Regex matching follows RE2 syntax  
-- Header matching requires full `key:value` format  
-- Multiple rules are AND-combined  
+**Configuration Notes**
+- Regex matching follows RE2 syntax
+- Header matching requires full `key:value` format
+- Multiple rules are AND-combined
 
-### Step 4: Set Rate Threshold  
-| Parameter | Description |  
-|-----------|-------------|  
-| Requests/Unit Time | Maximum allowed requests |  
-| ShadowMode | • Disabled: Enforces limit Enabled: Audit-only mode |  
+### Step 4: Set Rate Threshold
+| Parameter | Description |
+|-----------|-------------|
+| Requests/Unit Time | Maximum allowed requests |
+| ShadowMode | • Disabled: Enforces limit Enabled: Audit-only mode |
 
 ## Rate Limiting Monitoring
 
-### Key Metrics  
-| Metric | ShadowMode Disabled | ShadowMode Enabled |  
-|--------|---------------------|--------------------|  
-| Requests | Actual served | Matched requests |  
-| Limited | Rejected requests | Potential rejects |  
+### Key Metrics
+| Metric | ShadowMode Disabled | ShadowMode Enabled |
+|--------|---------------------|--------------------|
+| Requests | Actual served | Matched requests |
+| Limited | Rejected requests | Potential rejects |
 
-### Data Interpretation  
-1. Select policy from dropdown  
-2. Choose time range (last 1h/24h/7d)  
-3. Compare allowed vs limited curves  
-4. Validate policy effectiveness  
+### Data Interpretation
+1. Select policy from dropdown
+2. Choose time range (last 1h/24h/7d)
+3. Compare allowed vs limited curves
+4. Validate policy effectiveness
 
-## Policy Management  
-- ​**Global-Conditional Relationship**: Requests matching either policy type get limited  
-- ​**Rule Precedence**: First-match principle in conditional policies  
-- ​**Policy Editing**: Immediate effect after modification  
+## Policy Management
+- **Global-Conditional Relationship**: Requests matching either policy type get limited
+- **Rule Precedence**: First-match principle in conditional policies
+- **Policy Editing**: Immediate effect after modification
 
 

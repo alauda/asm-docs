@@ -26,7 +26,7 @@ In addition to pipeline components, you can configure [Extensions](#extensions),
 
 Below is an example of a Collector configuration that includes receivers, processors, exporters, and three extensions.
 
-**Important Note:** While it’s common to bind endpoints to `localhost` when all clients are local, our sample configuration uses the "unspecified" address `0.0.0.0` for convenience. The Collector currently defaults to using `localhost`. For detailed information on these endpoint configuration values, see the [Security Measures to Prevent Denial of Service Attacks](https://github.com/open-telemetry/opentelemetry-collector/blob/main/docs/security-best-practices.md#safeguards-against-denial-of-service-attacks).
+**Important Note:** While it's common to bind endpoints to `localhost` when all clients are local, our sample configuration uses the "unspecified" address `0.0.0.0` for convenience. The Collector currently defaults to using `localhost`. For detailed information on these endpoint configuration values, see the [Security Measures to Prevent Denial of Service Attacks](https://github.com/open-telemetry/opentelemetry-collector/blob/main/docs/security-best-practices.md#safeguards-against-denial-of-service-attacks).
 
 ```yaml
 receivers:
@@ -648,7 +648,7 @@ The Prometheus Exporter exports metric data in Prometheus or OpenMetrics format,
 **Required Configuration**
 
 - **endpoint**: Specifies the address for exposing metric data, with the path `/metrics`. This must be configured and does not have a default value.
-  
+
 **Optional Configuration**
 
 - **const_labels**: Key-value pair labels applied to each exported metric, default is not set.
