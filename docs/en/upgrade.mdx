@@ -6,7 +6,7 @@ i18n:
 sourceSHA: ca877d503e4d5812aaf2ea24956f0500017337d1e9d247ef5d2fafdbaa3cbd04
 title: Upgrade
 ---
-## Install lastest Global Alauda Servie Mesh Essentials Cluster Plugin 
+## Install lastest Global Alauda Servie Mesh Essentials Cluster Plugin
 
 Please visit [Alauda Service Mesh Essentials](./install/asm-essentials.mdx) for installation instructions.
 
@@ -56,7 +56,7 @@ The complete service mesh upgrade process includes the following steps:
 
 **Note**: The non-Istio components of the service mesh include asm, Flagger Operator, Asm Operator, Jaeger Operator.
 
-#### <span id="newistiod">Deploy the New Version of istiod</span>
+#### Deploy the New Version of istiod \{#newistiod}
 
 **Note**: Before deploying the new version of istiod, please refer to [Before Upgrading](#ref) to ensure the Kubernetes version of the cluster meets the upgrade path requirements.
 
@@ -118,7 +118,7 @@ Upgrading via UI allows for batch upgrades by different namespaces or specifying
 
 **Note**: The Sidecar is updated through rolling update of the service's Deployment to complete the data plane image update of the Pod. Therefore, if the service has long connections, there will be a brief service interruption during the rolling update of the Pod.
 
-#### <span id="oldistiod">Decommission the Old Version of istiod in the Cluster</span>
+#### Decommission the Old Version of istiod in the Cluster \{#oldistiod}
 
 The old version of istiod in the cluster can only be decommissioned after all Istio data planes in the cluster have been upgraded.
 

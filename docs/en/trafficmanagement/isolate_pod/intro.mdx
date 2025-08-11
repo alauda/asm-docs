@@ -14,16 +14,14 @@ Pod Isolation enables immediate traffic cutoff to malfunctioning Pods while main
 Core purpose: Ensure service continuity by dynamically managing endpoint participation
 
 ## Limitations
-- ​**State Constraints**
+- **State Constraints**
   Only affects Running Pods, excludes Completed/CrashLoopBackOff
 
-- ​**Version Compatibility**
+- **Version Compatibility**
   Legacy services require label updates (asm.cpaas.io/msselector)
 
-- ​**Conflict Scenarios**
+- **Conflict Scenarios**
   Disabled during canary releases and horizontal scaling events
 
-- ​**Persistence**
+- **Persistence**
   Isolation resets on pod restart or scale-down operations
-
-
