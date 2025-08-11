@@ -22,10 +22,12 @@ Configuring more than one gateway using the same TLS certificate will cause brow
 
 You can use the following script to quickly check if your environment has Gateway configurations matching the problem description. The script needs to be executed on the master node of the business cluster where the Istio Ingress Gateway is located.
 
-**Note:**
+:::note
 
 - The script depends on the `jq` tool. If your cluster node does not have the `jq` tool, please install `jq` in the cluster before executing the script. Download link for the tool: [jq download](https://jqlang.github.io/jq/download/).
 - The `jq` tool version must be 1.7 or higher.
+
+:::
 
 ```bash
 #!/bin/bash
@@ -116,6 +118,7 @@ Merge multiple Gateway resources that use the same TLS certificate into one.
 2. Modify the related VirtualService resources to ensure they point to the merged Gateway.
 
 For example, in the original configuration, two Gateways use the same TLS certificate `testhl`:
+
 ```yaml
 # Gateway Error Example 1: Two Gateways use the same TLS certificate
 apiVersion: networking.istio.io/v1beta1

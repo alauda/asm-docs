@@ -55,18 +55,20 @@ metadata:
 
 ### Configuration Update
 1. Modify Deployment labels:
-```yaml
-metadata:
-  labels:
-    asm.cpaas.io/msselector: product-service
-```
+
+    ```yaml
+    metadata:
+      labels:
+        asm.cpaas.io/msselector: product-service
+    ```
 
 2. Update internal route selector:
-```yaml
-spec:
-  selector:
-    asm.cpaas.io/msselector: product-service
-```
+
+    ```yaml
+    spec:
+      selector:
+        asm.cpaas.io/msselector: product-service
+    ```
 
 ## Monitoring & Validation
 
