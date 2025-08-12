@@ -67,7 +67,7 @@ http:
 - match:
   - headers: { "user-type": "internal" }
   route:
-    ◦ destination: reviews-canary
+    - destination: reviews-canary
 ```
 
 ### Path-Specific Testing
@@ -75,7 +75,7 @@ http:
 - match:
   - uri: { prefix: "/api/v2" }
   route:
-    ◦ destination: reviews-canary
+    - destination: reviews-canary
       weight: 20
 ```
 
