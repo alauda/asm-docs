@@ -55,8 +55,8 @@ metadata:
 spec:
   egress:
   - hosts:
-    ◦ "dev/*"
-    ◦ "prod/db-service"
+    - "dev/*"
+    - "prod/db-service"
 ```
 
 ### Implementation Steps
@@ -81,8 +81,8 @@ metadata:
 spec:
   egress:
   - hosts:
-    ◦ "prod/*"  # Current namespace
-    ◦ "monitoring/*"  # Specific namespace
+    - "prod/*"  # Current namespace
+    - "monitoring/*"  # Specific namespace
 ```
 
 ### Example 2: Full Cluster Access
@@ -95,7 +95,7 @@ metadata:
 spec:
   egress:
   - hosts:
-    ◦ "*/*"  # All namespaces
+    - "*/*"  # All namespaces
 ```
 
 ## Parameter Specifications
