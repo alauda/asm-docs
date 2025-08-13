@@ -15,29 +15,29 @@ The Ingress Gateway serves as the secure entry point for external traffic into t
 Unlike Kubernetes Ingress, it enables granular traffic routing with service mesh capabilities while maintaining operational flexibility.
 
 ## Advantages
-- ​**Dual-Layer Architecture**
+- **Dual-Layer Architecture**
   Tier1 manages external exposure rules while Tier2 handles service-level routing, preventing rule conflicts between infrastructure and application teams
 
-- ​**Protocol Flexibility**
+- **Protocol Flexibility**
   Supports HTTP/HTTPS/TCP traffic with mutual TLS encryption
 
-- ​**Traffic Governance**
+- **Traffic Governance**
   Enables canary releases and service routing for ingress traffic
 
-- ​**Operational Decoupling**
+- **Operational Decoupling**
   Separates infrastructure routing (Tier1) from business routing (Tier2) management
 
 ## Scenarios
-- ​**Hybrid Cloud Traffic Management**
+- **Hybrid Cloud Traffic Management**
   Unified entry point for multi-cloud deployments
 
-- ​**Security-Sensitive Exposures**
+- **Security-Sensitive Exposures**
   Enforce WAF policies and rate limiting at edge
 
-- ​**Canary Launch Coordination**
+- **Canary Launch Coordination**
   Implement phased rollouts combining gateway and service routing
 
-- ​**Multi-Team Environments**
+- **Multi-Team Environments**
   DevOps manages Tier1, App teams control Tier2 configurations
 
 ## Limitations

@@ -22,7 +22,7 @@ Sidecar performance depends on many factors, for example:
 Number and types of proxy filters, specifically telemetry v2 related filters.
 The latency, throughput, and the proxies' CPU and memory consumption are measured as a function of these factors.
 
-   
+
 ## CPU and memory consumption
 
 
@@ -30,14 +30,14 @@ Since the sidecar proxy performs additional work on the data path, it consumes C
 
 The memory consumption of the proxy depends on the total configuration state the proxy holds. A large number of listeners, clusters, and routes can increase memory usage.
 
-Since the proxy normally doesn’t buffer the data passing through, request rate doesn’t affect the memory consumption.
+Since the proxy normally doesn't buffer the data passing through, request rate doesn't affect the memory consumption.
 
 ## Additional latency
 
 
 Since Istio injects a sidecar proxy on the data path, latency is an important consideration. Istio adds an authentication filter, a telemetry filter, and a metadata exchange filter to the proxy. Every additional filter adds to the path length inside the proxy and affects latency.
 
-The Envoy proxy collects raw telemetry data after a response is sent to the client. The time spent collecting raw telemetry for a request does not contribute to the total time taken to complete that request. However, since the worker is busy handling the request, the worker won’t start handling the next request immediately. This process adds to the queue wait time of the next request and affects average and tail latencies. The actual tail latency depends on the traffic pattern.
+The Envoy proxy collects raw telemetry data after a response is sent to the client. The time spent collecting raw telemetry for a request does not contribute to the total time taken to complete that request. However, since the worker is busy handling the request, the worker won't start handling the next request immediately. This process adds to the queue wait time of the next request and affects average and tail latencies. The actual tail latency depends on the traffic pattern.
 
 Inside the mesh, a request traverses the client-side proxy and then the server-side proxy. In the default configuration of Istio 1.12.3 (that is, Istio with telemetry v2), the two proxies add about 1.7 ms and 2.7 ms to the 90th and 99th percentile latency, respectively, over the baseline data plane latency.
 
@@ -54,4 +54,4 @@ Users with platform management permissions can navigate to the service mesh deta
 
 * When adding a new service, set specific Sidecar resource quotas (CPU and memory).
 
-* After accessing the details page of an already added service, navigate to the **Details** tab and update the Sidecar configuration in the **Sidecar** 
+* After accessing the details page of an already added service, navigate to the **Details** tab and update the Sidecar configuration in the **Sidecar**
