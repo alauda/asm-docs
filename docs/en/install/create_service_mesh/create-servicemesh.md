@@ -19,23 +19,29 @@ For instructions on creating a multi-cluster service mesh, please refer to the M
 - When the cluster is an IPv4/IPv6 dual-stack network, a service mesh cannot be deployed.
 
 ## Prerequisites
-Download the Alauda Service Mesh Operator installation package corresponding to your platform architecture.
 
-Upload the Alauda Service Mesh Operator installation package using the Upload Packages mechanism.
+- The [Alauda Service Mesh Essentials Cluster Plugin](../asm-essentials.mdx) has been installed.
 
-Ensure that the cluster has deployed the Prometheus plugin or VictoriaMetrics plugin.
+- Download the following installation package corresponding to your platform architecture, and use the Upload Packages mechanism to upload the package to the global cluster and the target cluster (please do not install them manually).
 
-**Note:** When VictoriaMetrics is a multi-cluster deployment architecture, `vmstorage` can be in a different cluster from the service mesh.
+  - `Alauda Service Mesh` Operator
+  - `Flagger` Operator
+  - `Alauda Build of Jaeger` Operator
+  - `Alauda Build of OpenTelemetry` Operator
 
-Ensure there is an available Elasticsearch. The service mesh can interface with the cluster's Elasticsearch logging plugin or your own Elasticsearch.
+- Ensure that the cluster has deployed the Prometheus plugin or VictoriaMetrics plugin.
 
-When the cluster is an **OpenShift** cluster, the following prerequisites must also be met:
+  **Note:** When VictoriaMetrics is a multi-cluster deployment architecture, `vmstorage` can be in a different cluster from the service mesh.
 
-- The namespace `istio-system` has been created.
-- Add the `istio-system` namespace to the `anyuid` SCC (Security Context Constraints) group. To do this, log in to the OpenShift cluster's bastion host and execute the command:
-  ```shell
-  oc adm policy add-scc-to-group anyuid system:serviceaccounts:istio-system
-  ```
+- Ensure there is an available Elasticsearch. The service mesh can interface with the cluster's Elasticsearch logging plugin or your own Elasticsearch.
+
+- When the cluster is an **OpenShift** cluster, the following prerequisites must also be met:
+
+  - The namespace `istio-system` has been created.
+  - Add the `istio-system` namespace to the `anyuid` SCC (Security Context Constraints) group. To do this, log in to the OpenShift cluster's bastion host and execute the command:
+    ```shell
+    oc adm policy add-scc-to-group anyuid system:serviceaccounts:istio-system
+    ```
 
 ## Steps
 
