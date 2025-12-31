@@ -98,7 +98,7 @@ spec:
 2. The CNI binary directory. (Default: `/opt/cni/bin`)
 3. The CNI configuration directory. (Default: `/etc/cni/net.d`)
 4. Configuration file to insert istioCni plugin configuration, by default this will be the first file found in the **cniConfiDir**.
-5. This directory must exist on the node, if it does not, consult your container runtime documentation for the appropriate path. (Default: `/var/run/netns`, in minikube/docker/others can be `/var/run/docker/netns`)
+5. This directory must exist on the node, if it does not, consult your container runtime documentation for the appropriate path. (Default: `/var/run/netns`)
 6. Deploy the config files as plugin chain (value `true`) or as standalone files in the conf dir (value `false`).
 7. Custom configuration happens based on the CNI provider, possible values: `default` and `multus`. (Default: `default`)
 

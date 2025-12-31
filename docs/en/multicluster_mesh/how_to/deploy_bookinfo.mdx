@@ -74,7 +74,7 @@ By executing a script, tag the images and upload them to the image repository ac
 
     ```sh
     unzip <file_name>.zip
-    docker load -i images.tar
+    crictl load -i images.tar
     ```
     
     :::note
@@ -82,7 +82,7 @@ By executing a script, tag the images and upload them to the image repository ac
     
     * `images.tar`: The image package of Bookinfo.
     * `bookinfo.yaml`: The YAML file of Bookinfo.
-    * `docker_script.sh`: A script for tagging images, uploading images, and modifying the image addresses in the YAML file.
+    * `crictl_script.sh`: A script for tagging images, uploading images, and modifying the image addresses in the YAML file.
     :::
 
 3. Execute the following command to log in to the image repository accessible by the platform.
@@ -92,28 +92,28 @@ By executing a script, tag the images and upload them to the image repository ac
     :::
 
     ```sh
-    docker login <Harbor address>
+    crictl login <Harbor address>
     ```
     
     :::note
-    If you receive the following error after entering your username and password, modify the **Docker Engine** configuration to add the Harbor address to **insecure-registries**, then re-execute the login command.
+    If you receive the following error after entering your username and password, modify the **container runtime** configuration to add the Harbor address to **insecure-registries**, then re-execute the login command.
     :::
 
     ```sh
     Error response from daemon: Get "https://<Harbor address>/v2/": http: server gave HTTP response to HTTPS client
     ```
 
-4. Modify the **docker_script.sh** script file.
+4. Modify the **crictl_script.sh** script file.
 
     Replace `<Harbor address>` with the **Harbor project address** where you want to upload the images, for example: `registry-harbor.example.com/bookinfo`.
 
 5. Execute the following commands sequentially.
 
-    The following commands execute the **docker_script.sh** script to tag the images, upload the images to the Harbor project, and modify the image addresses in the **bookinfo.yaml** file.
+    The following commands execute the **crictl_script.sh** script to tag the images, upload the images to the Harbor project, and modify the image addresses in the **bookinfo.yaml** file.
 
     ```sh
-    chmod +x docker_script.sh
-    ./docker_script.sh
+    chmod +x crictl_script.sh
+    ./crictl_script.sh
     ```
 
 ### One-Click Application Deployment

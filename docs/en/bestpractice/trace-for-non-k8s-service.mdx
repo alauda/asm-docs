@@ -49,12 +49,12 @@ ___Select and execute the appropriate script based on the cluster's runtime comp
         nerdctl container stop $CONTAINERID  
         ```
 
-- **Docker Runtime Component**
+- **Containerd Runtime Component**
 
     1. Log in to the image repository used by the cluster:
 
         ```bash
-        docker login <image_registry_address>
+        crictl login <image_registry_address>
         ```
 
     2. Run the following script to copy the Java Agent jar file from the image to the local system:
@@ -62,11 +62,11 @@ ___Select and execute the appropriate script based on the cluster's runtime comp
         ```bash
         #!/bin/sh  
         TAG=$(kubectl -n istio-system get cm otel-java-agent -oyaml | grep versions -A1 | grep -v versions | awk '{print substr($0, 7)}')  
-        CONTAINERID=$(docker run -d <image_registry_address>/asm/otel-java-instrumentation:$TAG sleep 9999)  
+        CONTAINERID=$(crictl run -d <image_registry_address>/asm/otel-java-instrumentation:$TAG sleep 9999)  
         echo "copy agent from $CONTAINERID"  
         mkdir -p agent  
-        docker cp $CONTAINERID:/opentelemetry-javaagent-ext.jar ./agent/opentelemetry-javaagent-ext.jar  
-        docker container stop $CONTAINERID  
+        crictl cp $CONTAINERID:/opentelemetry-javaagent-ext.jar ./agent/opentelemetry-javaagent-ext.jar  
+        crictl container stop $CONTAINERID  
         ```
 
 ### 2. Distribute the Java Agent to Java Service Nodes  
