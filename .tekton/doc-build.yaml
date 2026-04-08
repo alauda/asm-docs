@@ -10,8 +10,7 @@ metadata:
       (
         event == "push" && (
           source_branch.matches("^(main|master|release-.*)$") ||
-          target_branch.matches("^(main|master|release-.*)$") ||
-          target_branch.startsWith("refs/tags/")
+          target_branch.matches("^(main|master|release-.*)$")
         )
       )
 spec:
@@ -57,7 +56,7 @@ spec:
             - ReadWriteOnce
           resources:
             requests:
-              storage: 1Gi
+              storage: 5Gi
     - name: cache
       persistentVolumeClaim:
         claimName: doc-build-cache
