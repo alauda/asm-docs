@@ -10,6 +10,10 @@ Ensure the following operators are installed before proceeding:
 
 - `Alauda Service Mesh Essentials` cluster plugin, please visit [Alauda Service Mesh Essentials Cluster Plugin](../asm-essentials.mdx) for installation.
 
+:::danger{title=CAUTION}
+If the ACP **global** cluster runs **MicroOS**, installing the `Alauda Service Mesh Essentials` cluster plugin is not supported. In this scenario, you cannot continue creating a service mesh.
+:::
+
 Ensure the following operators are uploaded to the global cluster and the target cluster (please do not install them manually):
 
 - `Alauda Service Mesh` Operator
