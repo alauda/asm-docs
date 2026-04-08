@@ -14,7 +14,7 @@ spec:
                 - ReadWriteOnce
               resources:
                 requests:
-                  storage: 10Gi
+                  storage: 5Gi
         - name: cache
           persistentVolumeClaim:
             claimName: build-cache
