@@ -106,7 +106,7 @@ To address this issue, we offer two solutions. You can refer to the comparison b
 | [(Recommended) Solution 1: Merge Gateway Resources](#merge_gateway) | - Community-recommended fix, with backward compatibility.<br/>- Maintains HTTP/2 performance for the client.          | - If there are a large number of related Gateway resources in the cluster, the merge operation may be cumbersome.                                                                                                                                                                                        |
 | [Solution 2: Response Code 421](#res_401)                           | - No need to modify existing Gateway and VirtualService resources.<br/>- Maintains HTTP/2 performance for the client. | - Strongly dependent on the client supporting the 421 response code. Most mainstream browsers support the 421 response code, such as Chrome, Firefox, and Safari (Safari version must be 15.1 or higher, i.e., macOS Monterey).<br/>- Before upgrading Istio, EnvoyFilter compatibility must be checked. |
 
-### <span id="merge_gateway">Solution 1: Merge Gateway Resources</span>
+### Solution 1: Merge Gateway Resources \{#merge_gateway}
 
 **Solution Description**
 
@@ -298,7 +298,7 @@ spec:
 
 **Important Note:** After performing the above steps, please rerun the check script to confirm that the issue has been resolved.
 
-### <span id="res_401">Solution 2: Response Code 421</span>
+### Solution 2: Response Code 421 \{#res_401}
 
 **Solution Description**
 
