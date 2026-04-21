@@ -165,7 +165,7 @@ service:
       exporters: [otlp]
 ```
 
-## Receivers
+## Receivers \{#receivers}
 
 Receivers collect telemetry data from one or more sources. They can be either pull-based or push-based and may support one or more [data sources](https://opentelemetry.io/docs/concepts/signals/).
 
@@ -281,7 +281,7 @@ The Zipkin receiver ingests traces in both Zipkin v1 and v2 formats.
 | `endpoint` | The Zipkin HTTP endpoint. If omitted, the default is 0.0.0.0:9411. |
 | `tls` | The server-side TLS configuration. Refer to the OTLP Receiver's `protocols.grpc.tls` for configuration details. |
 
-## Processors
+## Processors \{#processors}
 
 Processors modify or transform data collected by receivers before sending it to exporters. Data processing is based on the rules or settings defined for each processor, which may include filtering, deleting, renaming, or recalculating telemetry data. The order of processors in the pipeline determines the sequence in which the Collector applies processing operations to signals.
 
@@ -492,7 +492,7 @@ The `error_mode` field describes how the processor reacts to errors when process
   - OTTL Functions: [https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/ottlfuncs](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/ottlfuncs)
   - OTTL Contexts: [https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/contexts](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/contexts)
 
-## Exporters
+## Exporters \{#exporters}
 
 Exporters send data to one or more backends or destinations. Exporters can be pull-based or push-based and may support one or more [data sources](https://opentelemetry.io/docs/concepts/signals/).
 
@@ -695,7 +695,7 @@ This configuration exposes Prometheus metrics at `0.0.0.0:8889/metrics` and conf
 2. By default, resource attributes are added to the `target_info` metric. You can use Prometheus queries to select and group these attributes as metric labels.
 3. To simplify queries and grouping, it is recommended to use the `transform processor` to directly convert commonly used resource attributes into metric labels.
 
-## Connectors
+## Connectors \{#connectors}
 
 Connectors link two pipelines, acting both as exporters and receivers. A connector consumes data as an exporter at the end of one pipeline and sends data as a receiver at the start of another pipeline. The consumed and sent data can be of the same or different types. You can use connectors to aggregate, duplicate, or route data.
 
@@ -743,7 +743,7 @@ Service topologies are very useful in many use cases:
 | `store.ttl` | The lifetime of temporary data in memory storage. |
 | `store.max_items` | The maximum number of span data entries that can be temporarily stored in memory. |
 
-## Extensions
+## Extensions \{#extensions}
 
 Extensions add capabilities to the Collector. For example, extensions can automatically add authentication features to receivers and exporters.
 
@@ -755,7 +755,7 @@ You can configure extensions in the `extensions` section of the Collector config
 
 **Tip**: For more detailed extension configuration, refer to the [extension README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/extension/README.md).
 
-## Service Section
+## Service Section \{#service-section}
 
 The `service` section is used to enable components in the Collector based on the configuration in the `receivers`, `processors`, `exporters`, and `extensions` sections. If a component is configured but not defined in the `service` section, it will not be enabled.
 
@@ -916,7 +916,7 @@ service:
         - otlp/auth
 ```
 
-### Configuring certificates
+### Configuring certificates \{#configuring-certificates}
 
 For secure communication in production environments, use TLS certificates or mTLS for mutual authentication. Follow these steps to generate a self-signed certificate, or use your current certificate provider for production certificates.
 

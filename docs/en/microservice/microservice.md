@@ -6,7 +6,7 @@ title: Microservice Resource Description
 
 This document primarily provides a description of the resources for ServiceMesh type Microservices.
 
-### <span id="ms">MicroService Resource Reference</span>
+### MicroService Resource Reference {#ms}
 
 #### **YAML Example**
 
@@ -47,7 +47,7 @@ spec:
 
 
 
-#### <span id="spec">**spec Parameters**</span>
+#### **spec Parameters** {#spec}
 
 * <span id="dep">**deployments**</span>
 
