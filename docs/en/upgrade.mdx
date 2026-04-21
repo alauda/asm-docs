@@ -11,7 +11,8 @@ title: Upgrade
 Please visit [Alauda Service Mesh Essentials](./install/asm-essentials.mdx) for installation instructions.
 
 ## Upgrade bussiness cluster components
-### <span id="ref">Before Upgrading</span>
+
+### Before Upgrading \{#ref}
 
 The platform provides a canary upgrade for Istio in the service mesh, where the new version of the istiod component is deployed first. Once all data planes are upgraded, the old version of the istiod component is decommissioned.
 
@@ -45,7 +46,7 @@ The complete service mesh upgrade process includes the following steps:
 
 ### Upgrade Operations
 
-#### <span id="component">Upgrade the Non-Istio Components of the Service Mesh in the Cluster</span>
+#### Upgrade the Non-Istio Components of the Service Mesh in the Cluster \{#component}
 
 {/* TODO: [Upgrade Components](@console-platform-docs/zh/platform-usermanual/clusterall/1cluster/11upgrade/) */}
 
@@ -63,7 +64,7 @@ The complete service mesh upgrade process includes the following steps:
 1. Return to the mesh details page, and in the **Mesh Deployment** area, click the **Upgrade** button to the right of the `Istio Version` of the corresponding cluster. An upgrade path for Istio will be displayed in the popup.
 2. Click the **Upgrade** button in the popup.
 
-#### <span id="envoyfilters">Check if there are any EnvoyFilters in the Cluster</span>
+#### Check if there are any EnvoyFilters in the Cluster \{#envoyfilters}
 
 1. In the **Platform Management** left navigation, click **Service Mesh** > **EnvoyFilter**.
 
@@ -73,7 +74,7 @@ The complete service mesh upgrade process includes the following steps:
     - If no data is found, the check is complete.
     - If data is found, contact the EnvoyFilter creator to adapt all EnvoyFilters to the new version of Istio, or contact technical support.
 
-#### <span id="data-planes">Upgrade All Istio Data Planes in the Cluster</span>
+#### Upgrade All Istio Data Planes in the Cluster \{#data-planes}
 
 The Istio data planes in the cluster include Sidecars, ingress gateways, and egress gateways.
 
@@ -134,4 +135,3 @@ The old version of istiod in the cluster can only be decommissioned after all Is
 2. Click the **Confirm** button in the popup.
 
 **Note**: If there are data planes that have not been upgraded in the cluster, after clicking **Decommission Old Version**, the popup will display the ingress gateways, egress gateways, and Sidecars in the cluster that have not been upgraded, quickly tracking the data planes to be upgraded.
-
