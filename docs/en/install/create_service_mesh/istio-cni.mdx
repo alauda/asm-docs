@@ -145,7 +145,7 @@ After Istio CNI component is installed and properly configured, the following ch
 - The `istio-init` container will no longer be present (transparent traffic interception will be handled by the Istio CNI node agent).
 - Instead, Istio will inject a container named `istio-validation` that checks if the iptables rules for transparent traffic interception are successfully set.
 
-## Race condition & mitigation
+## Race condition & mitigation \{#race-condition--mitigation}
 
 The Istio CNI DaemonSet installs the CNI network plugin on every node. However, a time gap exists between when the
 DaemonSet pod gets scheduled onto a node, and the CNI plugin is installed and ready to be used.

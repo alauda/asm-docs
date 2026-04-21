@@ -10,7 +10,7 @@ This document will guide you through creating a ServiceMesh service or OpenTelem
 1.  The current namespace has been added to the service mesh. Please refer to [Add Namespaces](../add_namespaces)  for instructions.
 2. The workload type is a Deployment, and there is a one-to-one association with a Service.
 
-## Add ServiceMesh service
+## Add ServiceMesh service {#add-servicemesh-service}
 ### Steps
 
 1. In the left navigation bar, click **Service List**.
@@ -38,7 +38,7 @@ This document will guide you through creating a ServiceMesh service or OpenTelem
     * Restart the service's Deployment.<br/>During the restart process, as long as at least one Pod of the Deployment is in the **Running** state, the service is **Online**; otherwise, the service is **Offline**.
 
 
-## Add OpenTelemetry Service
+## Add OpenTelemetry Service {#add-opentelemetry-service}
 ### Steps
 
 1. In the left navigation bar, click **Service List**.
