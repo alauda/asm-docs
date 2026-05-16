@@ -1,0 +1,1178 @@
+{
+  "version": 1,
+  "generator_version": 3,
+  "project_name": "Alauda Service Mesh",
+  "summary": "Documentation for Alauda Service Mesh (ASM) — an Istio-based service mesh for Kubernetes covering installation, traffic management, security (mTLS, authorization), observability (metrics, tracing, topology), multi-cluster mesh, and microservice governance.",
+  "generated_at": "2026-05-16T09:53:29Z",
+  "include_patterns": [
+    "docs/en/*.md",
+    "docs/en/*.mdx",
+    "docs/en/**/*.md",
+    "docs/en/**/*.mdx"
+  ],
+  "exclude_patterns": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/.llmstxt-cache/**",
+    "**/llms.txt",
+    "**/llmstxt-state.json",
+    "**/CHANGELOG.md",
+    "**/CONTRIBUTING.md",
+    "**/.DS_Store",
+    ".llmstxt-cache/**",
+    "llms.txt",
+    "llmstxt-state.json"
+  ],
+  "grouping_base_path": "docs/en",
+  "description_max_words": 150,
+  "files": {
+    "docs/en/add_namespaces.mdx": {
+      "sha256": "ec5b20dc4e1eca0ec5d2aad91d9603a811c361e1421d46106c6edbde9bc65055",
+      "size": 817,
+      "description": "Walkthrough for namespace governance in Alauda Service Mesh: scoping which Kubernetes namespaces a mesh controls so services can only be added and governed inside managed namespaces. Provides UI steps under Service Mesh > Meshes > Manage Namespace to add namespaces per cluster, and notes that a namespace can only be unmanaged (removed) when it contains no services.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:53:29Z"
+    },
+    "docs/en/apis/index.mdx": {
+      "sha256": "8c7f805aeebf43490c6f1c9129e813b62fdf1877f060877c018a798dbe4092d8",
+      "size": 210,
+      "description": "Top-level landing page for the Alauda Service Mesh (ASM) API Reference section, which catalogs every Kubernetes-style CRD ASM exposes. It renders an Overview component and acts as the entry point into the per-API-group subsections (asm.alauda.io, networking.istio.io, security.istio.io, operator.alauda.io).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/apiattributes.mdx": {
+      "sha256": "d88b81e05582e6896b8a00bc6cc9d164fe034fcf90b5381d6896c0537b882ae2",
+      "size": 45,
+      "description": "Reference page for the namespaced ApiAttribute CRD (asm.alauda.io/v1alpha2, short name apiattr), which stores per-microservice API metadata used by the service mesh gateway and API monitoring. It declares the API list (method, path with REST path params, operationId, port, gatewayGroupReferences) plus exact/prefix matchers and Swagger/OpenAPI import metadata so dashboards can map Envoy traffic back to declared APIs.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/canarydeliveries.mdx": {
+      "sha256": "27c64e9f6de2601c0e5fef44521091a0350ebc3791c5d9a0fec7e1e97e378246",
+      "size": 49,
+      "description": "Reference page for the CanaryDelivery CRD (asm.alauda.io/v1alpha1), which is the per-service progressive-delivery resource backing ASM's Canary Release feature (built on Flagger). It drives canary, blue/green, A/B, and mirror strategies via spec.analysis (interval, stepWeight, maxWeight, threshold, metrics, webhooks, HTTP header match), targetRef to a workload, and trafficControl/promoteControl modes; printer columns surface IsAvailable, phase, weight, and failedChecks.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/canaryevents.mdx": {
+      "sha256": "15ff92ead4f90a32b7fed5552521be87107c6da16d92e51e80ff2591ae20eda9",
+      "size": 45,
+      "description": "Reference page for the CanaryEvent CRD (asm.alauda.io/v1alpha1), which records the history and audit trail of CanaryDelivery executions. Each object stores a records list with start/end time, current weight, canary/primary deployment names, tracked ConfigMap/Secret diffs (configtracks), and a per-record events array (eventName, eventType, phase, weight, message) so operators can inspect Flagger-driven canary/A-B/blue-green progressions after the fact.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/canarytemplates.mdx": {
+      "sha256": "fee04bc0b383ceb9b5b30ba3170269986726d59a4099223cef8e257fc91a0359",
+      "size": 48,
+      "description": "Reference page for the CanaryTemplate CRD (asm.alauda.io/v1alpha1), a reusable Flagger-style template defining default progressive-delivery parameters: analysis (interval, iterations, maxWeight/stepWeight, A/B header match, metric thresholds and templateRef, mirror, webhooks), service (port, hosts, gateways, CORS, retries, rewrite, headers, trafficPolicy with connectionPool/outlierDetection/loadBalancer/TLS), targetRef, autoscalerRef, ingressRef, and progressDeadlineSeconds — instantiated by CanaryDelivery objects.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/casemonitors.mdx": {
+      "sha256": "694bbc0174be916b1f28c9ddb889beaa1149648531ec99b54d488ad9025c49d1",
+      "size": 45,
+      "description": "Reference page for the CaseMonitor CRD (asm.alauda.io/v1beta2), an ASM-specific monitor object inspired by Prometheus ServiceMonitor. It defines pingurls (HTTP probes with path/port/scheme/tlsConfig/scrapeTimeout/customErrors), crd checks (group/version/kind operators such as Exists or HttpPing with optional basicAuth), interval, label/namespace selectors, and a monitorResults status — used by the mesh's health-check pipeline to surface platform/component anomalies.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/connectionpools.mdx": {
+      "sha256": "9a0fb0c498e9633ee185d4f17f70f460e2f1a3cb4b5e1eae2ed9aa7c0f80f414",
+      "size": 48,
+      "description": "Reference page for the ConnectionPool CRD (asm.alauda.io/v1alpha1, short name cp), which expresses upstream connection-pool tuning for a destination host. HTTP settings cover httpMaxPendingRequests, httpMaxRequests, maxConnections, maxRequestsPerConnection and maxRetries; TCP settings cover connectTimeout, maxConnections, and tcpKeepalive (time/interval/probes). It is the ASM-managed form of Istio DestinationRule connectionPool used for circuit-breaking and resource isolation.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/domains.mdx": {
+      "sha256": "020fa04c8b6cb4bbac540419ab29a7bf55ddb4f3a86329f93d1447a9fa4cbd75",
+      "size": 40,
+      "description": "Reference page for the cluster-scoped Domain CRD (asm.alauda.io/v1alpha1), which represents an enterprise-managed DNS domain bound to one cluster and a list of namespaces. The platform's domain-name management uses this CRD to centrally allocate domains to projects/namespaces, so ingress gateways and VirtualService hosts can be issued and audited from a shared pool.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/envoyfilterbindings.mdx": {
+      "sha256": "0ac10c8fce9d9a171dd605c6fc345e2e20a025938e04f5d03a796d5dbdeb4e34",
+      "size": 52,
+      "description": "Reference page for the EnvoyFilterBinding CRD (asm.alauda.io/v1alpha1), the project-scoped resource that binds a managed Istio EnvoyFilter template to specific services, namespaces, or gateways inside a mesh. Because EnvoyFilter customizations can break the data plane if misapplied, this binding object lets project-level operators safely reuse a shared filter (sourced from an EnvoyFilterTemplateSync) across selected workloads.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/envoyfiltertemplatesyncs.mdx": {
+      "sha256": "6027e43f7aa5ab0cca78e921e7219d470d97bd54f27356b28ce67ab0382e1959",
+      "size": 57,
+      "description": "Reference page for the EnvoyFilterTemplateSync CRD (asm.alauda.io/v1alpha1), which distributes versioned EnvoyFilter templates into a service mesh. Each spec.templates entry pins an istioVersion plus a version, hash, and raw filter value so the controller can render and reconcile the correct EnvoyFilter for the running Istio control plane — the synchronization mechanism behind EnvoyFilterBinding.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/errorchecks.mdx": {
+      "sha256": "6bf6a1c00e99a91bdfefa9634202b4c67dd2bdcdf367bac5c3f76bb3f1973d3e",
+      "size": 44,
+      "description": "Reference page for the ErrorCheck CRD (asm.alauda.io/v1alpha1), the catalog of platform error codes evaluated by the CaseMonitor pipeline. Its spec.errlist entries carry errorcode, errordesc, errorlevel, resourename (the affected resource kind/name), and relatename, providing the structured error vocabulary surfaced as alerts and case-monitor results in the mesh.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/gatewaydeploys.mdx": {
+      "sha256": "38c6b75a202014e55a9ff9af56189bbfbbe0af0e55d8e7d1d7d9a7794aa0f02c",
+      "size": 47,
+      "description": "Reference page for the GatewayDeploy CRD (asm.alauda.io/v1alpha1, short name gdeploy), which provisions an Istio ingress/egress gateway Deployment in the mesh. It controls replicas, HPA (autoscaleEnabled, hpaSpec min/max), nodeSelector and node pinning, podStrategy anti-affinity, resource requests/limits, accessLogging, externalLoadBalancerIPAddress, and project visibility (private); status reports phase plus proxy revision (current/target/state) for gateway upgrades.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/gatewaygroups.mdx": {
+      "sha256": "8e58e592458c260968cd79f68ce5c4b2cc743e8aaf29222000e252b6155261ee",
+      "size": 46,
+      "description": "Reference page for the GatewayGroup CRD (asm.alauda.io/v1alpha1), the API-group resource that aggregates a set of microservice APIs published through an ingress gateway. It records the group name, apiPrefixPath/apiPrefixRule, host (domain or non-domain access), publish flag, target gateway reference, and an apiRoute list (msname, namespace, port, method, path, operationid, status) — used by the gateway management UI to govern grouped APIs.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/gatewayprojectbindings.mdx": {
+      "sha256": "9784b63d92cb611bc829ab87c27adde4fce75fde65e2a32bb628ba14fe0d3a1e",
+      "size": 55,
+      "description": "Reference page for the GatewayProjectBinding CRD (asm.alauda.io/v1alpha1, short name gpb), which authorizes a project to consume a shared ingress gateway. Its spec.gatewayRef (name + namespace) attaches a project to a GatewayDeploy so the gateway becomes visible in that project, complementing the gateway's private/shared visibility flag.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/globalratelimiters.mdx": {
+      "sha256": "32582224b5d5622f877bce93ba634f5a45aaf6df5a5cf3099a89d766a9239699",
+      "size": 51,
+      "description": "Reference page for the GlobalRateLimiter CRD (asm.alauda.io/v1alpha1, short name grl), which defines Redis-backed global rate limiting for a service. Each object pins a globally-unique domain, failureModeDeny, and a rules list whose descriptors match by header/method/path (eq, ne, regex) and apply a fixedWindow rateLimit (requestsPerUnit per second/minute/hour/day); shadowMode runs the rule in audit-only mode.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/index.mdx": {
+      "sha256": "0fc50ee3d57d431d75810c09eb3c66e48c2f7b58168e2b3e3047e718266ae176",
+      "size": 136,
+      "description": "Landing page for the Kubernetes API reference of the `asm.alauda.io` API group, which contains the Alauda Service Mesh custom resource definitions (CRDs) such as ServiceMesh, IngressGateway, JWTPolicy, ManualGrayRelease, OutlierDetection, MicroService, IsolatePod, ServiceMeshGroup, SidecarBypass, SidecarHotUpgradePlan, WasmModuleTemplate/Install, and LoadBalancer. The page renders an auto-generated overview that links to each CRD's detailed schema reference.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/ingressgateways.mdx": {
+      "sha256": "162060c9deb0846affafad9ddefa928b81254419916a4e05143954dc02afe6ff",
+      "size": 48,
+      "description": "Auto-generated CRD reference for `ingressgateways.asm.alauda.io`, the ASM resource that declares an edge Envoy proxy fronting the mesh. The schema documents how operators configure exposed ports, protocols, hostnames, and TLS so that external traffic can enter the Istio data plane, complementing the Tier1/Tier2 gateway model described in the install component overview.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/isolatepods.mdx": {
+      "sha256": "de97554bffec4117cf2c35672c48f0a0b0517435639e6fe80db99b3bf7d32d2e",
+      "size": 44,
+      "description": "Auto-generated CRD reference for `isolatepods.asm.alauda.io`, used by ASM to mark and isolate individual sidecar-injected pods (for example, to take a faulty workload out of mesh traffic for debugging without deleting it). The page renders the resource spec, status, and metadata fields exposed by the IsolatePod controller.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/jwtpolicies.mdx": {
+      "sha256": "c0fb8835f3d41129d90bdc257f818f64ee92adfd8afc151f8c4796ba04cbb9ad",
+      "size": 44,
+      "description": "Auto-generated CRD reference for `jwtpolicies.asm.alauda.io`, the ASM resource that configures JWT (JSON Web Token) authentication and authorization policies on mesh workloads and gateways. The schema covers issuer, JWKS, audience, and claim-based rules used to validate inbound requests through Istio's authentication layer.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/loadbalancers.mdx": {
+      "sha256": "33ac91506d0be5447006a828cbc1380f7b9389b423fcd6d205094dc72584a209",
+      "size": 46,
+      "description": "Auto-generated CRD reference for `loadbalancers.asm.alauda.io`, ASM's resource for declaring load-balancing policies (algorithms such as round-robin, least-request, random, or consistent-hash, plus locality and session-affinity settings) that the controller projects onto the underlying Istio DestinationRule/traffic-policy configuration for selected services.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/manualgrayevents.mdx": {
+      "sha256": "ec38419d607dcf9537185280cbf82ac43bf4574d33f1170d014315a986b992e5",
+      "size": 49,
+      "description": "Auto-generated CRD reference for `manualgrayevents.asm.alauda.io`, which records per-step events (promote, pause, abort, weight change) emitted during the execution of a ManualGrayRelease. The schema is the API surface that the UI and operators use to drive and audit each stage of a manual gray (canary) rollout.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/manualgrayreleases.mdx": {
+      "sha256": "ec8128de7879bd9feae67a5bc065f355a033701c334d1865d914dc9f40a451e9",
+      "size": 51,
+      "description": "Auto-generated CRD reference for `manualgrayreleases.asm.alauda.io`, ASM's resource that describes a manual gray (canary) release: baseline and canary workloads, traffic-split weights, matching rules, and progression state. It is the API used to coordinate stepwise traffic shifting through the Tier2 gateway, integrating with Flagger-style progressive delivery.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/microservices.mdx": {
+      "sha256": "58aecbffc38c3e2a7cdf938b6d9168e5b2c07e7b500db8e887b0176a76b18cf6",
+      "size": 46,
+      "description": "Auto-generated CRD reference for `microservices.asm.alauda.io`, the MicroService resource that lets users register an existing Kubernetes workload (typically a Deployment and its Service) as a unit of mesh governance. Creating this resource unlocks ASM features such as distributed tracing, service topology, canary releases, and traffic management for that workload.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/outlierdetections.mdx": {
+      "sha256": "a30d10955eca63f00a3f497594e6a229ee2eb5ae0a1f3aa8d8e30020b1f25890",
+      "size": 50,
+      "description": "Auto-generated CRD reference for `outlierdetections.asm.alauda.io`, the ASM resource that configures Envoy outlier detection (consecutive 5xx/gateway errors, ejection percentage, base ejection time, interval) to evict unhealthy endpoints from load-balancing pools, exposed as a higher-level abstraction over Istio DestinationRule outlier-detection settings.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/servicemeshgroups.mdx": {
+      "sha256": "9282fd0a979ae4efc8b3c954686c1258988096ea1ce971ed1888da98e94a0b44",
+      "size": 50,
+      "description": "Auto-generated CRD reference for `servicemeshgroups.asm.alauda.io`, the resource that groups together multiple ServiceMesh instances (for example, across primary/remote clusters in a multi-cluster topology) so they can be managed and observed as a single logical mesh group from the ASM control plane.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/servicemeshs.mdx": {
+      "sha256": "b1c146c07dcc7821d3301e609d830510de5882cadf73751ada7da4e3afb1b4f5",
+      "size": 45,
+      "description": "Auto-generated CRD reference for `servicemeshs.asm.alauda.io`, the top-level ServiceMesh CR that declares an entire Alauda Service Mesh instance: Istio version and revision, control-plane components (istiod, istio-cni, tier2-gateway, eastwest-gateway, asm-core, asm-controller), OpenTelemetry/Jaeger/Flagger add-ons, resource requests/limits, and multi-cluster topology.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/sidecarbypasses.mdx": {
+      "sha256": "04569a455cb2f476fcecca56b7811a404745d82e31c7a5a46b99152ff3b0569b",
+      "size": 48,
+      "description": "Auto-generated CRD reference for `sidecarbypasses.asm.alauda.io`, the ASM resource that selectively bypasses sidecar interception for specific pods, ports, or destinations. Operators use it to exclude certain traffic from Envoy's inbound/outbound chains, useful for legacy protocols or troubleshooting without disabling injection globally.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/sidecarhotupgradeplans.mdx": {
+      "sha256": "41306e270bef01c7203591e4ef36995accca06c6bda453c50817cb094c66d204",
+      "size": 55,
+      "description": "Auto-generated CRD reference for `sidecarhotupgradeplans.asm.alauda.io`, the resource that drives a controlled hot upgrade of istio-proxy sidecars across selected workloads without restarting application containers. The schema captures target namespaces/selectors, batch sizing, pause/abort controls, and rollout status used by the ASM controller to coordinate the upgrade.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/wasmmoduleinstalls.mdx": {
+      "sha256": "06f3f7819a0367d45d0941734f23b0ef128d13488f4bcb908d60f93bc35f257d",
+      "size": 51,
+      "description": "Auto-generated CRD reference for `wasmmoduleinstalls.asm.alauda.io`, which represents an actual installation of a WebAssembly (Wasm) extension onto chosen sidecars or gateways. It binds a WasmModuleTemplate to a workload selector and configuration values so the ASM controller pushes the resulting Envoy WasmPlugin into the mesh.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/wasmmoduletemplates.mdx": {
+      "sha256": "4d2fb859894418c46b98fdf1186a55c405ba9fbcf24fa77d6be4b22849d4fca7",
+      "size": 52,
+      "description": "Auto-generated CRD reference for `wasmmoduletemplates.asm.alauda.io`, the ASM resource that catalogs reusable WebAssembly (Wasm) modules: image/URL of the .wasm binary, runtime (V8), configuration schema, and metadata. Templates are instantiated by WasmModuleInstall resources to extend Envoy's data path with custom filters.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/asm.alauda.io/whitelists.mdx": {
+      "sha256": "813faaa1879a0c0fe8b61b73ebf075a079b97f3da28511a6957b1ee2fb314969",
+      "size": 43,
+      "description": "Reference page for the `whitelists.asm.alauda.io` CRD, an ASM-specific Custom Resource for declaring service-mesh access whitelists. Renders the live cluster schema (fields, validation, defaults) via the `<K8sCrd>` MDX component so operators can author Whitelist YAML against the exact API the asm-controller serves.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/index.mdx": {
+      "sha256": "3ab1f3ce42d8f6234d3e62fe4c8ee3fc3069b3a4cef43acf199924f41442e0fc",
+      "size": 211,
+      "description": "Top-level entry page for the Kubernetes APIs section of the ASM documentation, weighted 30 in the navigation. Uses an `<Overview />` component to list the API group sub-pages (asm.alauda.io, networking.istio.io, operator.alauda.io, security.istio.io) that document the CRDs exposed by Alauda Service Mesh.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/networking.istio.io/destinationrules.mdx": {
+      "sha256": "9403926c7a5642cd46b27b5ae74ee6db273af5b9d644e79877159eeef276685f",
+      "size": 55,
+      "description": "Reference page for the `destinationrules.networking.istio.io` CRD, used by Istio to configure traffic policies (load balancing, connection pool, outlier detection, TLS) and named service subsets that are applied after routing. Renders the live CRD schema via `<K8sCrd>` so users editing DestinationRules in ASM see the exact validated fields.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/networking.istio.io/gateways.mdx": {
+      "sha256": "e1550f6749f267aabe755f7e846ecc787425caacdb1a9473f9996ac21c8f3412",
+      "size": 47,
+      "description": "Reference page for the `gateways.networking.istio.io` CRD, which configures the Istio ingress/egress gateway: ports, protocols, hosts, and TLS termination/passthrough settings exposed at the mesh edge. Renders the live cluster schema via the `<K8sCrd>` component for authoring Gateway resources in ASM.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/networking.istio.io/index.mdx": {
+      "sha256": "5ca95766fb14f0353ddd7e9c562791aa4194c85a7d9d24e6b9754392f838a0dc",
+      "size": 142,
+      "description": "Index page for the `networking.istio.io` API group, listing the Istio traffic-management CRDs documented in ASM — Gateway, VirtualService, DestinationRule, and Sidecar. Renders an `<Overview />` component that surfaces the child reference pages.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/networking.istio.io/sidecars.mdx": {
+      "sha256": "b2b0c349604f88b5c519f07daf641e50afa27e9e1b74123ebc512b60ac8b82f8",
+      "size": 47,
+      "description": "Reference page for the `sidecars.networking.istio.io` CRD, which scopes the configuration of Envoy sidecar proxies — limiting the set of services/ports a workload can reach and tuning ingress/egress listener behavior per namespace or workload. Renders the live CRD schema via `<K8sCrd>`.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/networking.istio.io/virtualservices.mdx": {
+      "sha256": "ad66c69195f5cf0ce58b42033051c91dceb16ec00eea36c41031a89a67fc895e",
+      "size": 54,
+      "description": "Reference page for the `virtualservices.networking.istio.io` CRD, which defines Istio routing rules — HTTP/TCP/TLS match conditions, weighted destinations, retries, timeouts, fault injection, and traffic mirroring. Renders the live CRD schema via `<K8sCrd>` so users can author VirtualService YAML against the exact API served by the mesh.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/operator.alauda.io/index.mdx": {
+      "sha256": "5905427017b8f2c1c2ce642ab1ff1123f4196aee00b4343d1e5676216b3dc04b",
+      "size": 141,
+      "description": "Index page for the `operator.alauda.io` API group, which contains the CRDs used by the ASM operator to manage mesh component lifecycle. Renders an `<Overview />` listing the child resources (notably OperatorStatus).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/operator.alauda.io/operatorstatuses.mdx": {
+      "sha256": "362ac86055a68d7bff531273170e53873744d74819a1e2d06b09d1b7540877d2",
+      "size": 54,
+      "description": "Reference page for the `operatorstatuses.operator.alauda.io` CRD, which records the reconciliation and health state reported by the ASM operator for installed mesh components. Renders the live cluster schema via `<K8sCrd>` for operators inspecting or scripting against operator status.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/security.istio.io/index.mdx": {
+      "sha256": "de487daaf35ca0756b678a0c444cf2615157b23d2ba09bbe7cd24142e38a745a",
+      "size": 140,
+      "description": "Index page for the `security.istio.io` API group, listing Istio security CRDs documented in ASM — primarily PeerAuthentication for mTLS posture. Renders an `<Overview />` component to navigate to child resource pages.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/apis/kubernetes_apis/security.istio.io/peerauthentications.mdx": {
+      "sha256": "a4354bf26f99ddac814c5d65dac01bbec0a1d4d8e3d70d9a1bebefbd5be350ad",
+      "size": 56,
+      "description": "Reference page for the `peerauthentications.security.istio.io` CRD, which configures peer (workload-to-workload) authentication — most commonly the mTLS mode (`STRICT`, `PERMISSIVE`, `DISABLE`) at mesh, namespace, or workload scope. Renders the live CRD schema via `<K8sCrd>`.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/bestpractice/15editistiosource.mdx": {
+      "sha256": "a80792464c5d7dbf1535003befcbaabb950dfb80f753b73ec7e999592105246d",
+      "size": 5869,
+      "description": "Best-practice guide for customizing native Istio resources (DestinationRule, VirtualService, etc.) when the ASM UI doesn't expose a needed capability. Explains adding the `asm.cpaas.io/user-managed: \"true\"` annotation to detach a resource from the asm-controller's reconciliation, then editing the YAML on the **Platform Management > Clusters > Resources** page; includes a worked example using `portLevelSettings` on a DestinationRule to apply per-port load-balancing policies (LEAST_CONN globally, consistent-hash by source IP on port 81) and warns that user-managed resources are excluded from upgrade compatibility handling.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/bestpractice/index.mdx": {
+      "sha256": "9f0a530b6297912203f6db934f13af1209571cf992ff0ce66cf8ab86aeb7eee1",
+      "size": 128,
+      "description": "Landing page for the Best Practices section (weight 140) of the ASM documentation. Uses an `<Overview />` component to list the child best-practice articles such as OpenTelemetry ingestion, Java containerization specification, and customizing Istio source resources.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/bestpractice/ingestion.mdx": {
+      "sha256": "6c083d4e06b1466ed069f036837eed3237419a7ab6bd04877fedb5a05fc51724",
+      "size": 4256,
+      "description": "Walkthrough for ingesting OpenTelemetry observability data into ASM so platform Tracing/metrics visualizations can be used. Covers the OTel Collector receivers enabled by default — OTLP over HTTP (`asm-otel-collector.cpaas-system:4318`) and gRPC (`:4317`), and Zipkin (`:9411`) — and shows how user-developed services using the OpenTelemetry SDK or third-party systems like Harbor and GitLab can be wired to those endpoints, finishing with a validation step that queries the platform's Tracing view.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/bestpractice/java_spec.mdx": {
+      "sha256": "72017590e77d8ac82b0acc5230541b83541110e4d6f1ea82505e18afbbe5d31f",
+      "size": 3806,
+      "description": "Containerization specification for Java applications onboarded to ASM's OpenTelemetry-based governance, applicable to ACP v3.14.3, v3.16.2, v3.18+. Requires Deployments that set `JAVA_TOOL_OPTIONS` to declare it explicitly so the auto-injected `-javaagent:/otel-auto-instrumentation-java/javaagent.jar` is not overridden, and provides a legacy Dockerfile template (JDK 8u212+, non-root `admin` user, `start.sh` using `exec java ${JAVA_OPTS}`) for older ACP releases.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/bestpractice/trace-for-non-k8s-service.mdx": {
+      "sha256": "c55300a1319b3b7ac7520910124cb0564a9002da8eb89baa783a55cdce116c1d",
+      "size": 7441,
+      "description": "Step-by-step guide for adding distributed tracing to non-containerized Java services running on VMs or bare metal so their call chains appear alongside mesh services. Covers extracting the `opentelemetry-javaagent-ext.jar` from the `asm/otel-java-instrumentation` image via `nerdctl`/`crictl`, setting `OTEL_PROPAGATORS`, `OTEL_TRACES_EXPORTER`, `OTEL_EXPORTER_OTLP_ENDPOINT`, and `OTEL_RESOURCE_ATTRIBUTES` (with `service.name`/`vm.name`), launching the JVM with `-javaagent`, and registering each VM in a labeled `virtualmachine-config` ConfigMap that maps host/port to `serviceName`.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/architecture.mdx": {
+      "sha256": "10f5f16ae904ee737af334d34341306e5a7b9670db0791375dc8c789e157d542",
+      "size": 2544,
+      "description": "Describes the distributed tracing architecture built on Istio, OpenTelemetry, and Jaeger spanning collection, transmission, storage, query, and visualization. Details the role of `istio-proxy`/`istiod`, `opentelemetry-operator`/`otel-collector`, `jaeger-operator`/`jaeger-collector`/`jaeger-query`, the self-developed Tracing UI, and Elasticsearch as the Span store. Includes the two write paths (Istio direct to jaeger-collector vs. OTel via otel-collector then jaeger-collector) and the UI to jaeger-query to Elasticsearch read path.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/concepts/concept.mdx": {
+      "sha256": "60a3cfae9a1aea89299f607e44e4973629f6a7b1d1cf5e17ae9a52e7f87591f8",
+      "size": 3445,
+      "description": "Defines the core distributed tracing vocabulary used throughout the module: Telemetry, Trace, Span (including Root Span and Service Entry Span), Span Tags, and OperationName. Also introduces Jaeger as the OpenTracing/OpenTelemetry-compatible backend and the vendor-neutral OpenTelemetry Collector that receives, processes, and exports telemetry to multiple backends.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/concepts/index.mdx": {
+      "sha256": "d97ae4997786456f28aa5ee5c67b163484fa4f23d46f708db1f101eba9056cb8",
+      "size": 76,
+      "description": "Landing page that renders an `<Overview />` index of the Concepts section, providing entry navigation to the core distributed tracing terminology pages (Trace, Span, Tags, Jaeger, OpenTelemetry Collector).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/functions/index.mdx": {
+      "sha256": "d187739a106fc2d67dc7aec33dd10cf33532e13e2a2d14e1b035f5c22fe68334",
+      "size": 73,
+      "description": "Landing page that renders an `<Overview />` index for the Guides section, linking to the user-facing trace query and trace log query workflows.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/functions/query_trace_logs.mdx": {
+      "sha256": "a2ed83d6df9d76a0baefd62d0253417312053bf45621b99eb2d18f6e4ae7e666",
+      "size": 2690,
+      "description": "Operator workflow for querying business logs correlated to a specific TraceID from the trace detail panel via the **View Log** tab. Covers prerequisite instrumentation (linking to `how_to/log_with_traceid`), filtering by Pod name, time range, keyword query conditions, the **Contain Trace ID** toggle, and **Hide Sidecar Logs** option, plus advanced operations: exporting logs as JSON/CSV with selectable columns, customizing display fields, and viewing 5 preceding/succeeding log records around any entry via the **Insight** action.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/functions/query_tracing.mdx": {
+      "sha256": "604d1e45cce533fe63eaf619b149fca820cbebe27a2095ce14845ef33f8e1851",
+      "size": 6040,
+      "description": "Reference for the multi-dimensional Trace Query feature that locates cross-service call issues and performance bottlenecks. Documents the nine combinable query conditions (TraceID, Service, Client, Server, API, Tags, Span duration, Only error traces, Span kind including Root Span vs Service Entry Span, and Max query count up to 1000), and how the result view presents a Span list alongside a time-series waterfall chart with indentation-based call hierarchy and per-Span detail (Service, duration, URL, Tags, raw JSON).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/how_to/index.mdx": {
+      "sha256": "d7d21d9d609e3517514bee615923145a640d38519ecb4d12e7ee15d393a61e63",
+      "size": 72,
+      "description": "Landing page that renders an `<Overview />` index for the How To section, linking to the tag-reference and operational walkthroughs (Istio built-in tags, OTel built-in tags, TraceID-in-logs correlation, OTel Collector configuration).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/how_to/istio_built_in_tags.mdx": {
+      "sha256": "3d6fb5cec99ee40d56cd1f842a14e9a32ec2e2b7f14e6545abe0a9855c68b16a",
+      "size": 14391,
+      "description": "Reference catalog of Span Tags emitted by Istio sidecars usable in trace queries and Span detail panels. Lists keys grouped as Metadata (`error`, `internal.span.format`, `otel.status_code`, `span.kind`), HTTP request info (`http.method`, `http.url`, `http.status_code`, `response_flags`, `guid:x-request-id`, etc.), gRPC info (`grpc.path`, `grpc.status_code`, `grpc.message`), Service info (`istio.canonical_service`, `istio.mesh_id`, `upstream_cluster`, `asm_upstream_cluster` for canary, `node_id`), and Process info (`cluster.name`, `container.name`, `host.name`, `ms.name`, `ms.namespace`) with example values.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/how_to/log_with_traceid.mdx": {
+      "sha256": "9081658903539bf41d5e187fbca680ec43e70fbca54b5e0f00d22e9a2db3582b",
+      "size": 4659,
+      "description": "Developer guide for emitting the TraceID inside application logs so business logs can be joined to trace context on the platform. For Java/Spring Boot on Log4j 1.2+, Log4j2 2.7+, or Logback 1.0+, shows two approaches: setting `logging.pattern.level = trace_id=%mdc{trace_id}` or templating `CONSOLE_LOG_PATTERN` with `%X{trace_id}`. For Python, provides a `getForwardHeaders` helper extracting `x-b3-traceid`/`x-b3-spanid` from incoming requests and prefixing log lines. Concludes with the **Contain Trace ID** verification flow in the Trace UI.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/how_to/otel_built_in_tags.mdx": {
+      "sha256": "d034541adb23c9609f9e0af3a3c082a5e74f9e2d3fb8533d2048a89b16e5e64d",
+      "size": 18192,
+      "description": "Reference catalog of Span Tags produced by OpenTelemetry instrumentation that surface in trace queries and detail views. Groups keys into Metadata (`internal.span.format=otlp`, `otel.status_code`, `span.kind`), HTTP info (`http.flavor`, `http.method`, `http.route`, `http.scheme`, `http.target`, `http.url`, `upstreamURLPath`), Service/Network (`inner.client.ms.*`, `net.host.*`, `net.sock.*`, `thread.*`), Middleware (`db.system` for mysql/oracle/postgresql/redis, `db.statement`, `db.sql.table`, `net.peer.*`), and Process (`container.id`, `host.arch`, `process.command_line`, `otel.library.*`, `telemetry.sdk.*`).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/how_to/otel_collector_config.mdx": {
+      "sha256": "a9946fc0884319527830c5e6191f116035fd22777fb223acc45e0f36fc259ff3",
+      "size": 42089,
+      "description": "Deep reference for authoring `otel-collector` pipelines via the four pipeline component types (Receivers, Processors, Exporters, Connectors) plus Extensions and the `service` section. Documents OTLP/Jaeger/Zipkin receivers, Batch/Memory Limiter/Filter/Metrics Transform/Transform processors (with OTTL contexts and `error_mode`), OTLP/OTLP HTTP/Debug/Load Balancing/Prometheus exporters, and the custom ASM-specific `asmservicegraph` connector that emits service-graph metrics with `mesh_id`/`cluster_name` extra dimensions. Also covers env-var substitution, `HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY`, OIDC/oauth2client authentication extensions, cfssl-based TLS certificate setup, and `--set` overrides.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/index.mdx": {
+      "sha256": "a1934880b7f8b3c660c566627824b4467820e2f4fbb017cc8e66958337b0b218",
+      "size": 54,
+      "description": "Top-level landing page for the Distributed Tracing module that renders an `<Overview />` index linking to the Introduction, Architecture, Concepts, Guides, How To, and Troubleshooting sub-pages.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/intro.mdx": {
+      "sha256": "2dff8b6016a422407636dc2a54dae51ac53f36c1375f40febda76e5b655054b6",
+      "size": 1280,
+      "description": "Introduces the Distributed Tracing module as an end-to-end observability pillar covering collection, storage in Elasticsearch, and visualization through a customized UI that supports queries by `TraceID`, service name, and tags. Calls out the sampling-rate-versus-performance trade-off in high-load scenarios where dense trace ingest pressures Elasticsearch.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/trouble_shooting/incomplete_trace.mdx": {
+      "sha256": "17b34bbef5d0b2a7beec2cab0b8252b856b2fc046a716ad5e0ea8f7243fd447c",
+      "size": 1376,
+      "description": "Troubleshooting note for two failure modes in trace queries: spans missing within the last 30 minutes (caused by Elasticsearch persistence delay from memory buffer to translog to segment files, resolved by waiting and refreshing) and traces older than one hour appearing disconnected (caused by `jaeger-query`'s default one-hour span-to-trace lookup window). Provides the fix of raising the window via the `--es.asm.span-trace-query-time-adjustment-hours` startup parameter on `jaeger-query`.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/trouble_shooting/index.mdx": {
+      "sha256": "99ba08ebdb8b78682f01ae2e07502dfb2066970e0c52f847b1ef3cfce2bebe2d",
+      "size": 91,
+      "description": "Section landing page for distributed-tracing troubleshooting, rendering the auto-generated child-page Overview that links to the trace-querying problem guides (notably the missing-trace article) under the Distributed Tracing area of the ASM docs.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/distributed_tracing/trouble_shooting/missing_trace.mdx": {
+      "sha256": "07a0f0ae63a3e5dec4a4a338a5ed45d92fdc7539206a7e4e9c30d2386be8ffe2",
+      "size": 3333,
+      "description": "Diagnoses why traces cannot be retrieved from ASM's Jaeger/Elasticsearch backend, attributing it to three root causes: low sampling rate, Elasticsearch's default 10s `refresh_interval` for indices, and misuse of the `Span kind` filter (selecting both Client and Server with Root Span or Service Entry Span yields no data). Remediation includes raising the sampling rate or using tail sampling, tuning the `--es.asm.index-refresh-interval` flag on `jaeger-collector`, and dropping conflicting Client/Server conditions from queries.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/faq/envoy-startup.mdx": {
+      "sha256": "bf7eb7c9f7741bce49cbe9a38bce6231b78310afafee96e761bc723d4931a1e6",
+      "size": 2482,
+      "description": "Troubleshoots Envoy sidecar (`istio-proxy`) startup problems where pods fail with `PostStarHookError` and the 30s xDS-ready timeout. Covers fixes for insufficient sidecar CPU/memory limits, firewall/NetworkPolicy (generic, Calico `GlobalNetworkPolicy`, `CiliumNetworkPolicy`) blocking traffic to the `istio-system` namespace, the HuaweiCloud CCE + Ubuntu 22.04 VPC-CNI bug that forces Istio CNI usage, and disruptive WASM or EnvoyFilter plugins that stall sidecar startup.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/faq/index.mdx": {
+      "sha256": "d35a6b459505a406f218993c0ad0e2b35cbe0a9f990968d2ca547d23397753b0",
+      "size": 117,
+      "description": "Landing page for the ASM FAQ section, rendering an auto-generated Overview that aggregates entries on Envoy proxy startup failures, Ingress Gateway 404 issues from shared TLS certificates, trace-query gotchas, and Istio CNI troubleshooting.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/faq/ingress-gw-404.mdx": {
+      "sha256": "fd5472359f1053613c42c96f310c782fdc70e3a5f36962c4889754d412c4516d",
+      "size": 12695,
+      "description": "Explains the Istio community-known HTTP/2 connection-reuse bug where browsers hit 404s when two Gateway resources share a single TLS `credentialName` for different hosts (e.g. `a.example.com` and `b.example.com`). Includes a `kubectl`/`jq` bash script that scans all namespaces for duplicate-credential Gateways, plus two fixes: (1) the recommended merge of `spec.servers.hosts` (or a wildcard like `*.test.com`) into a single Gateway with VirtualServices repointed, and (2) an EnvoyFilter that uses an inline Lua HTTP filter to compare `requestedServerName` against the `:authority` header and respond `421 Misdirected Request` so clients reopen the connection.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/faq/trace-query.mdx": {
+      "sha256": "128bb5e9b6eb96dab178a428354fbaf9648277f4edcafe1cd452302eb73fc382",
+      "size": 4011,
+      "description": "FAQ for trace-querying problems in ASM, explaining why traces appear missing (low sampling rate, Elasticsearch's 10s refresh latency tuned via `--es.asm.index-refresh-interval` on `jaeger-collector`, and incompatible `Span kind` filters that combine `Client` and `Server` with `Root Span` or `Service Entry Span`) and why traces appear incomplete (in-flight spans not yet flushed, plus the default ±1 hour query window around a span which can be widened via `--es.asm.span-trace-query-time-adjustment-hours` on `jaeger-query`).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/faq/troubleshooting-istio-cni.mdx": {
+      "sha256": "51249f56fbc4f4b79944d03330dca1bc509fe249238497646b33081cdb13e62e",
+      "size": 3852,
+      "description": "Operational guide for debugging the Istio CNI plugin in ASM, covering: raising the plugin log level via `cni.values.logLevel` on the **istioCNI** component, reading `istio-cni-node` DaemonSet logs, interpreting race-condition repair evictions, diagnosing pod startup failures through the `istio-validation` init container's `connection refused` to `127.0.0.6:15002`, and resolving Multus + Kube-OVN circular CNI chains by setting `cni.values.cniConfFileName` explicitly.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/index.mdx": {
+      "sha256": "1ab8b46c2436e7025479813c2adbe456d47e917108ea68fcdd2c4633a0b0024e",
+      "size": 133,
+      "description": "Top-level navigation landing page for the Alauda Service Mesh English documentation. Renders an automatically generated overview of child topics via the `<Overview>` component rather than containing prose content.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:53:29Z"
+    },
+    "docs/en/install/asm-essentials.mdx": {
+      "sha256": "5eaac2158b0d1f5ba864a3643cdf032ba410749e86fbfa0128802a83efd9ab23",
+      "size": 2534,
+      "description": "Installation procedure for the **Alauda Service Mesh Essentials** cluster plugin which supplies the UI, advanced API server, and centralized control plane. Walks through retrieving the package from Alauda Cloud, downloading the `violet` packaging tool from the ACP Marketplace, running `violet push --clusters=global` to upload it, then installing via **Marketplace / Cluster Plugin** on the global cluster. Warns that the plugin is unsupported when the ACP global cluster runs **MicroOS**.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/install/create_service_mesh/component-descriptions.md": {
+      "sha256": "bdbd2eaf472aabfde309d8a2f57c28acfb1230aca8e5f0f545911008a37a0136",
+      "size": 6250,
+      "description": "Catalogs the control-plane and data-plane components that make up an ASM deployment, identifying the upstream projects (Istio, OpenTelemetry, Jaeger, Flagger) and the per-component roles of `istiod`, `istio-cni`, `tier2-gateway`, `istio-eastwestgateway` (multi-cluster only), `asm-core` (global rate limiting via Redis), `asm-otel-collector`/`-lb`, `jaeger-prod-collector`/`-query`, `flagger`, `asm-controller`, plus Ingress/Egress gateways, sidecars, and the OpenTelemetry Java Agent. Provides a recommended-minimum CPU/memory request and limit table for every component for capacity planning.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/install/create_service_mesh/create-servicemesh.md": {
+      "sha256": "e11fe6528a01513f3c9e0c2c12815864b0fed609c2027edb02d88a7e1d6577c8",
+      "size": 8308,
+      "description": "Step-by-step procedure for creating a single-cluster service mesh from the ACP console, including constraints (one mesh per cluster, not allowed on dual-stack IPv4/IPv6 or DR global clusters), prerequisites (the Essentials plugin and the `Alauda Service Mesh`, `Flagger`, `Alauda Build of Jaeger`, and `Alauda Build of OpenTelemetry` Operators uploaded to global and target clusters, Prometheus/VictoriaMetrics, Elasticsearch, and `oc adm policy add-scc-to-group anyuid system:serviceaccounts:istio-system` on OpenShift), and a detailed parameter reference for Elasticsearch/monitoring integration, sidecar resource quotas, trace sampling rate, Redis for global rate limiting, HTTP retry policy, Pod anti-affinity, instance count, and the Huawei Cloud ELB binding for CCE clusters.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/install/create_service_mesh/global_rate_limit.md": {
+      "sha256": "a4669ecfbcce8527196298bcec9b568deb01ec4ee9313ec82f244858f8d55dab",
+      "size": 4140,
+      "description": "Configures the cluster-dimension **Redis Configuration** that the `asm-core` component requires to enable global rate limiting. Provides a matrix mapping Redis deployment mode (Sentinel vs. Cluster) and connection method (same-cluster vs. cross-cluster) to the correct **Deployment Mode**, **MasterName** (`mymaster` for Sentinel), and **Address List** values, including how to obtain credentials from the platform's Data Services Redis Secret Dictionary, and how to point at non-platform Redis (Single Node, Cluster-Sentinel, Cluster-Cluster) with Basic Auth or no authentication.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/install/create_service_mesh/index.mdx": {
+      "sha256": "84b5246c892701857799b6295438ab2eed41c802643fb89caa251ff4f95bc7d4",
+      "size": 778,
+      "description": "Landing page for the Create Service Mesh section that lists installation prerequisites — the `Alauda Service Mesh Essentials` cluster plugin (not supported on MicroOS global clusters) and the `Alauda Service Mesh`, `Flagger`, `Alauda Build of Jaeger`, and `Alauda Build of OpenTelemetry` Operators uploaded to global and target clusters — before rendering the child-page Overview for mesh creation topics.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/install/create_service_mesh/istio-cni.mdx": {
+      "sha256": "04636183c574736ed2bb1cd6f1e663dd8000d14104af080acc89c874eacc6c30",
+      "size": 7394,
+      "description": "Installation and configuration guide for the Istio CNI node agent as a DaemonSet that replaces the privileged `istio-init` init container for traffic redirection (mandatory for ambient mode and for restricted environments like Huawei Cloud CCE or where `NET_ADMIN`/`NET_RAW` are forbidden). Shows the `ServiceMesh` (`asm.alauda.io/v1alpha1`) `componentConfig.istioCni` block, including `cni.values` knobs like `logLevel`, `cniBinDir`, `cniConfDir`, `cniConfFileName`, `excludeNamespaces`, and `chained=false`/`provider=multus` for OpenShift or Multus. Documents the `istio-validation` init container that replaces `istio-init` and the `repair` race-condition mitigation modes `repairPods`/`deletePods`/`labelPods` (with explicit priority ordering).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/install/create_service_mesh/istioctl.mdx": {
+      "sha256": "611ddb2e5ae3a8f87378929457fb2b2f4de1f9ce950f57a1ce30dbd90fac2714",
+      "size": 1199,
+      "description": "Documents Istio's `istioctl` command-line utility for diagnosing and managing mesh configuration resources. Explains that the platform auto-installs the matching `istioctl` version for the chosen Istio release and provides an in-UI launcher under **Service Mesh > Mesh > Mesh Deployment > Istioctl Tool**, with a pointer to the upstream Istio command reference for external use.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/install/create_service_mesh/mesh-deploy-model.md": {
+      "sha256": "02b3c6e00cbd77ea5bc9fc950445a9e4014cdacf9a50c18c6d9e24f337407cc2",
+      "size": 1837,
+      "description": "Compares ASM's two mesh deployment models — single-cluster (one Kubernetes cluster, all microservices governed locally) and multi-cluster (cross-cluster microservice governance with cross-region high-availability and traffic management) — to guide users in choosing the right topology before following the per-model creation procedures.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/install/create_service_mesh/monitoring_component.md": {
+      "sha256": "f987808f476645d9a282d1bef55596f39f9c39437b1dafcc01c7327d5d5b08c8",
+      "size": 1190,
+      "description": "Walks through viewing built-in monitoring charts for Service Mesh components via Service Mesh > Mesh > Monitoring tab, with metric definitions for Component Memory Usage Rate (usage/quota), Component CPU Usage Rate, and Connection Success Rate measuring connection health between mesh components and Redis, Elasticsearch, and monitoring components.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/install/index.mdx": {
+      "sha256": "12d51b00f823811654fddf29146a30bb4640e6389a56c5a5e127cdbe12387ded",
+      "size": 143,
+      "description": "Landing page for the Alauda Service Mesh installation section, embedding an Overview component that links to the platform/operator installation subtopics in this directory.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/install/install-operator.mdx": {
+      "sha256": "f1471ce20319cb2708418d895347f0f4787ee7881f0bcbcf6edae8e998126bfd",
+      "size": 4470,
+      "description": "Procedure for uploading the ASM operator package to the platform's Marketplace using the `violet` upload tool, covering required flags (`--platform-address`, `--platform-username`, `--platform-password`, `--clusters`), verification on the Operator Hub details page, and troubleshooting options for pushing to an external image registry (`--dst-repo`, `--username`, `--password`, `--plain`).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/concepts/concept.mdx": {
+      "sha256": "9f04ff16da947724f5a4c353ab8c72e6d5540eda6ba7c476b89ff747fdfb6d6d",
+      "size": 2029,
+      "description": "Glossary of core observability concepts used across the ASM monitoring docs: Traffic, Monitoring Metrics, API Monitoring, JVM Monitoring, RPS (Requests Per Second), and percentile metrics TP50/TP90/TP99 for measuring response-time distributions.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/concepts/index.mdx": {
+      "sha256": "d97ae4997786456f28aa5ee5c67b163484fa4f23d46f708db1f101eba9056cb8",
+      "size": 76,
+      "description": "Landing page for the Metrics Monitoring Concepts section, rendering an Overview component that aggregates child concept pages (core terms, alerting principles, JVM memory model).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/concepts/insight_alerting.mdx": {
+      "sha256": "d06c99396a10aa4a0e9e2922b07093379250bf4e8c611c12570b1cc691385311",
+      "size": 4016,
+      "description": "Explains the ASM alerting model: the data-collection-to-notification pipeline backed by Prometheus and platform logs/events, the four alert types (Metric, Custom, Log, Event - the latter two for computational components only), and the alert/silence state machine including Alert, Processing, Normal, Silence Waiting, and Silencing.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/concepts/insight_jvm_memory.mdx": {
+      "sha256": "1a1bd989ea3b12d4b1a7d61cc02313b65b37107131aeb3b81f0ff94a7e011942",
+      "size": 4057,
+      "description": "Reference on the JVM memory model that underlies ASM's JVM monitoring views: heap layout with Young Generation (Eden, SurvivorFrom, SurvivorTo), Old/Tenured Generation, and Permanent Generation/Metaspace; Minor vs Major GC triggers and object promotion at age 15; non-heap regions including Code Cache, Permanent Space, Meta Space, and Direct Buffer.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/functions/alert_plolicies.mdx": {
+      "sha256": "abccb25ec02f43c207cf9a823ba2a5242abe46a167898bb2a93f593beff7101d",
+      "size": 13830,
+      "description": "Step-by-step guide for creating ASM alert policies covering Resource Alerts and Event Alerts, defining metric/custom/log/event rules (including custom Prometheus expressions like `rate(node_network_receive_bytes{...}[5m])` with `{{.key}}` legend parameters), choosing comparison operators and durations, assigning Critical/High/Medium/Low severity, attaching notification policies, plus template-based creation, real-time alert panels, and rule disable/enable.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/functions/alert_silencing.mdx": {
+      "sha256": "7fa5833ab364e2f7dc27335d0a1dfe13141764ad3b1665c6e1abb684436d2e51",
+      "size": 3422,
+      "description": "Procedure for setting Alert Silencing on an alert policy via Alerts > Alert Policies > Set Silence, configuring Silence Target (specific components or all components in the namespace) and Silence Duration (Permanent or Custom with a 5-minute minimum); explains the Silence Waiting and Silencing states and the typical use case of suppressing noise during platform upgrades or maintenance.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/functions/create_api.mdx": {
+      "sha256": "9c0763f75d97f17c18db7fb3075dce75f317770b418cb5602ab60b7b0ce0e0f4",
+      "size": 4646,
+      "description": "Instructions for declaring service APIs so the ASM monitoring system can distinguish per-API traffic quality, supporting Batch Import via Swagger/OpenAPI 3.0 `.yaml`/`.json` files or document URLs (max 5 MB, up to 2000 APIs) and Manual Import where users specify Service Port, API Request Path with precise or regex matching, and an HTTP method (GET/PUT/POST/DELETE/PATCH/HEAD/OPTIONS).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/functions/index.mdx": {
+      "sha256": "d187739a106fc2d67dc7aec33dd10cf33532e13e2a2d14e1b035f5c22fe68334",
+      "size": 73,
+      "description": "Landing page for the Metrics Monitoring Guides section, rendering an Overview component that links task-oriented guides for Istio and OpenTelemetry traffic metrics, JVM metrics, API declaration, and alert policy/silencing workflows.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/functions/istio_traffic_metrics.mdx": {
+      "sha256": "e01df94aa0664f644718a13e91f942c11d1ec83ed3ec1f7eea65ffccec111e18",
+      "size": 9637,
+      "description": "Guide to viewing Istio sidecar-collected traffic metrics under the Monitoring view for HTTP/HTTP2/gRPC, Dubbo, and TCP protocols, including Average Response Time, Average and per-period Incoming/Outgoing RPS, response-time percentiles (TP50/TP95/TP99), traffic breakdown by 2xx/3xx/4xx/5xx, TCP connection success/error rates, Client Traffic Comparison (including unknown clients without Sidecar), and cross-cluster aggregation when services share namespace and name.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/functions/jvm_metrics.mdx": {
+      "sha256": "bffafd3d304b89597446da99449459940a70d1b69756bf68d4354275b752f0bf",
+      "size": 5645,
+      "description": "Guide to the JVM Monitoring tab showing OpenTelemetry Java Agent metrics per Pod: Young/Old Gen GC count and duration, System/Pod CPU usage, Heap and Heap Memory Details (Eden, Survivor, Old Gen), Non-Heap, Metaspace, and Direct Buffer memory, plus Daemon/Active thread counts and loaded/unloaded class counts; supports side-by-side comparison of two Pods and flexible metric filtering for diagnosing memory leaks and thread anomalies.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/functions/otel_traffic_metrics.mdx": {
+      "sha256": "ed7f960a5df609cd7272d177650e52c02e8c9c83085758ff5388789b0ed8744a",
+      "size": 7720,
+      "description": "Guide to viewing OpenTelemetry Java Agent-collected service traffic metrics in the Monitoring view, including Average Response Time, Average Incoming/Outgoing RPS, TP50/TP95/TP99 response-time percentiles, HTTP-code traffic breakdown, and Client Traffic Comparison (including unknown clients whose traffic is not managed by OpenTelemetry); also documents Regular Operations for manual/auto refresh, legend toggling, and enlarged-chart views referenced from other monitoring pages.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/index.mdx": {
+      "sha256": "d01d28e73561dcf2e5e7f1b43ba358c466c257087e45eb309494ab2eee7a04e4",
+      "size": 53,
+      "description": "Top-level entry point for the Metrics Monitoring documentation section, rendering an Overview component that links to Concepts (core terms, alerting principles, JVM memory) and Guides (Istio/OpenTelemetry traffic metrics, JVM metrics, API declaration, alert policies and silencing).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/metrics_monitoring/intro.mdx": {
+      "sha256": "311de7137bb2a852595a4fba76fbb3ce2efdbf7715d4f50b863d2fbb7a02c7a6",
+      "size": 1171,
+      "description": "Introduces ASM's metrics monitoring capabilities, covering traffic performance/quality dashboards plus JVM monitoring data (GC, heap/non-heap memory, threads, classes) collected via the OpenTelemetry Java Agent for diagnosing memory leaks and thread anomalies. Also outlines the role of alerting in cloud-native, distributed microservice environments as a mechanism for notifying operators of availability, performance, or security issues.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/microservice/add-service.md": {
+      "sha256": "ee54bcf5d9603797a2dae9b024c8e6337398db1d08719f36333006ad39cddc09",
+      "size": 16336,
+      "description": "Step-by-step guide for adding services to ASM via the Service List, supporting both ServiceMesh-mode services (which auto-inject a Sidecar with configurable CPU/memory limits, Envoy log level, and traffic passthrough) and OpenTelemetry-mode services (which inject the OpenTelemetry Java Agent for Java 8+ workloads via the `opentelemetry-operator`). Documents the one-to-one Deployment-to-Service requirement, supported protocols (HTTP, HTTP/2, gRPC, TCP), the `asm.cpaas.io/msname` label override, and the Cross-cluster Service Discovery toggle that synchronizes same-named internal routes across managed clusters.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/microservice/concepts.md": {
+      "sha256": "d5f32abeec80d0aa6684057c6560e06752a0d2f91c9b38ed4ccc0ff38284f4b2",
+      "size": 1777,
+      "description": "Defines the microservices architecture style and explains ASM's ServiceMesh microservice as a platform-defined Kubernetes CRD (`MicroService`) that unifies management of Deployments and associated resources. Lists the capabilities unlocked after adding services—call chain tracing, global service topology, canary releases, traffic governance—and notes that Git/Chart deployments (GitOps, OAM Java apps, Chart-deployed Dubbo apps) can auto-integrate based on service configuration.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/microservice/index.mdx": {
+      "sha256": "109edb745b7768d577eb2b533712d78fa7159c42544b2e5a1b09526ad5f9eb83",
+      "size": 150,
+      "description": "Landing page for the `Service Integration into Service Mesh` documentation section, rendering an `<Overview />` component that links to the subpages covering microservice concepts, the `MicroService` CRD reference, the add-service workflow, and troubleshooting.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/microservice/microservice.md": {
+      "sha256": "6a6f3bfb07a3299b3c7913c11893a45f717538aea254c50e1a0c97e9a717694b",
+      "size": 3323,
+      "description": "Reference for the `MicroService` CRD (`asm.alauda.io/v1beta3`) used by ASM to model ServiceMesh-type microservices, with a YAML example labeled `app.cpaas.io/microservice-type: service-mesh`. Documents top-level fields (`apiVersion`, `kind`, `metadata`, `spec`) and `spec` parameters including `deployments`, `services`, `accessLogging.enabled`, `auth.enabled` (black/white list rules), and `sidecar` configuration (`cpuLimit`, `memoryLimit`, `envoyLogLevel`), with constraints requiring NodePort/ClusterIP services and HTTP/HTTP2/gRPC/TCP protocols.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/microservice/troubleshooting.md": {
+      "sha256": "f42f07d20b3ed22d42eebea0ed0b5f7b75fb7fccb5a19ae5c534500cf45a9cc1",
+      "size": 165,
+      "description": "Short index of troubleshooting topics for service onboarding, currently pointing to the Envoy proxy startup troubleshooting FAQ (`../faq/envoy-startup.mdx`) for diagnosing failures when a Sidecar fails to come up after a service is added to the mesh.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/multicluster_mesh/architecture.mdx": {
+      "sha256": "a211a78808d6419a96588d9b56b00c47480a510d73c9fc1da3573e3b422f8bde",
+      "size": 1383,
+      "description": "Describes the architecture of ASM's multi-cluster service mesh: each cluster runs its own independently upgradable Istio control plane (deployed via `ServiceMesh` resources) managing local services, gateways, ServiceEntries, EnvoyFilters, and WASM plugins. Explains independent fault domains for cross-cloud/cross-region disaster recovery and load balancing, and contrasts Single Network mode (direct Pod IP communication) with Multi-Network mode (Istio east-west gateways bridging separate VPCs).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/multicluster_mesh/functions/cross_cluster_failover.mdx": {
+      "sha256": "72257930ee3a6f5a62e7729ec7056d88d97f16a8ec87d655846499ed63440f46",
+      "size": 3867,
+      "description": "Walkthrough for configuring cross-cluster failover on the Bookinfo demo, requiring both a Circuit Breaker policy and a Regional Load Balancing policy of type `Failover` (with Failure Region and Disaster Recovery Region) on cluster `c1`. Explains Envoy's overprovisioning-factor math (70% threshold) and includes a validation procedure that stops the productpage Pods and confirms traffic is shifted to cluster `c2` via the service topology and call chains.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/multicluster_mesh/functions/index.mdx": {
+      "sha256": "d187739a106fc2d67dc7aec33dd10cf33532e13e2a2d14e1b035f5c22fe68334",
+      "size": 73,
+      "description": "Section index page titled `Guides` for the multi-cluster mesh functions documentation, rendering an `<Overview />` that links to the cross-cluster failover and cross-region weight distribution guides.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/multicluster_mesh/functions/weight_distribution.mdx": {
+      "sha256": "c4c74cb25a4d13e0dff81613c5c9ae2922e94a3133b6abe9aa35bd53d9e061c6",
+      "size": 1980,
+      "description": "Guide for configuring cross-region weight distribution on a multi-cluster mesh using Bookinfo, by creating a `Regional Load Balancing` policy of type `Weight Distribution` on cluster `c1` and assigning per-region weights (e.g., 80%/20%) that must sum to 100; clusters in the same region share traffic equally. Validation uses the Monitoring page's Cluster Traffic Comparison panel to confirm productpage traffic proportions match the configured weights.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/multicluster_mesh/how_to/deploy_bookinfo.mdx": {
+      "sha256": "76dd3d00254d1fc737937f2698aa57e7e029dfa794f3f743a8a378d98c3f65de",
+      "size": 8891,
+      "description": "End-to-end recipe for deploying Istio's Bookinfo sample (productpage, details, reviews v1/v2/v3, ratings) across clusters `c1` and `c2` in the same-named namespace `ns1`, using Harbor for image hosting and a `crictl_script.sh` helper to retag and push images. Covers project/namespace prerequisites, YAML-based Native Application creation, adding the four services to the mesh with Sidecar injection, exposing productpage via an ingress gateway with a LoadBalancer internal route on port 9080, and access verification through the external address.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/multicluster_mesh/how_to/index.mdx": {
+      "sha256": "d7d21d9d609e3517514bee615923145a640d38519ecb4d12e7ee15d393a61e63",
+      "size": 72,
+      "description": "Section index page titled `How To` for the multi-cluster mesh procedural documentation, rendering an `<Overview />` that links to the Bookinfo deployment walkthrough and the cluster region configuration guide.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/multicluster_mesh/how_to/set_cluster_region.mdx": {
+      "sha256": "0de700c3e498afb0a576e079d8db54737260550492921fb66aad9e1a2ca53ef7",
+      "size": 1503,
+      "description": "Explains how to assign a region attribute to self-built or privately-deployed clusters (public-cloud clusters inherit regions automatically). For clusters already in the mesh, after setting the region, operators must `kubectl rollout restart` the Istiod Deployment (e.g., `istiod-1-18` in `istio-system`) and every Sidecar-injected service Deployment in the cluster so the new locality takes effect.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/multicluster_mesh/index.mdx": {
+      "sha256": "30f0e715bb416103435131d7de61d91c86a9dc15bf09b09a2e05323801214c51",
+      "size": 54,
+      "description": "Top-level landing page for the Multicluster Mesh documentation section, rendering an `<Overview />` component that links to the architecture, installation, functions (failover and weight distribution), and how-to guides for building and operating an ASM mesh spanning multiple Kubernetes clusters.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/multicluster_mesh/installation.mdx": {
+      "sha256": "ebae457041fdbf3d10fb0da11bc8eab2793286cff02b9573c3502c892376661d",
+      "size": 3530,
+      "description": "Installation procedure for a multi-cluster, multi-network service mesh, illustrated with two AWS EKS clusters (`c1`, `c2`) in separate VPCs. Covers prerequisites (LoadBalancer support, VictoriaMetrics monitoring with shared query address, kube-apiserver port 6443 reachability, supported Istio/Kubernetes versions), creating the initial mesh with `Multi-cluster` architecture and `Multi-network` type (auto-deploying east-west gateways), and the Add Cluster workflow under Mesh Details which syncs global monitoring and Elasticsearch settings to the newly joined cluster.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/multicluster_mesh/intro.mdx": {
+      "sha256": "beead673aacee17fb778e44074d5e4f27547f6282a1f613ac5ebc34e0d34d20a",
+      "size": 1951,
+      "description": "Introduces the platform's multi-cluster service mesh deployment model based on Istio's multiple-control-planes topology, where each primary cluster runs its own Istio control plane and services across clusters can discover each other and share load. Covers integrated capabilities such as cross-cluster failover when a circuit breaker trips, weighted traffic distribution across regions, automatic east-west gateway deployment in multi-network mode, and a unified UI providing cross-cluster topology, call chains, and comparative traffic monitoring.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/overview/1mesh-basicconcept.mdx": {
+      "sha256": "ca484af6ef84878e31797fe107fbe48bc3f5cacce8599e72351988f5789793d7",
+      "size": 8995,
+      "description": "Defines the foundational concepts of the Alauda Service Mesh product: what a service mesh is, the role of Istio's control plane and Envoy sidecar data plane, ingress/egress service gateways, and the sidecar pattern. Contrasts Istio with OpenTelemetry across protocol support, service governance (load balancing, circuit breaking, retries), routing rules, topology and tracing capabilities, registry compatibility, trace-ID propagation, and resource overhead, and offers selection guidance for governance, observability, resource-constrained, multi-language, and non-intrusive tracing scenarios.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/overview/5mesh-alpha.mdx": {
+      "sha256": "711e84f604861719ae0270dfde14ebd2f12dd834f8a1254a97fbc62dd00273a9",
+      "size": 5592,
+      "description": "Explains the maturity classification used throughout the platform's service mesh documentation, distinguishing Alpha, Beta, and GA versions of features. Details that Alpha features may carry serious bugs, are disabled by default in private deployments, can be removed without notice, and are flagged with an `Alpha` marker in the navigation (for example, `EnvoyFilter (Alpha)`); Beta features are enabled by default but may have breaking changes; GA features are stable and recommended for production. Includes a table mapping each version to recommended usage scopes such as POC, non-critical, or production environments.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/overview/index.mdx": {
+      "sha256": "77ae3cc19a67d12d2c1f6f69688e41ff83c7207dbf663d0e5e2334cba3716883",
+      "size": 121,
+      "description": "Top-level landing page for the Overview section of the Alauda Service Mesh documentation, rendering an auto-generated `<Overview />` index of the section's child pages (basic concepts, function maturity, release notes, etc.). Serves as the entry point users hit when navigating into the product introduction.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/overview/release_notes.mdx": {
+      "sha256": "6d6b48aeefd37ff3f554f6c7bb4515df08f035fd1c6cddc5de87c08eca110e04",
+      "size": 231,
+      "description": "Release notes for Alauda Service Mesh minor version 4.0.0. Notes that there are no new features or enhancements in this release and embeds placeholder template directives (`release-notes-for-bugs?template=fixed&project=ASM` and `template=unfixed`) that the docs platform expands into lists of fixed and known issues sourced from the ASM bug tracker.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/performance.mdx": {
+      "sha256": "a1d44af52a84fdedf49aeda67309cc29d9d6b740686613ae791da7b1e482ee30",
+      "size": 2923,
+      "description": "Performance characteristics of the Istio-based sidecar data plane: factors affecting latency, throughput, CPU and memory (client connections, request rate, request/response size, proxy worker threads, protocol, filters), with concrete Istio 1.12.3 figures (~0.5 vCPU per 1000 RPS, ~1.7 ms / 2.7 ms added at p90/p99 with telemetry v2). Also documents how to adjust default sidecar CPU/memory quotas at the cluster dimension and override them per service from the service Details > Sidecar configuration.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:53:29Z"
+    },
+    "docs/en/quickstart/access-bookinfo.mdx": {
+      "sha256": "98a22f0b12babbf9a1f5cb79d61f40250f375d182b1256756b3c3f64a7fb05e8",
+      "size": 3244,
+      "description": "Quickstart walkthrough for exposing the Bookinfo sample application through an Istio Ingress Gateway using the classic Istio `VirtualService` API and NodePort access (HTTP 30665, HTTPS 30666). Walks through creating the `platform` project and `platform-gateway` namespace, deploying a shared `public-ingressgw` gateway constrained to nodes with the `ingress:true` label, checking for free NodePorts with a `kubectl get svc` command, creating a `public-ingressgw-gateway` Gateway config and `public-ingressgw-vs` VirtualService that routes to the `productpage` service on port 9080, and verifying access with a `curl` against `$GATEWAY_IP_PORT/productpage`.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/quickstart/deploy-bookinfo.mdx": {
+      "sha256": "266657055f560baad962e0ee31635740f1b4934460fd0deae512171f26a08d51",
+      "size": 4070,
+      "description": "Step-by-step guide for deploying the Istio Bookinfo sample app on the platform. Covers creating the `demo` project and `demo-dev` namespace, downloading the Bookinfo bundle from the Customer Portal App Market, extracting `bookinfo-images-amd64.tar` / `bookinfo-images-arm64.tar`, running the `push-images.sh` helper to push images to a target registry (with parameters for auth, username, password, and Harbor project name), and applying the resulting `bookinfo.yaml` via `kubectl apply`. Verifies the deployment by checking Pod status and `curl`-ing `productpage:9080/productpage` from the `ratings` Pod.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/quickstart/index.mdx": {
+      "sha256": "4e6c99ddd711d9cdb27bf50e165b44299b80c024fc1d72cc8c948348b9069d05",
+      "size": 125,
+      "description": "Top-level Quick Start landing page that auto-renders an `<Overview />` index of the section's child guides (introduction, deploying Bookinfo, accessing Bookinfo, observability). Acts as the navigation entry point for users beginning hands-on exploration of the Alauda Service Mesh product.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/quickstart/intro.mdx": {
+      "sha256": "e2740c9288743ad0996a22234af269a5699d5d4ae22daa23a89394104677bb63",
+      "size": 750,
+      "description": "Introductory page for the Quick Start section, framing the end-to-end scenario the user will work through: deploying the Bookinfo sample, accessing it via the Istio Ingress Gateway, and exploring observability features. Lists prerequisites — reading the About Service Mesh overview and having a service mesh already created via the Creating a Service Mesh guide — and orients the reader before they start the hands-on steps.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/quickstart/observability.mdx": {
+      "sha256": "5672c9cdc05a82f69cdde88b14ca94bbbea48f562571a39efc3e565e013534c7",
+      "size": 5148,
+      "description": "Hands-on tutorial for enabling sidecar injection on Bookinfo and exploring Istio observability. Demonstrates managing the `demo-dev` namespace under the mesh, then applying `asm.alauda.io/v1beta3` `MicroService` custom resources for `productpage`, `details`, `reviews`, and `ratings` to enable sidecars with explicit CPU/memory requests and limits and the `asm.cpaas.io/isolatepod` label. Provides a `send-requests.sh` traffic generator that loops `curl` against `$GATEWAY_IP_PORT/productpage` once per second, then walks through inspecting the Service Mesh Topology, traffic-info side panel, Span/Trace details, and persistent Pod logs in the UI.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/security/index.mdx": {
+      "sha256": "d1a286757a285300ae68b0804110eec1a50dfa9eaf88eb5478afdd61c3ee1150",
+      "size": 44,
+      "description": "Top-level landing page for the Security section of the Alauda Service Mesh documentation, rendering an `<Overview />` auto-index that groups the section's child topics (security overview, mTLS, and related subpages). Serves as the navigation entry point for mesh security configuration.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/security/mtls/index.mdx": {
+      "sha256": "0c9578b53b68eadb81c002e34bffde8517352653438c32ce8c6e8cbd3dbc1abd",
+      "size": 20,
+      "description": "Index page for the mTLS subsection under Security, rendering an `<Overview />` widget that surfaces child pages such as the mTLS introduction and policy-creation guidance. Acts as the navigation hub for mutual-TLS topics in the Alauda Service Mesh docs.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/security/mtls/intro.mdx": {
+      "sha256": "341b7a53a29e62b43f78f0c137929f87b51c2218e080172b42b2afab4505cc3c",
+      "size": 2772,
+      "description": "Explains mutual TLS in the Alauda Service Mesh: how mTLS provides two-way authentication between sidecar proxies without requiring application code changes, and that mTLS is enabled by default in Permissive mode (sidecars accept both plaintext and encrypted traffic). Describes the workflow for creating a Security policy from the Service List by selecting a service and choosing Permissive or Strict mode in the Policies tab, noting that Permissive mode supports gradual migration to Istio while Strict mode rejects unencrypted traffic, and that the system auto-creates client rules with TLS enabled.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/security/overview/index.mdx": {
+      "sha256": "f2173503b518976d2ce0b364648e0aec87c10f0ae2f33957a7f310f0521283fd",
+      "size": 44,
+      "description": "Index page for the Security Overview subsection, rendering an `<Overview />` auto-index of its child pages (such as the security introduction). Provides navigation into the high-level security topics before users dive into specific mTLS and policy configuration guides.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/security/overview/intro.mdx": {
+      "sha256": "c6c4ad35763320caa9ee7c93e56276639c825b8b8bfc89e6be796e82d78f0cc7",
+      "size": 210,
+      "description": "Brief introduction framing the Security section: notes that when a service mesh application is composed of a complex set of microservices, the Alauda Service Mesh can be used to customize the security of communication between those services. Serves as the conceptual lead-in to subsequent mTLS and policy-creation topics.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/service_topology/concepts/concept.mdx": {
+      "sha256": "c1c8a369afc83242e24c3a5b8ee00922f70878d6e877e2ef5d06945a303eb4c1",
+      "size": 920,
+      "description": "Defines the foundational vocabulary used in ASM service topology diagrams: a Service Node (microservice, gateway, message queue, database, etc.) as an independent functional unit, a Connection Line representing the inter-service communication path (API call or data flow), and a Dependency describing how one service relies on another to complete its operations.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/service_topology/concepts/index.mdx": {
+      "sha256": "d97ae4997786456f28aa5ee5c67b163484fa4f23d46f708db1f101eba9056cb8",
+      "size": 76,
+      "description": "Landing page for the Service Topology concepts section that aggregates child topics (core terminology and in-depth node type definitions) via an <Overview /> component for navigation.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/service_topology/concepts/insight_node_types.mdx": {
+      "sha256": "6ad929162363da07f8e5c5dd1817a9fd78433d6c42dc7084052fc8b1f24f27cc",
+      "size": 1334,
+      "description": "Enumerates the node types rendered in ASM topology diagrams, split between Istio-governed nodes (ServiceMesh Service, Ingress Gateway, Egress Gateway, External Services via ServiceEntry, PassthroughCluster, BlackHoleCluster) and OpenTelemetry-governed nodes (OpenTelemetry Service plus middleware databases like Oracle/Redis/MySQL/PostgreSQL and message queues like Kafka/RabbitMQ/RocketMQ). Notes that unclassified relationships render as an Unknown Service node.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/service_topology/functions/index.mdx": {
+      "sha256": "d187739a106fc2d67dc7aec33dd10cf33532e13e2a2d14e1b035f5c22fe68334",
+      "size": 73,
+      "description": "Index page for Service Topology Guides that pulls in operational how-to topics, such as viewing and interacting with the topology diagram, through an <Overview /> component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/service_topology/functions/service_topology_diagram.mdx": {
+      "sha256": "47e291b09028e9f5337a2cb1a49059c664867cb8916c42ed44acd5041c2da5f8",
+      "size": 13242,
+      "description": "Operational guide for using the Service Topology view: prerequisites (Sidecar injection for Istio services, OpenTelemetry Java Agent for OTel services), navigating cross-cluster and per-namespace topologies, double-clicking for local topology, and clicking nodes/lines to open the detail panel. Covers viewing Tracing, traffic monitoring, alarm markers, auto-refresh interval, and traffic charts including HTTP/HTTP2/gRPC metrics (RPS, response time TP50/TP95/TP99, status code breakdown), TCP byte rates and connection success/error rates, and middleware information for database and message-queue connections.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/service_topology/index.mdx": {
+      "sha256": "2265fb0edb567391c890c8052730e36693466234ae3aee6f0517e7430203f5f6",
+      "size": 52,
+      "description": "Top-level entry point for the Service Topology documentation section, rendering child pages (introduction, concepts, and guides) through an <Overview /> component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/service_topology/intro.mdx": {
+      "sha256": "7a4a927d7763312ea4882ab076b3618a683c37adeacd378771ca97a974dca7f5",
+      "size": 1462,
+      "description": "Introduces ASM's Service Topology feature, which visualizes calling relationships across Istio mesh components (services, gateways, ServiceEntry externals) and OpenTelemetry-monitored middleware (Kafka, PostgreSQL, MySQL, Oracle, Redis). Explains how the diagram helps locate errors, view per-service or per-edge traffic information, surface alarm markers on triggered services, and display security and circuit breaker indicators for Istio workloads.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/canary_release/functions/canary_func.mdx": {
+      "sha256": "33328d1d196fc08e5bb2521da3266e9c57a94b55d7361f5c4cc662aec641c953",
+      "size": 2873,
+      "description": "Step-by-step guide for enabling and operating Canary Release on a service: configuring the analysis block (interval, maxWeight, stepWeight, threshold, maxResponseTime, minSuccessRate), defining traffic distribution via weighted VirtualService routes, header-based routing, and path-prefix routing. Documents the CanaryDelivery CRD fields (delivertype, targetRef, promoteControl, trafficControl with user/system modes), monitoring thresholds (success rate >95%, latency <500ms), the Initializing→Progressing→Promoting→Completed state machine, the `kubectl get canarydeliveries` command, and constraints around GitOps-managed services and routing conflicts.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/canary_release/functions/index.mdx": {
+      "sha256": "3cfad3d1ce902e3ea12207a887926a9409387abc524e4ef3810b23f298be85c5",
+      "size": 43,
+      "description": "Index page for Canary Release Guides that surfaces the operational how-to topics (such as enabling canary releases and configuring routing) via an <Overview /> component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/canary_release/index.mdx": {
+      "sha256": "f62b4cfef49ff058d8de4f0bc0c0b918f690754d2615098e4c6eeb502e7e76d2",
+      "size": 52,
+      "description": "Top-level landing page for the Canary Release feature area, rendering the introduction and guides subsections through an <Overview /> component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/canary_release/intro.mdx": {
+      "sha256": "e8be222870025e99edeb4722299a8640ff4a1f7fd36d67f78871233f4eaa443d",
+      "size": 705,
+      "description": "Introduces the Canary Release module for Kubernetes+Istio environments: gradual traffic shifting with real-time monitoring, support for canary/blue-green/A/B testing strategies, automated rollback on failure detection, and unified observability across the release lifecycle. Lists limitations including incompatibility with existing service routing, the requirement for unique service names across clusters, restricted UI controls for GitOps-managed services, and that security policies remain active during a release.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/global_rate_limiting/functions/index.mdx": {
+      "sha256": "3cfad3d1ce902e3ea12207a887926a9409387abc524e4ef3810b23f298be85c5",
+      "size": 43,
+      "description": "Index page for Global Rate Limiting Guides that aggregates the procedural topics (policy creation, monitoring, management) via an <Overview /> component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/global_rate_limiting/functions/use_global_ratelimit.mdx": {
+      "sha256": "6ef0599de6a7edb324eda2ea234344dc4b00e4eef6c70284adc45d7ead944270",
+      "size": 2339,
+      "description": "Procedural guide for creating and managing Global Rate Limiting policies on a service. Walks through the Service List > Rate Limiting tab workflow, selecting Global vs Conditional policy types (with OR relationship between types and AND relationship between conditional rules), building rules that match on API Path, HTTP Method, or Headers using Equal/Not Equal/RE2 regex, setting Requests/Unit Time thresholds, and toggling ShadowMode for audit-only enforcement. Covers monitoring requests vs limited counts across 1h/24h/7d ranges and policy precedence rules.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/global_rate_limiting/index.mdx": {
+      "sha256": "443840b65bf489d78e6f58aa2a580b643bdd68c2b23ce8d36f54822cbeca19c2",
+      "size": 59,
+      "description": "Top-level entry page for the Global Rate Limiting feature area that pulls in the introduction and guides subsections through an <Overview /> component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/global_rate_limiting/intro.mdx": {
+      "sha256": "9a049dbaaa1890458ffa09c436016ac94ecbae79e16cf2366b7f0c27d87660d1",
+      "size": 643,
+      "description": "Introduces the Global Rate Limiting module that protects ASM services from overload during traffic spikes through multi-dimensional rules and a shadow mode for safe capacity planning. Lists the prerequisites and limits: pre-configured Redis cluster integration, mandatory Sidecar injection on target services, a maximum of one global policy per service, RE2-only regex matching, and a 7-day shadow-mode data retention window.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/index.mdx": {
+      "sha256": "1731a94757653876a72da1985574d6e09049e37b1805aaa8b5f31ca1c013afd8",
+      "size": 131,
+      "description": "Top-level landing page for the Traffic Management section of Alauda Service Mesh, rendering an Overview component that links into ingress gateway, pod isolation, and other sidecar-related guides.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/ingress_gateway/functions/deploy_gw.mdx": {
+      "sha256": "c2c4dd052febab96d511050397db0e6008158aa3ed80e4823435eb8488f94106",
+      "size": 2273,
+      "description": "Step-by-step guide for deploying an Istio Ingress Gateway through the ASM console, covering LoadBalancer-based exposure (with Huawei Cloud ELB and MetalLB integrations) and NodePort deployment for bare-metal clusters. Documents required fields like DNS-1123 Gateway Name, namespace selection, multi-protocol listeners (HTTP/HTTPS/TCP) on ports 1-65535, dedicated vs. shared deployment modes, recommended Client→F5/HAProxy→NodeIP architecture, and verification via curl against /healthz.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/ingress_gateway/functions/gw_ops.mdx": {
+      "sha256": "05e74642dfb3de83754bcff766b7f9d39434518da99a8160cea6d02b347b6be1",
+      "size": 2688,
+      "description": "Operations guide for monitoring and log management of deployed Ingress Gateways in the ASM console. Describes the auto-refreshing metrics dashboard with CPU (80% default alert), Memory (90%), QPS, and Connections metrics; enabling Access Log with configurable log levels (trace/debug/info/warning/error/critical/off); parsing Envoy access log fields like %RESPONSE_CODE%, %DURATION%, %UPSTREAM_HOST%; and integration with Operations Center for alert policies and 6-month audit-trail retention.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/ingress_gateway/functions/index.mdx": {
+      "sha256": "3cfad3d1ce902e3ea12207a887926a9409387abc524e4ef3810b23f298be85c5",
+      "size": 43,
+      "description": "Index page for Ingress Gateway feature guides, rendering an Overview component that lists deployment, operations, and related how-to articles under the ingress gateway section.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/ingress_gateway/index.mdx": {
+      "sha256": "35ccbf9cc726e3fc20fddc247279901dc85e02477a454ea6e614fe66e978fe55",
+      "size": 52,
+      "description": "Section landing page for the Ingress Gateway topic area, rendering an Overview component that aggregates the introduction, deployment guides, operations guides, and troubleshooting articles for ASM ingress gateways.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/ingress_gateway/intro.mdx": {
+      "sha256": "1eda744614d92eeba5115c45df92de2950260986cde3b7dbb17951ec223f7631",
+      "size": 718,
+      "description": "Introduces the Istio-based Ingress Gateway in ASM as the secure entry point for north-south traffic into the service mesh, providing centralized L4/L7 traffic management at the mesh edge with decoupled routing rules and enhanced observability versus Kubernetes Ingress. Notes limitations including required Envoy proxy at the edge, the predefined Tier1-Tier2 topology, HTTP/HTTPS prerequisites for L7 features, and separate TLS termination configuration.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/ingress_gateway/trouble_shooting/index.mdx": {
+      "sha256": "e39d4e46e7b7a63f833170e6b6898b41408417f84f98ad17c79ea958f6ef7e13",
+      "size": 52,
+      "description": "Index page for Ingress Gateway troubleshooting articles, rendering an Overview that surfaces known-issue runbooks such as the shared-TLS-certificate 404 case.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/ingress_gateway/trouble_shooting/tb-tls404.mdx": {
+      "sha256": "974af8b167cc175978a9ff012348cf9624015a2391fd3d16f9911ef7ac8b0e48",
+      "size": 5250,
+      "description": "Runbook for the known Istio issue where HTTP/2 clients hit 404 errors when multiple Gateway resources share the same TLS credentialName, caused by HTTP/2 connection reuse routing requests based on initial SNI. Provides a kubectl/jq verification script to detect duplicate credentialName usage cluster-wide, plus two remediations: merging conflicting Gateways into a single resource listing both hosts under one TLS block, or installing an EnvoyFilter with a Lua script that returns HTTP 421 (Misdirected Request) when SNI mismatches :authority (requires Istio ≥1.12).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/isolate_pod/functions/index.mdx": {
+      "sha256": "3cfad3d1ce902e3ea12207a887926a9409387abc524e4ef3810b23f298be85c5",
+      "size": 43,
+      "description": "Index page for the Pod Isolation feature guides, rendering an Overview component listing the available how-to articles for isolating Pods from service traffic.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/isolate_pod/functions/isolate-pod.mdx": {
+      "sha256": "f5c05d180b12e4bb8228c236dd6c1c7b98ae8ca3913e089507e1e90ac5f4b73f",
+      "size": 2358,
+      "description": "Walkthrough for using ASM's Pod Isolation feature to dynamically remove a misbehaving Pod from service traffic while keeping it Running for troubleshooting. Documents the asm.cpaas.io/isolated: \"true\" annotation applied via the Pod Group tab's Set Isolation control, the legacy-service activation path requiring asm.cpaas.io/msselector labels on the Deployment and matching Service selector (Kubernetes v1.18+), error-rate/latency/connection metrics thresholds, endpoint verification via kubectl get endpoints, and constraints such as resetting on Pod restart and being disabled during canary releases or scaling events.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/isolate_pod/index.mdx": {
+      "sha256": "6a28e91a232518f9e05f0bb01d11213e7b1855f885cd8568a41c8876e80630e4",
+      "size": 52,
+      "description": "Section landing page for the Isolate Pods topic, rendering an Overview that aggregates the introduction and how-to guides for excluding malfunctioning Pods from service mesh traffic.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/isolate_pod/intro.mdx": {
+      "sha256": "e6bbfdcc55b594068f2bbc151ef205b530d39ebf8b71127772b90d5bc3f6fa16",
+      "size": 799,
+      "description": "Conceptual introduction to ASM's Pod Isolation capability, explaining how it cuts traffic to defective Pods without terminating them so operators can troubleshoot in place and reintegrate after repair. Lists key limitations: only Running Pods can be isolated (Completed/CrashLoopBackOff excluded), legacy services must adopt the asm.cpaas.io/msselector label, isolation is disabled during canary releases and horizontal scaling, and the state resets on Pod restart or scale-down.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/other/functions/index.mdx": {
+      "sha256": "3cfad3d1ce902e3ea12207a887926a9409387abc524e4ef3810b23f298be85c5",
+      "size": 43,
+      "description": "Index page for advanced sidecar operation guides under the \"Other\" traffic management section, rendering an Overview of the related how-to articles.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/other/functions/other_op.mdx": {
+      "sha256": "d615b36574442c81eae0678e45768d6bbd76629e245b76afcea7b0dc7e7ae47d",
+      "size": 2968,
+      "description": "Guide to advanced Istio sidecar operations exposed through the ASM console: configuring inbound/outbound traffic passthrough by destination port, CIDR range, or container port (triggers Deployment restart); enabling per-Pod Bypass Mode for non-disruptive sidecar isolation during troubleshooting (requires Kubernetes ≥1.23 and Istiod restart); dynamically adjusting sidecar log levels (trace/debug/info) with temporary or permanent persistence and multi-cluster propagation; and fully removing a sidecar (which disables security policies, rate limiting, canary releases, and monitoring) using kubectl delete sidecar.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/other/index.mdx": {
+      "sha256": "bed2f050056193ee6b48cbd0d9b9f96354894903b261a9c68c2ae90ebf8a9e4d",
+      "size": 64,
+      "description": "Section landing page for Other Advanced Operations under traffic management, rendering an Overview that links to sidecar passthrough, bypass mode, log control, and sidecar removal guides.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/other/intro.mdx": {
+      "sha256": "b60b4d3abf61d300c6504291b9913fe01b9c15675032822a4f2a4559e693f0f8",
+      "size": 567,
+      "description": "Introduces Advanced Sidecar Operations that give granular control over Istio proxy behavior to optimize mesh performance, enable targeted troubleshooting, and provide temporary service-recovery paths. Notes operational limitations including Bypass mode requiring Kubernetes 1.23+, passthrough configuration triggering deployment restarts, removed sidecars disabling security policies, and multi-cluster log sync adding latency.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/overview/features.mdx": {
+      "sha256": "ce49283f86fc8228db3d6acc1a8a3479ad70bafc31649b9c81db5c5d264b89b6",
+      "size": 3127,
+      "description": "Catalogs Alauda Service Mesh traffic management features, organized into architecture (dual-layer Tier1/Tier2 gateway design, HTTP/1.1, HTTP/2, gRPC and WebSocket support, weight- and header-based dynamic routing, traffic mirroring, request retries), security (TLS termination, cross-cluster gateway instance groups), service governance (canary releases via Tier2 proxy, routing policy synchronization), resilience (circuit breaking, fault injection, timeout control), observability (QPS/latency monitoring and access log analysis), and deployment flexibility across AWS/Azure/private cloud with HPA-based horizontal scaling.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/overview/index.mdx": {
+      "sha256": "77ae3cc19a67d12d2c1f6f69688e41ff83c7207dbf663d0e5e2334cba3716883",
+      "size": 121,
+      "description": "Top-level overview landing page for the Traffic Management module that renders an `<Overview />` component to surface the section's subtopics.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/overview/intro.mdx": {
+      "sha256": "331567f27aaef9d8ecf26b2ebd986e00cd343bdad9dff052b2c27825f54d5ff2",
+      "size": 1198,
+      "description": "Introduces the Traffic Management Advanced Operations module covering traffic passthrough, circuit breakers, canary releases, and global rate limiting for inbound/outbound traffic across multi-cluster environments. Documents key limitations including sidecar injection requirement, canary-vs-routing exclusivity, pod isolation reset on deploy/scale, Redis cluster requirement for global rate limiting, cross-cluster discovery constraints, Kubernetes v1.23+ for bypass mode, regional consistency for egress gateways, and policy bypass for traffic-passthrough services.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/sidecar_configuration/functions/config_sidecar.mdx": {
+      "sha256": "e9db03855fb587c124b451b67f24bee29032cb299522d5f5f3cbe5fe0203e1c8",
+      "size": 3028,
+      "description": "Step-by-step guide to managing Istio `Sidecar` (networking.istio.io/v1beta1) resources via the Service Mesh > Meshes > Sidecar Config UI, covering default cluster-wide configuration in the `istio-system` namespace and per-namespace custom configurations. Includes YAML examples for namespace isolation and full-cluster `*/*` access, `namespace/dnsName` egress host patterns with `*` and `.` wildcards, parameter tables, and operational constraints (60s update latency, Istio 1.9+ control plane, leftmost-only wildcards).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/sidecar_configuration/functions/index.mdx": {
+      "sha256": "3cfad3d1ce902e3ea12207a887926a9409387abc524e4ef3810b23f298be85c5",
+      "size": 43,
+      "description": "Guides landing page for the Sidecar Configuration section, rendering an `<Overview />` component that links to procedural how-tos like configuring sidecars.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/sidecar_configuration/index.mdx": {
+      "sha256": "69507901c9cdccf962832f0bf1be17d2b07ce1dcf1f5188ecd0faaf94dbe64ea",
+      "size": 60,
+      "description": "Section landing page for Sidecar Configuration under Traffic Management, rendering an `<Overview />` component that exposes the section's introduction and function guides.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/trafficmanagement/sidecar_configuration/intro.mdx": {
+      "sha256": "454ae282557a240cd8533363706367e12bf39fd130c2e109fe0f087383016568",
+      "size": 814,
+      "description": "Introduces Sidecar Configuration for controlling Envoy proxy inbound/outbound traffic policies, namespace-scoped access, and proxy resource utilization in an Istio mesh. Lists limitations including namespace binding rules (custom configs scoped to their namespace, defaults requiring `istio-system`), wildcard pattern matching only in the leftmost DNS component (e.g., `prod/*.svc.cluster.local`), and a 60-second update propagation window on Istiod 1.9+.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:51:15Z"
+    },
+    "docs/en/uninstalling_servicemesh.mdx": {
+      "sha256": "3709dd0573b4e572e77923b507e47669d173331c96f9f9d8973b1b449b57f687",
+      "size": 841,
+      "description": "Procedure to delete a service mesh from the platform: uninstalls all mesh components on the managed cluster, removes the binding with the Elasticsearch access component, and deletes resources created on the mesh. Documents the prerequisite that the mesh contain no services and the Service Mesh > Meshes > Actions > Delete UI flow, warning that the deletion is irreversible and cannot be re-issued while in progress.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:53:29Z"
+    },
+    "docs/en/upgrade.mdx": {
+      "sha256": "8d7ee194d9ba33b987443ee54748460ea676f033db61ce591b35a8f98d181527",
+      "size": 9175,
+      "description": "End-to-end canary upgrade workflow for Istio in Alauda Service Mesh, covering supported Istio paths (1.20 to 1.22, 1.18 to 1.22) and required Kubernetes versions (1.27/1.28). Steps cover upgrading non-Istio components (asm, Flagger Operator, Asm Operator, Jaeger Operator), deploying the new istiod, auditing existing EnvoyFilters, rolling out sidecars and ingress/egress gateways either via UI or via the `asm-controller bfg rollout` command (`kubectl -ncpaas-system exec -it deploy/asm-controller -- /app/asm-controller bfg rollout [--no-prompt]`), and finally decommissioning the old istiod once all data planes are upgraded.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:53:29Z"
+    },
+    "docs/en/zappendix.mdx": {
+      "sha256": "acd697d244d85c6cd3784a5adf29186476376b5d743e18544e3a97c14140f469",
+      "size": 12096,
+      "description": "Glossary appendix defining proprietary and Kubernetes/Istio terminology used throughout the Alauda Service Mesh docs. Entries cover platform concepts (Cluster, Node, Project, Namespace, Role, Audit, Token), Kubernetes primitives (Pod, Deployment, ReplicaSet, Service, ConfigMap, Secret, CRD), and mesh-specific concepts (Service Mesh, Sidecar, Envoy, EnvoyFilter, Ingress/Egress Gateway, Microservice Gateway, Tracing, Service Topology, API Group).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T09:53:29Z"
+    }
+  }
+}
