@@ -17,11 +17,7 @@ Prepare the projects and namespaces for deploying the application, with the foll
 
 You can prepare projects and namespaces by following the instructions below:
 
-{/* TODO: [Create a Project](@console-platform-docs/zh/project-usermanual/project/1addproject/) */}
-
 1. Refer to [Create a Project]() to create a project on the platform that includes the **associated clusters** `c1` and `c2`.
-
-{/* TODO: [Create a Namespace](@console-platform-docs/zh/project-usermanual/namespace/1createns/) */}
 
 2. Refer to [Create a Namespace]() to create the same named namespace `ns1` in clusters `c1` and `c2`.
 
@@ -76,10 +72,10 @@ By executing a script, tag the images and upload them to the image repository ac
     unzip <file_name>.zip
     docker load -i images.tar
     ```
-    
+
     :::note
     After unzipping, you will get the following files:
-    
+
     * `images.tar`: The image package of Bookinfo.
     * `bookinfo.yaml`: The YAML file of Bookinfo.
     * `docker_script.sh`: A script for tagging images, uploading images, and modifying the image addresses in the YAML file.
@@ -94,7 +90,7 @@ By executing a script, tag the images and upload them to the image repository ac
     ```sh
     docker login <Harbor address>
     ```
-    
+
     :::note
     If you receive the following error after entering your username and password, modify the **Docker Engine** configuration to add the Harbor address to **insecure-registries**, then re-execute the login command.
     :::
@@ -152,7 +148,7 @@ After injecting the Sidecar, the architecture of Bookinfo is shown below.
 
     :::note
     Unless otherwise specified, select Deployment and use the default values for the parameters on the interface.
-    
+
     * Repeat the above steps to add the services `productpage`, `details`, `reviews`, and `ratings` to the platform in the namespace `ns1` of clusters `c1` and `c2`.
     :::
 
@@ -165,9 +161,9 @@ Refer to [Using Ingress Gateway](../../trafficmanagement/ingress_gateway/) to de
 Configure the relevant parameters as required, and configure other parameters as needed.
 
 * **Ingress Gateway**:
-   
+
     * **Internal Routing Type**: `LoadBalancer`.
-    
+
     * Port includes HTTP protocol port.
 
 * **Gateway Configuration**: Select the port with the HTTP protocol.
