@@ -27,8 +27,6 @@ The table below shows the supported Istio upgrade paths for the current platform
 
 **Note**:
 
-{/* TODO: [Upgrade Components](@console-platform-docs/zh/platform-usermanual/clusterall/1cluster/11upgrade/) */}
-
 - The table only describes the major versions of Istio and Kubernetes; minor versions do not affect compatibility.
 - You can check the current running versions of Istio and Kubernetes in the cluster by going to the **Components** list.
 - If the current Kubernetes version of the cluster is lower than the required version for the Istio upgrade, you need to upgrade Kubernetes to a compatible version through [Upgrade Components]().
@@ -47,8 +45,6 @@ The complete service mesh upgrade process includes the following steps:
 ### Upgrade Operations
 
 #### Upgrade the Non-Istio Components of the Service Mesh in the Cluster \{#component}
-
-{/* TODO: [Upgrade Components](@console-platform-docs/zh/platform-usermanual/clusterall/1cluster/11upgrade/) */}
 
 1. In the **Platform Management** left navigation, click **Service Mesh** > **Meshes**.
 2. Click the `Service Mesh Name` that needs to be upgraded to enter the mesh details.
@@ -101,7 +97,7 @@ Upgrading via UI allows for batch upgrades by different namespaces or specifying
 **Upgrade Ingress and Egress Gateways**
 
 1. In the left navigation bar, click **Service Mesh** > **Gateways**.
-    **Note**: In the cluster's gateway list, the ![](/zh/img/00feature.png) icon to the right of **Istio Version** indicates that the data plane proxy of the gateway can be upgraded.
+    **Note**: In the cluster's gateway list, the ![](/00feature.png) icon to the right of **Istio Version** indicates that the data plane proxy of the gateway can be upgraded.
 2. Click the **Upgrade** button to the right of **Istio Version**, and **Confirm**.
 
 **Upgrade Sidecars**
@@ -111,9 +107,9 @@ Upgrading via UI allows for batch upgrades by different namespaces or specifying
 3. In the **Namespaces** area of the mesh details, there is a list of namespaces managed by the service mesh. Click the `Namespace Name` to open the **Service Mesh** in a new tab and enter the namespace where the Sidecar is located.
     **Note**: Perform Sidecar upgrades for all namespaces sequentially.
 4. In the left navigation bar, click **Service List**.
-    **Note**: When the ![](/zh/img/00feature.png) icon appears next to the `Service Name`, it indicates that the Sidecar of the service can be upgraded.
+    **Note**: When the ![](/00feature.png) icon appears next to the `Service Name`, it indicates that the Sidecar of the service can be upgraded.
 5. Click **Batch Upgrade Sidecars**.
-    **Note**: Click the **Upgrade** button to the right of the ![](/zh/img/00feature.png) icon for the service record to upgrade a single service.
+    **Note**: Click the **Upgrade** button to the right of the ![](/00feature.png) icon for the service record to upgrade a single service.
 6. Select all, one, or more services, and then click **Upgrade**.
     **Note**: The platform will upgrade the Sidecar of the service by rolling updating the Pods with different current and target versions of the Sidecar. If the upgrade fails, check the container group events in the Container Platform to understand the cause of the failure or try **Re-upgrade**.
 
