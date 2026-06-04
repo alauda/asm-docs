@@ -29,6 +29,10 @@ For instructions on creating a multi-cluster service mesh, please refer to the M
   - `Alauda Build of Jaeger` Operator
   - `Alauda Build of OpenTelemetry` Operator
 
+  :::warning
+  When uploading the operators with `violet push`, do not add the `--target-catalog-source` parameter — use the default catalog source defined within the operator instead.
+  :::
+
 - Ensure that the cluster has deployed the Prometheus plugin or VictoriaMetrics plugin.
 
   **Note:** When VictoriaMetrics is a multi-cluster deployment architecture, `vmstorage` can be in a different cluster from the service mesh.
